@@ -10,6 +10,7 @@ export interface Conflict {
   id: string; kind: 'overlap' | 'dependency' | 'file'; functions: string[];
   title: string; explanation: string; canCombine: boolean; combineReason: string;
   base: string; a: string; b: string;
+  observationsA?: string[]; observationsB?: string[];
 }
 export interface Analysis {
   nodes: GraphNode[]; conflicts: Conflict[]; changedA: string[]; changedB: string[];

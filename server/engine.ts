@@ -77,6 +77,31 @@ function combine(base: FunctionDeclaration | undefined, a: FunctionDeclaration |
   if (critical) throw new InputError(`Cannot compose: ${ts.flattenDiagnosticMessageText(critical.compilerObject.messageText, '\n')}`);
   return candidate;
 }
+function observations(original: FunctionDeclaration | undefined, variant: FunctionDeclaration | undefined): string[] {
+  if (!variant) return ['Removes this function.'];
+  if (!original) return ['Adds this function.'];
+  const before = original.getStatements().map(text);
+  const added = variant.getStatements().filter(n => !before.includes(n.getText()));
+  const facts: string[] = [];
+  const newCalls = calls(variant).filter(c => !calls(original).includes(c));
+  if (newCalls.length) facts.push(`Adds calls to ${newCalls.join(', ')}.`);
+  const checks = added.filter(Node.isIfStatement).length;
+  if (checks) facts.push(`Adds or changes ${checks} conditional ${checks === 1 ? 'check' : 'checks'}.`);
+  for (const statement of added) {
+    const returns = [statement, ...statement.getDescendantsOfKind(SyntaxKind.ReturnStatement)].filter(Node.isReturnStatement);
+    for (const ret of returns) {
+      const expression = ret.getExpression();
+      if (expression && Node.isObjectLiteralExpression(expression)) {
+        const error = expression.getProperty('error');
+        if (error && Node.isPropertyAssignment(error)) {
+          const value = error.getInitializer();
+          if (value && Node.isStringLiteral(value)) facts.push(`Can return the error “${value.getLiteralValue()}”.`);
+        }
+      } else if (expression && Node.isIdentifier(expression)) facts.push(`Can return ${expression.getText()} before later statements.`);
+    }
+  }
+  return [...new Set(facts)].slice(0,5).length ? [...new Set(facts)].slice(0,5) : ['Changes this function’s implementation. Inspect the source to review its behavior.'];
+}
 export function analyze(input: Input): Analysis {
   const base = parse(input.base, 'Base').source, a = parse(input.agentA, 'Agent A').source, b = parse(input.agentB, 'Agent B').source;
   if ([base,a,b].some(s => s.getStatements().length > 150)) throw new InputError('Use a smaller file (at most 150 top-level statements).');
@@ -96,7 +121,7 @@ export function analyze(input: Input): Analysis {
     let canCombine = true, combineReason = 'Both revisions add statements without replacing the base body. Choose which runs first, then inspect the preview.';
     try { combine(bm.get(name), am.get(name), cm.get(name), 'a-first'); combine(bm.get(name), am.get(name), cm.get(name), 'b-first'); }
     catch (error) { canCombine = false; combineReason = (error as Error).message; }
-    conflicts.push({id:`overlap:${name}`,kind:'overlap',functions:[name],title:`Both agents changed ${name}`,explanation:'These revisions change the same function differently. Their guards, side effects, or return values may depend on the chosen order.',canCombine,combineReason,base:text(bm.get(name)),a:text(am.get(name)),b:text(cm.get(name))});
+    conflicts.push({id:`overlap:${name}`,kind:'overlap',functions:[name],title:`Both agents changed ${name}`,explanation:'These revisions change the same function differently. Their guards, side effects, or return values may depend on the chosen order.',canCombine,combineReason,base:text(bm.get(name)),a:text(am.get(name)),b:text(cm.get(name)),observationsA:observations(bm.get(name),am.get(name)),observationsB:observations(bm.get(name),cm.get(name))});
   }
   function reaches(from: string, to: string, visited = new Set<string>()): boolean {
     if (from === to) return true;
