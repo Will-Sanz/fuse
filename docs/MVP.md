@@ -9,6 +9,7 @@ Resolution keeps A, keeps B, or composes insertions into an otherwise unchanged 
 React + Vite UI; TypeScript + Express API; local SQLite persistence. A no-key checkout example is fully interactive. GitHub import reads one file at three pinned commits; private repositories require a server-side token. Linear, Slack, Teams, autonomous agent execution, AI semantic judgments, multi-file resolution, and hosted multi-user authentication are follow-on work. The MVP is a local reviewer workspace and must bind to loopback.
 
 Delivery checkpoints:
+
 1. AST analysis, constrained composition, and engine tests.
 2. Persistent API, GitHub import, and API tests.
 3. Three-surface UI, browser tests, production build, and team setup documentation.

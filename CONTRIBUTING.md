@@ -6,6 +6,12 @@ Accept your repository invitation. Then clone `https://github.com/Will-Sanz/fuse
 
 For command-line Git, configure your name and email before committing. Use an email verified with GitHub or your GitHub-provided no-reply email.
 
+## Development checks
+
+Use Node.js 24 and `npm ci`. Run `npm run dev` for the app. Before pushing, run `npm run format`, `npm run check`, and `npm run test:e2e` for UI or workflow changes. Install the test browser once with `npx playwright install chromium`.
+
+Engine changes belong in `server/engine.ts` with behavioral tests in `tests/engine.test.ts`. API changes belong in `server/` with API tests. Interface work belongs in `src/`. Keep `shared/types.ts` consistent at both ends. Add credentials only to your ignored `.env` file.
+
 ## For each task
 
 1. Pick or create a GitHub issue and agree on who owns the work.

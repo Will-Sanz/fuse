@@ -27,13 +27,22 @@ function sendResponse(order: Order): Result {
 }
 `;
 export const checkoutExample: Input = {
-  title: 'Checkout validation', fileName: 'checkout.ts', nameA: 'Request validation', nameB: 'Schema validation',
+  title: 'Checkout validation',
+  fileName: 'checkout.ts',
+  nameA: 'Request validation',
+  nameB: 'Schema validation',
   base,
-  agentA: base.replace('function validateBody(order: Order): Result {', `function validateBody(order: Order): Result {
+  agentA: base.replace(
+    'function validateBody(order: Order): Result {',
+    `function validateBody(order: Order): Result {
   if (!order.email || !order.items || order.items.length === 0) {
     return { ok: false, error: "Your order is incomplete" };
-  }`),
-  agentB: base.replace('function validateBody(order: Order): Result {', `function validateBody(order: Order): Result {
+  }`,
+  ),
+  agentB: base.replace(
+    'function validateBody(order: Order): Result {',
+    `function validateBody(order: Order): Result {
   const schema = schemaCheck(order);
-  if (!schema.ok) return schema;`),
+  if (!schema.ok) return schema;`,
+  ),
 };
