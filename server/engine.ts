@@ -148,3 +148,15 @@ export function resolve(input: Input, decisions: Record<string, Decision>, analy
   parse(output,'Result');
   return output;
 }
+
+export function previewDecision(input: Input, conflict: Conflict, decision: Decision): string {
+  if (conflict.kind === 'dependency') {
+    if (decision.choice !== 'reviewed') throw new InputError('A path candidate requires an acknowledgment.');
+    return `${conflict.a}\n\n${conflict.b}`;
+  }
+  if (decision.choice === 'a') return conflict.a;
+  if (decision.choice === 'b') return conflict.b;
+  if (decision.choice !== 'both' || !conflict.canCombine || !decision.order) throw new InputError('Choose a supported resolution and an explicit order.');
+  const name = conflict.functions[0];
+  return combine(functions(parse(input.base,'Base').source).get(name),functions(parse(input.agentA,'Agent A').source).get(name),functions(parse(input.agentB,'Agent B').source).get(name),decision.order);
+}
