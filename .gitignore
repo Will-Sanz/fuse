@@ -1,0 +1,19 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Common local dependencies and caches; refine when the stack is chosen
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.next/
+coverage/
+*.log
