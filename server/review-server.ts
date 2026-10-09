@@ -19,6 +19,7 @@ import {
   setIntent,
 } from './local';
 import { InputError } from './engine';
+import { commonDir } from './git';
 
 export function createReviewApp(options: { repo?: string; dataDir?: string } = {}) {
   const directory = resolve(options.dataDir || 'data/demos');
@@ -106,8 +107,13 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
   router.get('/reviews/:id/audit', (req, res) => {
     res.attachment('fuse-decision.json').json(find(req.params.id).review);
   });
-  const legacyStore = new Store(':memory:');
-  const app = createApp(legacyStore, { reviewRouter: router });
+  const legacyStore = new Store(
+    join(options.repo ? join(commonDir(options.repo), 'fuse') : directory, 'snapshots.sqlite'),
+  );
+  const app = createApp(legacyStore, {
+    reviewRouter: router,
+    githubToken: process.env.GITHUB_TOKEN,
+  });
   const dist = fileURLToPath(new URL('../dist', import.meta.url));
   if (existsSync(join(dist, 'index.html'))) {
     app.use(express.static(dist));

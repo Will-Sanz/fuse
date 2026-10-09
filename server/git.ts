@@ -65,6 +65,14 @@ export function blob(repo: string, revision: string, path: string): FileSnapshot
       mode: entry.mode,
       unsupported: 'Symlinks and submodules require manual review.',
     };
+  const size = Number(git(repo, ['cat-file', '-s', entry.oid]));
+  if (size > 100000)
+    return {
+      code: null,
+      hash: entry.oid,
+      mode: entry.mode,
+      unsupported: 'File exceeds the 100 KB analysis limit.',
+    };
   const data = execFileSync('git', ['-C', repo, 'cat-file', 'blob', entry.oid], {
     maxBuffer: 1024 * 1024,
     timeout: 15000,
@@ -129,6 +137,13 @@ export function snapshot(repo: string, base: string, ref: SourceRef): Snapshot {
               hash: 'non-file',
               mode: 'unsupported',
               unsupported: 'Non-regular file requires manual review.',
+            };
+          else if (stat.size > 100000)
+            files[path] = {
+              code: null,
+              hash: hash(`${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`),
+              mode: 'unsupported',
+              unsupported: 'File exceeds the 100 KB analysis limit.',
             };
           else
             files[path] = fromBuffer(readFileSync(full), stat.mode & 0o111 ? '100755' : '100644');

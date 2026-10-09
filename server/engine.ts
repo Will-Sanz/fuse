@@ -282,7 +282,7 @@ export function analyze(input: Input): Analysis {
       id: `overlap:${name}`,
       kind: 'overlap',
       functions: [name],
-      title: `Both agents changed ${name}`,
+      title: `Both revisions changed ${name}`,
       explanation:
         'These revisions change the same function differently. Their guards, side effects, or return values may depend on the chosen order.',
       canCombine,

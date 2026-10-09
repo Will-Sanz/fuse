@@ -140,7 +140,9 @@ export function registerSession(repo: string, id: string, name: string, worktree
       worktree: path,
       registeredAt: new Date().toISOString(),
     };
-    config.sessions = [...config.sessions.filter((s) => s.id !== id), session];
+    config.sessions = config.sessions.some((s) => s.id === id)
+      ? config.sessions.map((s) => (s.id === id ? session : s))
+      : [...config.sessions, session];
     if (config.sessions.length > 2)
       throw new InputError(
         'This release supports two registered sessions. Remove a session first.',
@@ -218,7 +220,13 @@ export function inspect(options: InspectOptions, persist = true): Review {
         : [original, left, right].find((s) => s.unsupported)?.unsupported ||
           ([original, left, right].some((s) => !['100644', 'absent'].includes(s.mode))
             ? 'Executable, symlink, submodule, or mode changes require manual review.'
-            : undefined);
+            : left.mode !== right.mode &&
+                left.hash !== original.hash &&
+                right.hash !== original.hash &&
+                !left.code &&
+                !right.code
+              ? 'One side deletes this file and the other keeps an empty file. Reconcile the file presence manually.'
+              : undefined);
     if (reason) {
       unsupported.push({ path, reason });
       continue;
@@ -295,6 +303,20 @@ function current(store: LocalStore, id: string, revision: number) {
   return review;
 }
 export function assertFresh(review: Review) {
+  const registered = new LocalStore(review.repository).config().sessions;
+  for (const source of Object.values(review.sources))
+    if (
+      source.ref.sessionId &&
+      !registered.some(
+        (s) =>
+          s.id === source.ref.sessionId &&
+          s.name === source.ref.label &&
+          s.worktree === source.ref.value,
+      )
+    )
+      throw stale(
+        'Session registration changed. Inspect again to capture the current attribution.',
+      );
   for (const source of Object.values(review.sources))
     if (
       snapshot(review.repository, review.baseCommit, source.ref).fingerprint !== source.fingerprint
@@ -517,9 +539,15 @@ export function linkCommit(repo: string, id: string, revision: number, ref: stri
     const sha = commit(repo, ref);
     if (sha === r.baseCommit || git(repo, ['merge-base', r.baseCommit, sha]) !== r.baseCommit)
       throw new InputError('Commit must descend from the reviewed base.');
-    for (const [path, code] of Object.entries(r.preview.outputs))
-      if (blob(repo, sha, path).code !== code)
+    for (const [path, code] of Object.entries(r.preview.outputs)) {
+      const output = blob(repo, sha, path);
+      if (
+        code === null
+          ? output.mode !== 'absent'
+          : output.code !== code || output.mode !== '100644' || output.unsupported
+      )
         throw new InputError(`Commit does not contain the reviewed result: ${path}`);
+    }
     r.commit = sha;
     r.status = 'committed';
     r.revision++;
@@ -535,9 +563,14 @@ export function markMerged(repo: string, id: string, revision: number, ref: stri
     if (r.status !== 'committed' || !r.commit)
       throw new InputError('Link the actual resolution commit first.');
     const sha = commit(repo, ref);
-    if (sha === r.commit || git(repo, ['merge-base', r.commit, sha]) !== r.commit)
+    const parents = git(repo, ['rev-list', '--parents', '-n', '1', sha]).split(' ').slice(1);
+    if (
+      parents.length < 2 ||
+      git(repo, ['merge-base', r.commit, sha]) !== r.commit ||
+      git(repo, ['merge-base', r.commit, parents[0]]) === r.commit
+    )
       throw new InputError(
-        'Merged status requires a later integration commit containing the resolution in its ancestry.',
+        'Merged status requires an actual merge commit that brings the resolution into its first-parent history. A later ordinary commit is not merge evidence.',
       );
     r.status = 'merged';
     r.mergedInto = sha;
@@ -545,7 +578,7 @@ export function markMerged(repo: string, id: string, revision: number, ref: stri
     event(
       r,
       'Integration ancestry verified',
-      `${r.commit} is an ancestor of ${ref} (${sha}). Local Git evidence; no remote PR status is inferred.`,
+      `${r.commit} was integrated by merge commit ${sha} (${ref}). Local Git evidence; no remote PR status is inferred.`,
     );
     store.save(r);
     return r;

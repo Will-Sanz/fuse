@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync, symlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createDemo } from '../server/demo';
@@ -54,6 +54,8 @@ describe('local Git companion', () => {
     const d = demo();
     expect(d.review.sources.a.ref.sessionId).toBe('request');
     expect(d.review.sources.b.ref.sessionId).toBe('schema');
+    registerSession(d.repo, 'request', 'Request validation', d.sessionA!);
+    expect(new LocalStore(d.repo).config().sessions[0].id).toBe('request');
     for (const path of [d.sessionA!, d.sessionB!]) {
       git(path, ['add', 'checkout.ts']);
       git(path, ['commit', '-m', 'Session edit']);
@@ -68,6 +70,7 @@ describe('local Git companion', () => {
   });
   it('asks about ambiguous intent, then grounds the recommendation in the answer', () => {
     const d = demo();
+    d.review = inspect({ repo: d.repo, sessions: true });
     expect(d.review.files[0].recommendations[0].action).toBeUndefined();
     expect(d.review.files[0].recommendations[0].question).toContain('should A or B');
     const r = setIntent(d.repo, d.review.id, 0, {
@@ -97,8 +100,12 @@ describe('local Git companion', () => {
     const linked = linkCommit(d.repo, r.id, applied.revision, 'HEAD');
     expect(linked.status).toBe('committed');
     expect(linked.commit).toBe(git(d.repo, ['rev-parse', 'HEAD']));
-    expect(() => markMerged(d.repo, r.id, linked.revision, 'HEAD')).toThrow('later integration');
+    expect(() => markMerged(d.repo, r.id, linked.revision, 'HEAD')).toThrow('actual merge commit');
     git(d.repo, ['commit', '--allow-empty', '-m', 'Integration checkpoint']);
+    expect(() => markMerged(d.repo, r.id, linked.revision, 'HEAD')).toThrow('actual merge commit');
+    git(d.repo, ['branch', 'resolved-change', linked.commit!]);
+    git(d.repo, ['switch', '-c', 'integration-target', d.review.baseCommit]);
+    git(d.repo, ['merge', '--no-ff', 'resolved-change', '-m', 'Integrate reviewed resolution']);
     expect(markMerged(d.repo, r.id, linked.revision, 'HEAD').status).toBe('merged');
   });
   it('records different observable checkout behavior for different orders', () => {
@@ -129,6 +136,11 @@ describe('local Git companion', () => {
     expect(() => applyReview(d.repo, r.id, r.revision, r.preview!.token)).toThrow('uncommitted');
     expect(readFileSync(join(d.repo, 'notes.txt'), 'utf8')).toBe('protect this');
     rmSync(join(d.repo, 'notes.txt'));
+    registerSession(d.repo, 'request', 'Renamed session', d.sessionA!);
+    expect(() => applyReview(d.repo, r.id, r.revision, r.preview!.token)).toThrow(
+      'Session registration changed',
+    );
+    registerSession(d.repo, 'request', 'Request validation', d.sessionA!);
     configureCheck(d.repo, {
       name: 'New check',
       command: process.execPath,
@@ -170,6 +182,16 @@ describe('local Git companion', () => {
     expect(next.review.id).not.toBe(first.review.id);
     expect(next.review.files[0].input.agentA).toContain('Complete your order');
     expect(watchOnce({ repo: d.repo }).alert).toBe(false);
+    writeFileSync(
+      join(d.sessionA!, 'checkout.ts'),
+      next.review.files[0].input.agentA.replace(
+        'function sendResponse(order: Order): Result {\n  return { ok: true };',
+        'function sendResponse(order: Order): Result {\n  return { ok: false };',
+      ),
+    );
+    const unrelated = watchOnce({ repo: d.repo });
+    expect(unrelated.updated).toBe(true);
+    expect(unrelated.alert).toBe(false);
   });
   it('keeps unsupported and malformed changes visible and blocks unsafe application', () => {
     const d = demo();
@@ -207,6 +229,68 @@ describe('local Git companion', () => {
     r = inspect({ repo: d.repo, sessions: true });
     expect(r.files[0].analysis.conflicts[0].kind).toBe('dependency');
     expect(r.files[0].recommendations[0].reason).toContain('not proof');
+  });
+  it('preserves unsupported binary, large, and symlink changes for manual review', () => {
+    const d = demo();
+    writeFileSync(join(d.sessionA!, 'binary.ts'), Buffer.from([0, 1, 2]));
+    writeFileSync(join(d.sessionA!, 'large.ts'), ' '.repeat(1100000));
+    symlinkSync(join(d.repo, 'checkout.ts'), join(d.sessionA!, 'linked.ts'));
+    const r = inspect({ repo: d.repo, sessions: true });
+    expect(r.unsupported.map((f) => f.path)).toEqual(['binary.ts', 'large.ts', 'linked.ts']);
+    expect(() => preview(d.repo, r.id, r.revision)).toThrow('Unsupported changes');
+    git(d.sessionA!, ['add', 'large.ts']);
+    git(d.sessionA!, ['commit', '-m', 'Large input fixture']);
+    const revisions = inspect({ repo: d.repo, a: 'session/request', b: 'session/schema' });
+    expect(revisions.unsupported.some((f) => f.path === 'large.ts')).toBe(true);
+  });
+  it('applies a deletion with source evidence and preserves a missing worktree failure', () => {
+    const d = demo();
+    const base = d.review.files[0].input.base;
+    writeFileSync(join(d.sessionB!, 'checkout.ts'), base);
+    rmSync(join(d.sessionA!, 'checkout.ts'));
+    const r = inspect({ repo: d.repo, sessions: true });
+    expect(
+      r.files[0].evidence.some((e) => e.observations[0]?.includes('Removes this function')),
+    ).toBe(true);
+    const ready = preview(d.repo, r.id, r.revision);
+    expect(ready.preview!.outputs['checkout.ts']).toBeNull();
+    const applied = applyReview(d.repo, ready.id, ready.revision, ready.preview!.token);
+    expect(existsSync(join(d.repo, 'checkout.ts'))).toBe(false);
+    expect(applied.checks[0].status).toBe('failed');
+    symlinkSync('checkout.test.mjs', join(d.repo, 'checkout.ts'));
+    git(d.repo, ['add', 'checkout.ts']);
+    git(d.repo, ['commit', '-m', 'An unsupported file is not a deletion']);
+    expect(() => linkCommit(d.repo, applied.id, applied.revision, 'HEAD')).toThrow(
+      'does not contain the reviewed result',
+    );
+    rmSync(join(d.repo, 'checkout.ts'));
+    git(d.repo, ['add', 'checkout.ts']);
+    git(d.repo, ['commit', '-m', 'Record the actual reviewed deletion']);
+    expect(linkCommit(d.repo, applied.id, applied.revision, 'HEAD').status).toBe('committed');
+    rmSync(d.sessionB!, { recursive: true });
+    expect(() => inspect({ repo: d.repo, sessions: true })).toThrow();
+  });
+  it('does not conflate deletion with a competing empty-file edit', () => {
+    const d = demo();
+    rmSync(join(d.sessionA!, 'checkout.ts'));
+    writeFileSync(join(d.sessionB!, 'checkout.ts'), '');
+    const r = inspect({ repo: d.repo, sessions: true });
+    expect(r.unsupported).toEqual([
+      {
+        path: 'checkout.ts',
+        reason:
+          'One side deletes this file and the other keeps an empty file. Reconcile the file presence manually.',
+      },
+    ]);
+    expect(() => preview(d.repo, r.id, r.revision)).toThrow('Unsupported changes');
+    expect(readFileSync(join(d.sessionB!, 'checkout.ts'), 'utf8')).toBe('');
+  });
+  it('does not claim all independent files can be applied as one atomic operation', () => {
+    const d = demo();
+    writeFileSync(join(d.sessionA!, 'another.ts'), 'export function answer() { return 42; }');
+    const r = inspect({ repo: d.repo, sessions: true });
+    expect(r.files).toHaveLength(2);
+    expect(() => preview(d.repo, r.id, r.revision)).toThrow('one TypeScript file');
   });
   it('exercises the actual executable, JSON output, and exit codes', () => {
     const d = demo();

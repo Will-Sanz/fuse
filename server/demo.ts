@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { checkoutExample } from '../shared/example';
 import { InputError } from './engine';
 import { git } from './git';
-import { configureCheck, inspect, registerSession } from './local';
+import { configureCheck, inspect, registerSession, setIntent } from './local';
 import { LocalStore } from './local-store';
 
 /** Scripted fixture construction only. All subsequent analysis uses real Git/worktree reads. */
@@ -49,7 +49,13 @@ console.log('PASS: empty order, valid order, and malformed email');
       timeoutMs: 10000,
     });
   }
-  const review = inspect({ repo, sessions: !single });
+  let review = inspect({ repo, sessions: !single });
+  if (!single)
+    review = setIntent(repo, review.id, review.revision, {
+      first: 'a',
+      rationale:
+        'Fixture expectation: missing fields receive the friendly incomplete-order error before schema details, while malformed email still receives a specific error.',
+    });
   review.demo = true;
   review.title = single ? 'A normal checkout change' : 'Checkout validation';
   new LocalStore(repo).save(review);

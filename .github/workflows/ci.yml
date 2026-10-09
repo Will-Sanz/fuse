@@ -1,7 +1,7 @@
 name: Verify Fuse
 on:
   push:
-    branches: [main]
+    branches: [main, 'feat/**']
   pull_request:
 permissions:
   contents: read
@@ -20,6 +20,7 @@ jobs:
       - run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run demo:verify
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

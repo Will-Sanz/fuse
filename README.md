@@ -1,113 +1,142 @@
 # Fuse
 
-A local oversight workspace for parallel agents’ TypeScript changes. Compare two revisions against their common base, inspect the affected call graph, choose how overlapping changes should behave, and keep a reproducible record of the decision.
+A local companion for understanding TypeScript changes. Inspect real Git work, see where explicitly registered sessions overlap, choose the intended behavior, and keep the evidence behind the result. The CLI and compact browser review use the same deterministic engine. No AI API keys are required.
 
-![Fuse agent overview](docs/overview.png)
+## Start here
 
-## Run it
-
-Use **Node.js 24** (the project includes `.nvmrc`) and npm.
+Use **Node.js 24** and Git. From a clean checkout:
 
 ```sh
 git clone https://github.com/Will-Sanz/fuse.git
 cd fuse
 npm ci
-npm run dev
+npm run build
+npm run fuse -- --help
 ```
 
-Open **http://127.0.0.1:5173**. Choose **New review → Checkout example**. No API keys, database service, or AI subscription are required.
+`npm run fuse -- ...` works without installing a global command. Optionally run `npm link` to expose `fuse` on your PATH. The examples below use that shorter command; `node /absolute/path/to/fuse/cli/run.mjs ...` also works from any directory.
 
-To run the production build locally:
+For the browser demo:
 
 ```sh
-npm run build
 npm start
 ```
 
-Open **http://127.0.0.1:3001**. Stop a running server with Ctrl+C. Both commands bind to this computer; this MVP is not a hosted multi-user service.
+Open **http://127.0.0.1:3001** and choose **Explore checkout demo**. This creates a real temporary-style repository under `data/demos/`, two Git worktrees, and explicit session registrations. Edits are labeled as scripted. Analysis, resolution, file application, and checks are real. **See a single change** demonstrates an ordinary edit without an artificial conflict.
 
-## Try the complete workflow
+`npm run dev` starts the development interface at **http://127.0.0.1:5173**. Both interfaces bind to loopback. This is a local tool, not a hosted team service.
 
-1. Open the checkout example. The overview identifies both agents’ changes to `validateBody`.
-2. Select **Review conflict**. Inspect the call relationships and behavior observations extracted from the AST.
-3. Choose **Keep A**, **Keep B**, or **Merge both**. For composition, choose **A first, then B** or **B first, then A**. The preview shows the exact generated body.
-4. Add a note and save the decision. Generate the resolved file.
-5. Download the TypeScript and the JSON review record from **Resolved summary**. Reload the page to confirm the review is saved.
-
-The difference in ordering is real: for an empty order, A-first returns `Your order is incomplete`; B-first returns a specific email error. Automated tests execute this fixed fixture in both orders. The application never executes submitted code.
-
-## What works
-
-- Three views: agent revision overview, focused conflict resolution, and decision history.
-- Pasted or uploaded base/A/B versions of a `.ts` file.
-- AST analysis through ts-morph: named top-level functions, resolved local call edges, shared-function edits, and conservative shared-path review candidates.
-- Automatic assembly of independent function edits, plus reviewer-controlled selection or constrained additive composition for overlaps.
-- Behavior observations generated from actual calls, conditions, and error returns.
-- Live read-only GitHub import: pin two branch tips, find their merge base, and read one file at those three commits.
-- SQLite persistence, revision checks against stale browser tabs, source/output hashes, decision notes, and downloadable audit records.
-- Standalone TypeScript diagnostics on the generated file.
-- Desktop and mobile layouts, plus CI checks on pushes and pull requests.
-
-## Bring your own code
-
-Choose **New review → TypeScript files**, supply a title and filename, and paste or upload three complete snapshots. An empty snapshot represents an absent file. Use a genuine common base. The limits are 100 KB per snapshot and 150 top-level statements.
-
-Example source files are in [`examples/checkout`](examples/checkout). Start small: one TypeScript file with named top-level function declarations.
-
-### GitHub import and credentials
-
-Choose **New review → GitHub branches** and supply `owner/repository`, two branches or commit IDs, and a relative TypeScript path. Public repositories work without credentials, subject to GitHub’s API rate limit.
-
-For a private repository:
+## Verify the entire acceptance workflow
 
 ```sh
-cp .env.example .env
+npm run demo:verify
 ```
 
-Set `GITHUB_TOKEN` in `.env` to a fine-grained GitHub token with **Contents: read** for that repository. Restart the server. The token stays on the server and is never stored in a review or sent to the browser. Do not commit `.env` or paste tokens into issues or pull requests.
+This invokes the actual CLI to create a fresh fixture, register both sessions, detect and deduplicate an overlap alert, record intent, choose a resolution, preview, approve, apply, run the configured checkout checks, create a normal Git commit, and verify its decision history. It also tests the actual review-server command and a separate single-developer change. The output includes the repository, review ID, commit, and a command to reopen the result. Fixtures remain available in your system temporary directory. Port 3211 must be available for this verification script.
 
-Import reads snapshots only. It does not push code or merge GitHub branches. Review the exported file in the target repository and run its own tests before opening a pull request. No OpenAI, Linear, Slack, or Teams keys are needed for this release.
-
-## Tests and formatting
+For a hands-on walkthrough:
 
 ```sh
-npm run check                # Type check, production build, engine/API tests
-npx playwright install chromium
-npm run test:e2e             # Production-server browser workflows
+fuse demo --dir /tmp/my-fuse-demo
+fuse watch --repo /tmp/my-fuse-demo/checkout --once
+# Exit 2 means there is new review attention, not that the tool crashed.
+# Copy the review ID printed by watch:
+fuse review REVIEW_ID --repo /tmp/my-fuse-demo/checkout --serve --open
+```
+
+The visual review shows the common base, each session’s actual calls and function edits, an intent-guided recommendation, and supported choices. Save a rationale, preview the full result, then explicitly approve application. The configured fixture checks expect a friendly missing-fields error first. Choosing **B then A** produces a real failed expectation with a specific email error instead; both orders retain the schema validation. Checks execute only after approval.
+
+Commit the result with your usual Git tools, then use **Link commit** in the review window or:
+
+```sh
+fuse link REVIEW_ID --repo /tmp/my-fuse-demo/checkout --commit HEAD
+fuse history --repo /tmp/my-fuse-demo/checkout --json
+```
+
+Fuse verifies that the linked commit descends from the common base and contains the exact recorded output. The review service does not create commits, bypass hooks, push, or merge your changes. Only the demo generator and verification script create commits in their own fixture repositories.
+
+## Inspect your own work
+
+```sh
+# Combined staged and unstaged working contents, including untracked files:
+fuse inspect --repo /path/to/project
+
+# One committed change:
+fuse inspect --repo /path/to/project --base HEAD~1 --a HEAD
+
+# Two revisions; their actual merge base is selected automatically:
+fuse inspect --repo /path/to/project --a feature/request --b feature/schema --json
+```
+
+Working changes are labeled **unattributed**. Fuse never guesses which agent wrote a file. Source-linked observations explain changed guards, calls, error returns, additions, and deletions even when there is no overlap. Non-TypeScript, malformed, oversized, binary, symlink, and unsupported mode changes remain visible for manual review.
+
+For two sessions, create separate worktrees through your usual Git workflow and register them explicitly. The first registration is A; the second is B. Updating an existing registration preserves its position.
+
+```sh
+fuse session add request --repo /path/to/project --name 'Request validation' --worktree /path/to/request-worktree
+fuse session add schema --repo /path/to/project --name 'Schema validation' --worktree /path/to/schema-worktree
+fuse session list --repo /path/to/project
+fuse inspect --repo /path/to/project --sessions
+fuse watch --repo /path/to/project
+```
+
+Watch polls the worktrees and emits a terminal alert with a review command and local URL when overlap evidence changes. Unchanged overlap does not alert again, including across restarts. Further edits update the saved analysis; unrelated function edits do not repeat an unchanged overlap alert. Start the linked visual server with the printed `fuse review ... --serve` command. Use `--once` for scripts or `--json` for JSONL events. Remove a registration with `fuse session remove ID`.
+
+## Decisions, application, and checks
+
+When intent is ambiguous, Fuse asks which side should come first at shared insertion points. Record an explicit preference and rationale; the recommendation remains labeled as static or intent-guided, never as a tested runtime fact.
+
+```sh
+fuse intent REVIEW_ID --first a --note 'Missing fields should get the friendly error first.' --repo /path/to/project
+fuse decide REVIEW_ID --file checkout.ts --conflict overlap:validateBody --choice both --order a-first --note 'Preserve both validators with friendly errors first.' --repo /path/to/project
+fuse preview REVIEW_ID --repo /path/to/project --json
+fuse apply REVIEW_ID --approve EXACT_PREVIEW_TOKEN --repo /path/to/project --json
+```
+
+Use `a`, `b`, or supported `both` for differing function edits; `both` requires `a-first` or `b-first`. Possible dependency interactions use `reviewed`. Whole-file changes can require selecting a complete snapshot. Unsupported compositions remain blocked, with the reason and both sources available.
+
+Application currently supports **one TypeScript file** into a **clean checkout at the common base**. It checks registration, both input worktrees, target HEAD, target contents, and the exact approval token. It refuses staged, unstaged, and untracked target work. For a dirty single-developer working copy, use the explanation as review feedback; commit or preserve the work before creating a separate base target for application.
+
+Configure checks explicitly before previewing. Commands are argument arrays, run without a shell; package scripts are never discovered or executed automatically.
+
+```sh
+fuse check add typecheck --repo /path/to/project --command /absolute/path/to/tsc --arg=--noEmit --timeout 30000
+fuse check list --repo /path/to/project
+```
+
+Only configure commands you intend to run locally. The preview lists the exact commands. Changing them invalidates approval. Results record actual exit status, stdout/stderr, timestamp, and duration. Failed checks leave the applied file available for inspection; they are never reported as passing. No configured checks means behavior is explicitly unverified.
+
+## Coding-tool integration
+
+Fuse includes a vendor-independent **stdio MCP server** and a verified **Codex integration**. It exposes inspection, watch refresh, history, intent, proposed decisions, and previews. Application and check execution remain explicit human CLI/browser actions; the MCP server has no apply tool.
+
+```sh
+codex mcp add fuse -- node /absolute/path/to/fuse/cli/run.mjs mcp --repo /absolute/path/to/project
+```
+
+Start a Codex session and ask it to invoke `fuse_inspect` with `sessions: true`, then read that review with `fuse_review`. See [the integration and JSON interface](docs/integration.md) for approval settings, the actual verification record, schemas, and exit codes.
+
+## Validation and development
+
+```sh
 npm run format:check
-npm run format              # Apply consistent formatting
+npm run check                  # TypeScript, production build, engine/API/Git/CLI/MCP tests
+npx playwright install chromium
+npm run test:e2e                # Browser → real Git fixture → checks → commit link
+npm run demo:verify             # Actual terminal acceptance walkthrough
 ```
 
-The browser tests run an isolated server on port 3101 and use an ignored database under `test-results/`. Engine tests cover observable checkout behavior, independent edits, deletions, unsupported compositions, shadowed calls, and comment preservation. API tests verify persistence, stale-write protection, validation, downloads, and origin restrictions. GitHub tests cover exact commit selection and error handling.
+GitHub Actions runs these checks on `main`, `feat/**`, and pull requests. Browser reports are uploaded on failure. Tests run controlled fixtures only. Arbitrary imported source is parsed, never automatically executed.
 
-The [Verify Fuse workflow](.github/workflows/ci.yml) runs these checks in GitHub Actions. Browser reports are uploaded when a run fails.
+## Boundaries and storage
 
-## Scope and limitations
+- Named top-level TypeScript functions, direct local calls, and constrained additive composition. Cross-file calls, callbacks, dynamic dispatch, and external effects are not modeled.
+- Shared-function edits, possible call-path interactions, and observed check results are different evidence. Static reachability is not proof of runtime conflict or order.
+- Analysis covers up to 80 changed files, 100 KB per snapshot, and 150 top-level statements per file. Multi-file changes are explained but require manual application. All graph nodes remain available in scrollable diagrams and JSON.
+- State progresses through **proposed → applied → committed → merged**. `fuse merged ID --into MERGE_COMMIT` requires an actual Git merge commit integrating the resolution. Fast-forward/squash/remote-PR merge status is not inferred.
+- Reviews, source snapshots, configuration, and watch state live in the repository’s common Git directory under `fuse/`, shared by its worktrees. They survive restarts but are local, not a tamper-proof or automatically shared audit. Store updates are atomic and Fuse mutations use a lock. Git identity is labeled local attribution, never verified authentication.
+- Input checks happen immediately before writing, and the single output is replaced atomically. Other editors do not participate in Fuse’s lock; avoid simultaneous saves during application.
+- Standard controls and tokens come from the real MIT-licensed [Untitled UI React source](src/untitledui/PROVENANCE.md). The free MCP connection was verified. Its dedicated Alerts component requires PRO; errors use plain accessible text and the free controls. No restricted source is included.
+- The earlier snapshot/GitHub-import APIs remain available for safe manual review and exports. Exporting source does not mark a review merged. Their contract is covered by the retained tests.
 
-This is the **single-file TypeScript conflict-resolution MVP** from the proposal’s first-semester plan, with the overview and summary surfaces included.
-
-- The overview shows saved revisions, not live running-agent telemetry. Start a new review to fetch new branch snapshots.
-- The graph combines statically resolved local calls from all three snapshots. It is not an execution trace. Dynamic dispatch, callbacks, cross-file calls, and runtime conditions are not modeled.
-- Shared-path warnings are review candidates, not proof of a semantic conflict or a distributed happens-before relationship. AI judgments are not implemented.
-- “Merge both” supports additive top-level statements within a function while preserving the base statement order. Signature changes, replacements, ambiguous anchors, duplicate declarations, and unsupported comment edits block composition. Choosing an order is a human behavior decision, not a correctness guarantee.
-- Module-level changes, classes, arrow-function implementations, overloads, and anonymous functions use conservative whole-file selection when both revisions differ. They are not independently reconciled.
-- Standalone diagnostics may include missing imports from the original project. Export remains available with diagnostics visible; a successful standalone check is not proof that application tests pass.
-- SQLite reviews are local to this computer. There is no user authentication, hosted team synchronization, automated test execution for imported code, or automatic GitHub write-back. Keep the server on loopback; add authentication and deployment hardening before hosting it.
-- Linear, Slack, Teams, autonomous agent execution, and AI semantic review are future work. The UI does not pretend these are connected.
-
-## Project layout
-
-```text
-src/                  React interface and review components
-server/engine.ts      AST analysis, composition, and diagnostics
-server/app.ts         Validated HTTP endpoints and review lifecycle
-server/store.ts       SQLite storage with revision checks
-server/github.ts      Read-only, commit-pinned GitHub imports
-shared/               Types and the checkout fixture
-examples/checkout/    Uploadable TypeScript snapshots
-tests/               Engine, API, GitHub, and browser tests
-```
-
-Reviews are stored in `data/fuse.sqlite` by default. The database, its WAL files, `.env`, test reports, and build output are ignored by Git. `FUSE_DB` can select another local database path. Node 24 may print an experimental SQLite warning; it is expected.
-
-See [architecture and API](docs/architecture.md), [MVP scope](docs/MVP.md), and [contributing](CONTRIBUTING.md).
+See [architecture](docs/architecture.md), [release acceptance](docs/MVP.md), and [contributing](CONTRIBUTING.md).

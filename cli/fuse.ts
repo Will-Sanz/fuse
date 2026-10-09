@@ -18,6 +18,7 @@ import {
 import { LocalStore } from '../server/local-store';
 import { createDemo } from '../server/demo';
 import type { Review } from '../shared/review';
+import { shellQuote } from '../shared/shell';
 
 export const help = `Fuse — understand and reconcile local TypeScript changes
 
@@ -80,11 +81,11 @@ export function describe(review: Review) {
   if (review.preview)
     lines.push(
       `Preview token: ${review.preview.token}`,
-      `Approve: fuse apply ${review.id} --repo ${JSON.stringify(review.repository)} --approve ${review.preview.token}`,
+      `Approve: fuse apply ${review.id} --repo ${shellQuote(review.repository)} --approve ${review.preview.token}`,
     );
   if (review.commit) lines.push(`Commit ${review.commit}`);
   lines.push(
-    `Visual review: fuse review ${review.id} --repo ${JSON.stringify(review.repository)} --serve --open`,
+    `Visual review: fuse review ${review.id} --repo ${shellQuote(review.repository)} --serve --open`,
   );
   return lines.join('\n');
 }

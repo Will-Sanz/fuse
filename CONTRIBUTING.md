@@ -8,9 +8,9 @@ For command-line Git, configure your name and email before committing. Use an em
 
 ## Development checks
 
-Use Node.js 24 and `npm ci`. Run `npm run dev` for the app. Before pushing, run `npm run format`, `npm run check`, and `npm run test:e2e` for UI or workflow changes. Install the test browser once with `npx playwright install chromium`.
+Use Node.js 24 and `npm ci`. Run `npm run dev` for the app. Before pushing, run `npm run format`, `npm run check`, `npm run test:e2e`, and `npm run demo:verify` for UI or workflow changes. Install the test browser once with `npx playwright install chromium`.
 
-Engine changes belong in `server/engine.ts` with behavioral tests in `tests/engine.test.ts`. API changes belong in `server/` with API tests. Interface work belongs in `src/`. Keep `shared/types.ts` consistent at both ends. Add credentials only to your ignored `.env` file.
+Engine changes belong in `server/engine.ts` with behavioral tests in `tests/engine.test.ts`. API changes belong in `server/` with API tests. Git/CLI/worktree behavior belongs in `server/local.ts`, `server/git.ts`, and `cli/` with temporary-repository tests. Interface work belongs in `src/`; retain the Untitled UI license and pinned provenance when updating copied components. Keep `shared/types.ts` consistent at both ends. Add credentials only to your ignored `.env` file.
 
 ## For each task
 

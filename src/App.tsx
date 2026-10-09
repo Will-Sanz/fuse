@@ -1,813 +1,1025 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Activity,
-  ArrowDownToLine,
   ArrowRight,
-  Check,
-  CircleCheck,
-  Clock3,
-  Code2,
-  ExternalLink,
-  FileCode2,
-  GitBranch,
-  GitMerge,
-  History,
-  Layers3,
-  LoaderCircle,
-  Plus,
-  RefreshCw,
-  ShieldCheck,
-  TriangleAlert,
-  X,
-} from 'lucide-react';
-import { api } from './api';
-import { FlowGraph } from './components/FlowGraph';
-import { NewWorkspace } from './components/NewWorkspace';
-import { Resolution } from './components/Resolution';
-import type { Workspace, WorkspaceSummary } from '../shared/types';
-type View = 'overview' | 'resolve' | 'history';
-const date = (value: string) =>
-  new Date(value).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  CheckCircle,
+  Code02,
+  GitBranch01,
+  LayersTwo01,
+  Terminal,
+  XClose,
+  ArrowUpRight,
+  RefreshCw01,
+} from '@untitledui/icons';
+import { Button } from './untitledui/components/base/buttons/button';
+import { Input } from './untitledui/components/base/input/input';
+import { TextArea } from './untitledui/components/base/textarea/textarea';
+import { Badge, BadgeWithDot } from './untitledui/components/base/badges/badges';
+import { Tabs, TabList, Tab, TabPanel } from './untitledui/components/application/tabs/tabs';
+import { Modal, ModalOverlay, Dialog } from './untitledui/components/application/modals/modal';
+import { LoadingIndicator } from './untitledui/components/application/loading-indicator/loading-indicator';
+import { Tooltip, TooltipTrigger } from './untitledui/components/base/tooltip/tooltip';
+import { ChangeGraph } from './components/ChangeGraph';
+import type { Review, ReviewFile } from '../shared/review';
+import type { Decision } from '../shared/types';
+import { shellQuote } from '../shared/shell';
+
+async function api<T>(path: string, data?: unknown): Promise<T> {
+  const result = await fetch(
+    `/api${path}`,
+    data === undefined
+      ? undefined
+      : {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+  );
+  const body = await result.json();
+  if (!result.ok) throw new Error(body.error || 'The request failed. Try again.');
+  return body;
+}
+const short = (s: string) => s.slice(0, 10);
+function Source({ code, start = 1, label }: { code: string; start?: number; label: string }) {
+  return (
+    <pre className="source" aria-label={label}>
+      <code>
+        {code ? (
+          code.split('\n').map((line, i) => (
+            <span className="source-line" key={i}>
+              <span className="line-number">{i + start}</span>
+              <span>{line || ' '}</span>
+            </span>
+          ))
+        ) : (
+          <span className="empty-code">File or function removed</span>
+        )}
+      </code>
+    </pre>
+  );
+}
+function Summary({ review }: { review: Review }) {
+  return (
+    <section className="record-section">
+      <div className="section-title">
+        <div>
+          <span className="eyebrow">DECISION RECORD</span>
+          <h2>A result you can retrace.</h2>
+        </div>
+        <Badge color={review.status === 'proposed' ? 'gray' : 'success'}>{review.status}</Badge>
+      </div>
+      <dl className="record-grid">
+        <div>
+          <dt>Common base</dt>
+          <dd>
+            <code>{short(review.baseCommit)}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Review</dt>
+          <dd>
+            <code>{short(review.id)}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Reviewer</dt>
+          <dd>{review.attribution.name}</dd>
+        </div>
+        <div>
+          <dt>Identity</dt>
+          <dd>Local Git attribution · unverified</dd>
+        </div>
+      </dl>
+      {review.commit && (
+        <div className="commit-reference">
+          <CheckCircle />
+          <span>
+            Linked commit <code>{review.commit}</code>
+          </span>
+        </div>
+      )}
+      <ol className="timeline">
+        {[...review.events].reverse().map((e, i) => (
+          <li key={`${e.at}-${i}`}>
+            <div>
+              <strong>{e.action}</strong>
+              <time>{new Date(e.at).toLocaleString()}</time>
+            </div>
+            <p>{e.detail}</p>
+            <small>{e.reviewer}</small>
+          </li>
+        ))}
+      </ol>
+      <Button
+        href={`/api/reviews/${review.id}/audit`}
+        color="secondary"
+        iconTrailing={ArrowUpRight}
+      >
+        Export decision JSON
+      </Button>
+    </section>
+  );
+}
 export default function App() {
-  const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]),
-    [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [view, setView] = useState<View>('overview'),
-    [selected, setSelected] = useState('');
-  const [showNew, setShowNew] = useState(false),
-    [loading, setLoading] = useState(true),
-    [busy, setBusy] = useState(false);
-  const [error, setError] = useState(''),
-    [notice, setNotice] = useState('');
-  const loadCounter = useRef(0);
-  async function refreshList() {
-    const all = await api<WorkspaceSummary[]>('/workspaces');
-    setWorkspaces(all);
-    return all;
-  }
-  function accept(w: Workspace) {
-    setWorkspace(w);
-    setSelected((s) =>
-      w.analysis.conflicts.some((c) => c.id === s) ? s : (w.analysis.conflicts[0]?.id ?? ''),
-    );
-    window.history.replaceState(null, '', `?review=${w.id}`);
-  }
+  const [review, setReview] = useState<Review>();
+  const [history, setHistory] = useState<{ id: string; title: string; status: string }[]>([]);
+  const [mode, setMode] = useState('demo');
+  const [loading, setLoading] = useState(true),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState('');
+  const [notice, setNotice] = useState(''),
+    [historyOpen, setHistoryOpen] = useState(false),
+    [approveOpen, setApproveOpen] = useState(false);
+  const [fileIndex, setFileIndex] = useState(0),
+    [functionName, setFunctionName] = useState(''),
+    [tab, setTab] = useState('change');
+  const [note, setNote] = useState(''),
+    [intentNote, setIntentNote] = useState(''),
+    [commitRef, setCommitRef] = useState('HEAD');
+  const [choice, setChoice] = useState<Record<string, Decision>>({});
+  const file: ReviewFile | undefined = review?.files[fileIndex];
+  const pending =
+    review?.files.reduce(
+      (sum, f) => sum + f.analysis.conflicts.filter((c) => !f.decisions[c.id]).length,
+      0,
+    ) || 0;
+  const loadHistory = () => api<typeof history>('/reviews').then(setHistory);
+  const accept = (r: Review) => {
+    setReview(r);
+    window.history.replaceState({}, '', `?review=${r.id}`);
+  };
   async function load(id: string) {
-    const request = ++loadCounter.current;
     setLoading(true);
     setError('');
     try {
-      const w = await api<Workspace>(`/workspaces/${id}`);
-      if (request === loadCounter.current) {
-        accept(w);
-        setNotice('');
-      }
+      accept(await api<Review>(`/reviews/${id}`));
+      setFileIndex(0);
+      setChoice({});
+      setFunctionName('');
     } catch (e) {
-      if (request === loadCounter.current) setError((e as Error).message);
+      setError((e as Error).message);
     } finally {
-      if (request === loadCounter.current) setLoading(false);
+      setLoading(false);
     }
   }
   useEffect(() => {
     let active = true;
-    api<WorkspaceSummary[]>('/workspaces')
-      .then(async (all) => {
+    Promise.all([api<{ mode: string }>('/mode'), api<typeof history>('/reviews')])
+      .then(([m, h]) => {
         if (!active) return;
-        setWorkspaces(all);
-        const id = new URLSearchParams(window.location.search).get('review') || all[0]?.id;
-        if (id) {
-          const w = await api<Workspace>(`/workspaces/${encodeURIComponent(id)}`);
-          if (active) accept(w);
-        }
+        setMode(m.mode);
+        setHistory(h);
+        const id = new URLSearchParams(location.search).get('review');
+        if (id) void load(id);
+        else setLoading(false);
       })
       .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
+        if (active) {
+          setError(e.message);
+          setLoading(false);
+        }
       });
     return () => {
       active = false;
     };
   }, []);
-  const conflict =
-    workspace?.analysis.conflicts.find((c) => c.id === selected) ??
-    workspace?.analysis.conflicts[0];
-  const pending = workspace
-    ? workspace.analysis.conflicts.filter((c) => !workspace.decisions[c.id]).length
-    : 0;
-  async function finalize() {
-    if (!workspace) return;
+  async function action(run: () => Promise<Review>, message: string) {
     setBusy(true);
     setError('');
+    setNotice('');
     try {
-      accept(
-        await api<Workspace>(`/workspaces/${workspace.id}/finalize`, 'POST', {
-          revision: workspace.revision,
-        }),
-      );
-      await refreshList();
-      setView('history');
-      setNotice('Resolved file and decision record saved.');
+      const r = await run();
+      accept(r);
+      setNotice(message);
+      await loadHistory();
+      return r;
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   }
-  function onSaved(w: Workspace) {
-    accept(w);
-    setNotice('Decision saved.');
-    void refreshList().catch((e) => setError(e.message));
+  const mutate = (endpoint: string, data: object = {}) =>
+    api<Review>(`/reviews/${review!.id}/${endpoint}`, { revision: review!.revision, ...data });
+  async function demo(single: boolean) {
+    setFileIndex(0);
+    setTab('change');
+    setChoice({});
+    setFunctionName('');
+    setNote('');
+    setIntentNote('');
+    await action(
+      () => api<Review>('/demo', { single }),
+      'Real Git fixture created. The session edits are scripted; the analysis is generated from their worktrees.',
+    );
   }
-  const nav: { key: View; label: string; icon: typeof Activity }[] = [
-    { key: 'overview', label: 'Agent overview', icon: Layers3 },
-    { key: 'resolve', label: 'Conflict resolution', icon: GitMerge },
-    { key: 'history', label: 'Resolved summary', icon: History },
-  ];
+  const activeFunction =
+    functionName ||
+    file?.analysis.conflicts[0]?.functions[0] ||
+    file?.analysis.changedA[0] ||
+    file?.analysis.changedB[0];
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <a className="brand" href="/" aria-label="Fuse home">
-          fuse<span>✳</span>
+      <header className="topbar">
+        <a className="wordmark" href="/" aria-label="Fuse home">
+          <span className="fuse-symbol">f</span>fuse
+          <span className="wordmark-divider" />{' '}
+          <span className="wordmark-caption">A little clarity for your code.</span>
         </a>
-        <div className="workspace-label">
-          <span className="team-mark">F</span>
-          <div>
-            Senior Design<span>Agent oversight workspace</span>
-          </div>
+        <div className="topbar-actions">
+          <BadgeWithDot color="success">Local companion</BadgeWithDot>
+          <Button
+            size="sm"
+            color="tertiary"
+            onClick={() => {
+              setHistoryOpen(true);
+              void loadHistory().catch((e) => setError(e.message));
+            }}
+          >
+            History
+          </Button>
         </div>
-        <div className="sidebar-section-label">WORKSPACE</div>
-        <nav aria-label="Workspace views">
-          {nav.map(({ key, label, icon: Icon }) => (
-            <button
-              className={view === key ? 'active' : ''}
-              key={key}
-              onClick={() => setView(key)}
-              aria-current={view === key ? 'page' : undefined}
+      </header>
+      <main>
+        {error && (
+          <div className="message-error" role="alert">
+            <strong>Couldn’t complete that step.</strong>
+            <p>{error}</p>
+            <Button
+              color="secondary"
+              size="sm"
+              onClick={() => (review ? void load(review.id) : location.reload())}
+              iconLeading={RefreshCw01}
             >
-              <Icon size={18} />
-              {label}
-              {key === 'resolve' && pending > 0 && <span className="nav-count">{pending}</span>}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-section-label recent-heading">
-          REVIEWS
-          <button className="icon-button" aria-label="New review" onClick={() => setShowNew(true)}>
-            <Plus size={16} />
-          </button>
-        </div>
-        <div className="recent-list">
-          {workspaces.length === 0 ? (
-            <p>Your reviews will appear here.</p>
-          ) : (
-            workspaces.map((w) => (
-              <button
-                key={w.id}
-                className={workspace?.id === w.id ? 'selected' : ''}
-                onClick={() => void load(w.id)}
-              >
-                <span className={`status-dot ${w.resolved ? 'done' : ''}`} />
-                <span>
-                  {w.title}
-                  <small>{w.fileName}</small>
-                </span>
-              </button>
-            ))
-          )}
-        </div>
-        <div className="sidebar-bottom">
-          <span className="connection-dot" />
-          <div>
-            Local workspace<span>Reviews saved on this machine</span>
+              Reload
+            </Button>
           </div>
-          <span className="version">0.1</span>
-        </div>
-      </aside>
-      <div className="main-shell">
-        <header className="topbar">
-          <span>
-            <span className="muted">Workspace</span>
-            <span className="breadcrumb-slash">/</span>
-            {nav.find((n) => n.key === view)?.label}
-          </span>
-          <div className="topbar-actions">
-            <span className="snapshot-label">
-              <ShieldCheck size={14} />
-              Snapshot review
-            </span>
-            <button className="button compact" onClick={() => setShowNew(true)}>
-              <Plus size={15} />
-              New review
-            </button>
-            <span className="user-avatar" aria-label="Local reviewer">
-              F
-            </span>
+        )}
+        {loading ? (
+          <div className="loading-state" role="status">
+            <LoadingIndicator label="Reading your review…" />
           </div>
-        </header>
-        <main id="main-content">
-          {error && (
-            <div role="alert" className="error page-alert">
-              <span>{error}</span>
-              <div>
-                {workspace && (
-                  <button className="text-button" onClick={() => void load(workspace.id)}>
-                    Reload review
-                  </button>
-                )}
-                <button
-                  className="icon-button"
-                  aria-label="Dismiss error"
-                  onClick={() => setError('')}
+        ) : !review ? (
+          <div className="welcome">
+            <div className="welcome-label">
+              <span className="tiny-line" /> YOUR NEXT CHANGE, UNDERSTOOD
+            </div>
+            <h1>
+              Keep the momentum.
+              <br />
+              <span>See where changes meet.</span>
+            </h1>
+            <p className="welcome-copy">
+              A focused second look at your code. Understand what changed, work through the overlap,
+              and keep the reason behind the result.
+            </p>
+            {mode === 'demo' && (
+              <div className="welcome-actions">
+                <Button
+                  size="lg"
+                  isLoading={busy}
+                  onClick={() => void demo(false)}
+                  iconTrailing={ArrowRight}
                 >
-                  <X size={16} />
-                </button>
+                  Explore checkout demo
+                </Button>
+                <Button
+                  size="lg"
+                  color="secondary"
+                  isDisabled={busy}
+                  onClick={() => void demo(true)}
+                >
+                  See a single change
+                </Button>
+              </div>
+            )}
+            <p className="demo-caption">
+              Scripted edits. Real Git worktrees, analysis, and test results. No API keys.
+            </p>
+            <div className="terminal-intro">
+              <div className="terminal-bar">
+                <Terminal />
+                <span>Or start in your own repository</span>
+                <Badge color="gray">TypeScript</Badge>
+              </div>
+              <pre>
+                <span>$</span> fuse inspect{`\n`}
+                <span>$</span> fuse session add request --name "Request validation" --worktree
+                ../request{`\n`}
+                <span>$</span> fuse watch
+              </pre>
+              <p>The CLI and this review window use the same engine.</p>
+            </div>
+            <div className="welcome-steps">
+              <div>
+                <span>01</span>
+                <h3>Notice the change</h3>
+                <p>Actual functions and local calls, with explicit session attribution.</p>
+              </div>
+              <div>
+                <span>02</span>
+                <h3>Make the decision</h3>
+                <p>Source evidence, a behavior question, and a preview you can inspect.</p>
+              </div>
+              <div>
+                <span>03</span>
+                <h3>Keep the context</h3>
+                <p>Recorded choices, real checks, and a link to the resulting commit.</p>
               </div>
             </div>
-          )}
-          {notice && (
-            <div role="status" className="success-notice">
-              <Check size={16} />
-              {notice}
-              <button
-                className="icon-button"
-                aria-label="Dismiss notification"
-                onClick={() => setNotice('')}
-              >
-                <X size={14} />
-              </button>
+          </div>
+        ) : (
+          <>
+            <div className="review-breadcrumb">
+              <GitBranch01 />
+              <span title={review.repository}>{review.repository.split('/').at(-1)}</span>
+              <span>/</span>
+              <code>{file?.path || 'Current changes'}</code>
+              <Badge color="gray">{review.demo ? 'Reproducible demo' : 'Local Git'}</Badge>
             </div>
-          )}
-          {loading ? (
-            <div className="loading">
-              <LoaderCircle className="spin" size={24} />
-              <p>Opening your workspace…</p>
+            <div className="review-heading">
+              <div>
+                <h1>
+                  {pending
+                    ? 'Two changes. One decision.'
+                    : review.status !== 'proposed'
+                      ? 'The decision has a history.'
+                      : file
+                        ? 'Your change, in focus.'
+                        : 'Nothing needs your attention.'}
+                </h1>
+                <p>
+                  {pending
+                    ? 'Follow the evidence, choose the behavior, and preview the result.'
+                    : review.status !== 'proposed'
+                      ? 'Review the applied result, check outcomes, and the reasoning that led here.'
+                      : 'A useful explanation doesn’t need a conflict.'}
+                </p>
+              </div>
+              <div className="heading-status">
+                <BadgeWithDot color={pending ? 'warning' : 'success'}>
+                  {review.status !== 'proposed'
+                    ? review.status
+                    : pending
+                      ? `${pending} decision${pending === 1 ? '' : 's'} needed`
+                      : 'No differing overlap'}
+                </BadgeWithDot>
+                <span>
+                  Base <code>{short(review.baseCommit)}</code>
+                </span>
+              </div>
             </div>
-          ) : !workspace ? (
-            <section className="welcome">
-              <span className="eyebrow">A CLEARER VIEW OF PARALLEL WORK</span>
-              <h1>
-                Many agents.
-                <br />
-                One shared understanding.
-              </h1>
-              <p>
-                See where code changes meet, understand the behavior behind a conflict, and make a
-                decision your team can trace.
+            {notice && (
+              <p className="notice" role="status">
+                <CheckCircle />
+                {notice}
               </p>
-              <button className="button primary" onClick={() => setShowNew(true)}>
-                Start your first review
-                <ArrowRight size={18} />
-              </button>
-              <div className="welcome-features">
-                <span>
-                  <GitBranch />
-                  Compare TypeScript revisions
-                </span>
-                <span>
-                  <GitMerge />
-                  Resolve with a preview
-                </span>
-                <span>
-                  <History />
-                  Keep the decision record
-                </span>
+            )}
+            {review.demo && (
+              <div className="demo-note">
+                <Terminal />
+                <p>
+                  <strong>Scripted checkout scenario.</strong> Fuse created a real repository and{' '}
+                  {review.sources.a.ref.sessionId
+                    ? 'two registered worktrees'
+                    : 'an ordinary working change'}
+                  .{' '}
+                  {review.sources.a.ref.sessionId &&
+                    'The configured checks expect a friendly message for missing fields, and a specific error for malformed email.'}
+                </p>
               </div>
-            </section>
-          ) : (
-            <>
-              <section className="page-heading">
-                <div>
-                  <span className="eyebrow">
-                    {view === 'overview'
-                      ? 'THE SHARED PICTURE'
-                      : view === 'resolve'
-                        ? 'UNDERSTAND. DECIDE. MOVE FORWARD.'
-                        : 'A RECORD OF WHAT CHANGED'}
-                  </span>
-                  <h1>
-                    {view === 'overview'
-                      ? 'Parallel work, in focus.'
-                      : view === 'resolve'
-                        ? 'Resolve the behavior.'
-                        : 'Decisions, made clear.'}
-                  </h1>
-                  <p>
-                    {workspace.input.title}
-                    <span className="heading-dot">·</span>
-                    <FileCode2 size={14} />
-                    {workspace.input.fileName}
-                  </p>
-                </div>
-                <div className="heading-actions">
-                  <span
-                    className={`tag ${workspace.output !== null ? 'success' : pending ? 'gold' : 'neutral'}`}
-                  >
-                    {workspace.output !== null ? <CircleCheck size={14} /> : <Clock3 size={14} />}{' '}
-                    {workspace.output !== null
-                      ? 'Resolution saved'
-                      : pending
-                        ? `${pending} ${pending === 1 ? 'decision' : 'decisions'} needed`
-                        : 'Ready to generate'}
-                  </span>
-                  <button
-                    className="icon-button bordered"
-                    aria-label="Refresh review"
-                    onClick={() => void load(workspace.id)}
-                  >
-                    <RefreshCw size={16} />
-                  </button>
-                </div>
-              </section>
-              {view === 'overview' && (
-                <>
-                  <section className="metrics" aria-label="Review metrics">
-                    <div>
-                      <span>Agent revisions</span>
-                      <strong>
-                        02<small>against one common base</small>
-                      </strong>
-                    </div>
-                    <div>
-                      <span>Changed functions</span>
-                      <strong>
-                        {String(
-                          new Set([...workspace.analysis.changedA, ...workspace.analysis.changedB])
-                            .size,
-                        ).padStart(2, '0')}
-                        <small>across both revisions</small>
-                      </strong>
-                    </div>
-                    <div>
-                      <span>Needs your attention</span>
-                      <strong className={pending ? 'gold-text' : ''}>
-                        {String(pending).padStart(2, '0')}
-                        <small>
-                          {workspace.analysis.conflicts.some((c) => c.kind === 'dependency')
-                            ? 'includes path review candidates'
-                            : 'decisions remaining'}
-                        </small>
-                      </strong>
-                    </div>
-                    <div>
-                      <span>Saved decisions</span>
-                      <strong>
-                        {String(Object.keys(workspace.decisions).length).padStart(2, '0')}
-                        <small>recorded with your notes</small>
-                      </strong>
-                    </div>
-                  </section>
-                  <div className="overview-columns">
-                    <section>
-                      <div className="section-heading">
-                        <h2>Agents in this review</h2>
-                        <span className="muted small">Pinned snapshots</span>
+            )}
+            <Tabs selectedKey={tab} onSelectionChange={(key) => setTab(String(key))}>
+              <TabList type="underline" aria-label="Review sections" className="review-tabs">
+                <Tab id="change">Change & decision</Tab>
+                <Tab id="result">Result preview {review.preview ? '· ready' : ''}</Tab>
+                <Tab id="record">Decision record</Tab>
+              </TabList>
+              <TabPanel id="change">
+                <div className="session-strip">
+                  {(['a', 'b'] as const).map((side) => (
+                    <div className={`session-summary session-${side}`} key={side}>
+                      <span className="session-avatar">{side.toUpperCase()}</span>
+                      <div>
+                        <strong>{review.sources[side].ref.label}</strong>
+                        <p>
+                          {review.sources[side].ref.sessionId
+                            ? `Registered session · ${review.sources[side].ref.sessionId}`
+                            : 'Revision / working copy · no agent inferred'}
+                        </p>
                       </div>
-                      <div className="agent-cards">
-                        {(
-                          [
-                            {
-                              key: 'a',
-                              name: workspace.input.nameA,
-                              changes: workspace.analysis.changedA,
-                            },
-                            {
-                              key: 'b',
-                              name: workspace.input.nameB,
-                              changes: workspace.analysis.changedB,
-                            },
-                          ] as const
-                        ).map((agent) => (
-                          <article className="agent-card" key={agent.key}>
-                            <div className="agent-card-head">
-                              <span className={`avatar ${agent.key}`}>
-                                {agent.key.toUpperCase()}
+                      <code>{short(review.sources[side].head)}</code>
+                    </div>
+                  ))}
+                </div>
+                {review.unsupported.length > 0 && (
+                  <section className="manual-review">
+                    <h2>These changes need manual review</h2>
+                    {review.unsupported.map((u) => (
+                      <p key={u.path}>
+                        <code>{u.path}</code> — {u.reason}
+                      </p>
+                    ))}
+                    <p>All changes remain in their worktrees. Automatic application is blocked.</p>
+                  </section>
+                )}
+                {review.files.length > 1 && (
+                  <div className="file-choices" aria-label="Changed files">
+                    {review.files.map((f, i) => (
+                      <Button
+                        key={f.path}
+                        color={i === fileIndex ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => {
+                          setFileIndex(i);
+                          setFunctionName('');
+                        }}
+                      >
+                        {f.path}
+                      </Button>
+                    ))}
+                    <p>
+                      Multi-file analysis is available; this release applies one TypeScript file at
+                      a time.
+                    </p>
+                  </div>
+                )}
+                {file ? (
+                  <>
+                    <section className="graph-section">
+                      <div className="section-title">
+                        <div>
+                          <span className="eyebrow">THE SHAPE OF THE CHANGE</span>
+                          <h2>
+                            {file.analysis.conflicts[0]?.kind === 'overlap'
+                              ? `The work meets at ${file.analysis.conflicts[0].functions[0]}.`
+                              : file.analysis.conflicts[0]?.kind === 'dependency'
+                                ? 'Connected functions need a closer look.'
+                                : 'Here’s what changed.'}
+                          </h2>
+                        </div>
+                        <Tooltip
+                          title="Static evidence"
+                          description="Arrows show resolved local calls. They do not prove runtime execution order or a behavioral conflict."
+                        >
+                          <TooltipTrigger>
+                            <Badge color="gray">Static call relationships</Badge>
+                          </TooltipTrigger>
+                        </Tooltip>
+                      </div>
+                      <div className="graph-comparison">
+                        {(['base', 'a', 'b'] as const).map((side) => (
+                          <div className={`graph-snapshot snapshot-${side}`} key={side}>
+                            <div className="graph-snapshot-label">
+                              <span>
+                                {side === 'base' ? 'Before' : `Change ${side.toUpperCase()}`}
                               </span>
-                              <span className="tag neutral">Analyzed</span>
+                              <small>
+                                {side === 'base'
+                                  ? short(review.baseCommit)
+                                  : review.sources[side].ref.label}
+                              </small>
                             </div>
-                            <h3>{agent.name}</h3>
-                            <p>Compared with the common base</p>
-                            <div className="changed-functions">
-                              {agent.changes.length ? (
-                                agent.changes.map((name) => (
-                                  <button
-                                    className="function-chip"
-                                    key={name}
-                                    onClick={() => {
-                                      const c = workspace.analysis.conflicts.find((c) =>
-                                        c.functions.includes(name),
-                                      );
-                                      if (c) {
-                                        setSelected(c.id);
-                                        setView('resolve');
-                                      }
-                                    }}
-                                  >
-                                    <Code2 size={13} />
-                                    {name}
-                                  </button>
-                                ))
-                              ) : (
-                                <span className="muted small">No named function changes</span>
-                              )}
-                            </div>
-                            <div className="agent-card-footer">
-                              <GitBranch size={14} />
-                              {agent.changes.length} changed{' '}
-                              {agent.changes.length === 1 ? 'function' : 'functions'}
-                              <span>{workspace.analysis.hashes[agent.key].slice(0, 7)}</span>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </section>
-                    <section className="attention-card">
-                      <span className="eyebrow">NEXT DECISION</span>
-                      {pending ? (
-                        <>
-                          <div className="attention-icon">
-                            <GitMerge size={24} />
+                            <ChangeGraph
+                              nodes={file.graphs[side]}
+                              changed={
+                                side === 'base'
+                                  ? []
+                                  : file.analysis[side === 'a' ? 'changedA' : 'changedB']
+                              }
+                              focus={[activeFunction || '']}
+                              onSelect={setFunctionName}
+                              label={`${side === 'base' ? 'Before' : `Change ${side.toUpperCase()}`} call graph`}
+                            />
                           </div>
-                          <h2>
-                            {
-                              workspace.analysis.conflicts.find((c) => !workspace.decisions[c.id])
-                                ?.title
-                            }
-                          </h2>
-                          <p>
-                            Follow the call relationships, compare both changes, and choose the
-                            intended behavior.
-                          </p>
-                          <button
-                            className="button primary"
-                            onClick={() => {
-                              setSelected(
-                                workspace.analysis.conflicts.find(
-                                  (c) => !workspace.decisions[c.id],
-                                )!.id,
-                              );
-                              setView('resolve');
-                            }}
-                          >
-                            Review conflict
-                            <ArrowRight size={17} />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <div className="attention-icon">
-                            <CircleCheck size={24} />
-                          </div>
-                          <h2>
-                            {workspace.output !== null
-                              ? 'This review is complete.'
-                              : 'All decisions are ready.'}
-                          </h2>
-                          <p>
-                            {workspace.output !== null
-                              ? 'Your resolved TypeScript and review record are ready to download.'
-                              : 'Generate the complete file and inspect its TypeScript diagnostics.'}
-                          </p>
-                          <button
-                            className="button primary"
-                            disabled={busy}
-                            onClick={() =>
-                              workspace.output !== null ? setView('history') : void finalize()
-                            }
-                          >
-                            {workspace.output !== null
-                              ? 'View resolution'
-                              : 'Generate resolved file'}
-                            <ArrowRight size={17} />
-                          </button>
-                        </>
-                      )}
-                    </section>
-                  </div>
-                  <section className="panel flow-panel">
-                    <div className="section-heading">
-                      <div>
-                        <h2>Where the work meets</h2>
-                        <p className="muted small">
-                          Local function calls extracted from all three TypeScript snapshots
-                        </p>
-                      </div>
-                      <span className="tag neutral">
-                        <Code2 size={13} />
-                        AST analysis
-                      </span>
-                    </div>
-                    <FlowGraph
-                      nodes={workspace.analysis.nodes}
-                      selected={[]}
-                      onSelect={(name) => {
-                        const c = workspace.analysis.conflicts.find((c) =>
-                          c.functions.includes(name),
-                        );
-                        if (c) {
-                          setSelected(c.id);
-                          setView('resolve');
-                        } else
-                          setNotice(
-                            `${name} calls ${workspace.analysis.nodes.find((n) => n.id === name)?.calls.join(', ') || 'no statically resolved local functions'}.`,
-                          );
-                      }}
-                    />
-                    <div className="graph-legend">
-                      <span>
-                        <i className="legend-dot unchanged" />
-                        Unchanged
-                      </span>
-                      <span>
-                        <i className="legend-dot changed" />
-                        One agent
-                      </span>
-                      <span>
-                        <i className="legend-dot overlap" />
-                        Both agents
-                      </span>
-                      <span className="muted">Arrows show calls, not execution order.</span>
-                    </div>
-                  </section>
-                </>
-              )}
-              {view === 'resolve' && (
-                <>
-                  <section className="panel flow-panel">
-                    <div className="section-heading">
-                      <div>
-                        <h2>The affected call flow</h2>
-                        <p className="muted small">
-                          Select a shared step to inspect the decision behind it
-                        </p>
-                      </div>
-                      <span className="tag neutral">
-                        {workspace.analysis.nodes.length} functions
-                      </span>
-                    </div>
-                    <FlowGraph
-                      nodes={workspace.analysis.nodes}
-                      selected={conflict?.functions ?? []}
-                      onSelect={(name) => {
-                        const c = workspace.analysis.conflicts.find((c) =>
-                          c.functions.includes(name),
-                        );
-                        if (c) setSelected(c.id);
-                        else setNotice(`${name}: no individual decision required.`);
-                      }}
-                    />
-                    <div className="graph-legend">
-                      <span>
-                        <i className="legend-dot overlap" />
-                        Shared edit
-                      </span>
-                      <span className="muted">
-                        Call relationships may include conditional paths.
-                      </span>
-                    </div>
-                  </section>
-                  {conflict ? (
-                    <>
-                      <div className="conflict-tabs" aria-label="Review decisions">
-                        {workspace.analysis.conflicts.map((c, i) => (
-                          <button
-                            className={conflict.id === c.id ? 'active' : ''}
-                            key={c.id}
-                            onClick={() => setSelected(c.id)}
-                          >
-                            {workspace.decisions[c.id] ? (
-                              <CircleCheck size={15} />
-                            ) : (
-                              <span className="step-number">{i + 1}</span>
-                            )}
-                            {c.kind === 'file' ? 'Whole file' : c.functions.join(' + ')}
-                          </button>
                         ))}
                       </div>
-                      <Resolution
-                        key={`${workspace.id}:${conflict.id}:${workspace.revision}`}
-                        workspace={workspace}
-                        conflict={conflict}
-                        onSaved={onSaved}
-                        onError={setError}
-                      />
-                    </>
-                  ) : (
-                    <div className="panel no-conflicts">
-                      <CircleCheck size={30} />
-                      <h2>No overlapping function edits</h2>
-                      <p>
-                        The changes can be assembled without a reviewer choice. Generate the result
-                        and run your project’s tests before adopting it.
-                      </p>
-                    </div>
-                  )}
-                  <div className="generate-bar">
-                    <div>
-                      <strong>
-                        {pending
-                          ? `${pending} ${pending === 1 ? 'decision remains' : 'decisions remain'}`
-                          : 'Ready for the complete picture'}
-                      </strong>
-                      <p>
-                        {pending
-                          ? 'Save each decision above to generate a resolved file.'
-                          : 'Generate the full TypeScript file and preserve this review.'}
-                      </p>
-                    </div>
-                    <button
-                      className="button primary"
-                      disabled={pending > 0 || busy}
-                      onClick={() => void finalize()}
-                    >
-                      {busy ? <LoaderCircle className="spin" size={17} /> : <GitMerge size={17} />}
-                      Generate resolved file
-                    </button>
-                  </div>
-                </>
-              )}
-              {view === 'history' && (
-                <>
-                  <section
-                    className={`result-banner ${workspace.output !== null ? 'complete' : ''}`}
-                  >
-                    <div className="result-symbol">
-                      {workspace.output !== null ? <CircleCheck size={28} /> : <Clock3 size={28} />}
-                    </div>
-                    <div>
-                      <span className="eyebrow">
-                        {workspace.output !== null ? 'RESOLUTION SAVED' : 'REVIEW IN PROGRESS'}
-                      </span>
-                      <h2>
-                        {workspace.output !== null
-                          ? 'One file. A traceable decision.'
-                          : 'Your decisions will come together here.'}
-                      </h2>
-                      <p>
-                        {workspace.output !== null
-                          ? `${Object.keys(workspace.decisions).length} decisions recorded · ${workspace.diagnostics.length} standalone TypeScript diagnostics`
-                          : `${pending} decisions remain before the resolved file can be generated.`}
-                      </p>
-                    </div>
-                    <div className="result-actions">
-                      {workspace.output !== null ? (
-                        <a
-                          className="button primary"
-                          href={`/api/workspaces/${workspace.id}/download`}
-                          download
-                        >
-                          <ArrowDownToLine size={16} />
-                          Download TypeScript
-                        </a>
-                      ) : (
-                        <button className="button primary" onClick={() => setView('resolve')}>
-                          Continue review
-                          <ArrowRight size={16} />
-                        </button>
-                      )}
-                      <a className="button" href={`/api/workspaces/${workspace.id}/audit`} download>
-                        <ArrowDownToLine size={16} />
-                        Export review record
-                      </a>
-                    </div>
-                  </section>
-                  <div className="history-columns">
-                    <section className="panel">
-                      <div className="section-heading">
-                        <h2>Decision timeline</h2>
-                        <History size={18} />
-                      </div>
-                      <ol className="timeline">
-                        {[...workspace.events].reverse().map((event) => (
-                          <li key={event.id}>
-                            <span className="timeline-dot" />
-                            <div>
-                              <time>{date(event.at)}</time>
-                              <h3>{event.action}</h3>
-                              <p>{event.detail}</p>
-                            </div>
-                          </li>
-                        ))}
-                      </ol>
-                    </section>
-                    <section className="panel provenance">
-                      <div className="section-heading">
-                        <h2>Review details</h2>
-                        <ShieldCheck size={18} />
-                      </div>
-                      <dl>
-                        <dt>Source</dt>
-                        <dd>
-                          {workspace.input.origin
-                            ? 'GitHub commit snapshots'
-                            : 'Local TypeScript snapshots'}
-                        </dd>
-                        <dt>File</dt>
-                        <dd>{workspace.input.fileName}</dd>
-                        <dt>Created</dt>
-                        <dd>{date(workspace.createdAt)}</dd>
-                        <dt>Input hashes · SHA-256</dt>
-                        <dd className="hashes">
-                          Base {workspace.analysis.hashes.base.slice(0, 16)}
-                          <br />A {workspace.analysis.hashes.a.slice(0, 16)}
-                          <br />B {workspace.analysis.hashes.b.slice(0, 16)}
-                        </dd>
-                        {workspace.outputHash && (
-                          <>
-                            <dt>Output hash · SHA-256</dt>
-                            <dd className="hashes">{workspace.outputHash}</dd>
-                          </>
-                        )}
-                      </dl>
-                      {workspace.input.origin && <pre>{workspace.input.origin}</pre>}
-                      <p className="muted small">
-                        Full source snapshots, hashes, notes, and timestamps are included in the
-                        review record.
-                      </p>
-                    </section>
-                  </div>
-                  {workspace.output !== null && (
-                    <section className="panel output-panel">
-                      <div className="section-heading">
-                        <h2>Resolved TypeScript</h2>
-                        <span
-                          className={`tag ${workspace.diagnostics.length ? 'gold' : 'success'}`}
-                        >
-                          {workspace.diagnostics.length ? (
-                            <TriangleAlert size={13} />
-                          ) : (
-                            <Check size={13} />
-                          )}{' '}
-                          {workspace.diagnostics.length
-                            ? 'Review diagnostics'
-                            : 'Standalone type check passed'}
+                      <div className="graph-footnote">
+                        <span>
+                          <i className="legend-focus" />
+                          Attention point
+                        </span>
+                        <span>
+                          <i className="legend-change" />
+                          Changed function
+                        </span>
+                        <span>
+                          Calls show relationships, not execution order. Select a function for its
+                          source.
                         </span>
                       </div>
-                      {workspace.diagnostics.length > 0 && (
-                        <div className="diagnostics">
-                          {workspace.diagnostics.map((d, i) => (
-                            <p key={i}>
-                              Line {d.line} · TS{d.code}: {d.message}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-                      <p className="muted small">
-                        Run the result in your project’s test suite. Standalone analysis cannot
-                        validate external dependencies or application behavior.
-                      </p>
-                      <pre>
-                        <code>{workspace.output}</code>
-                      </pre>
                     </section>
-                  )}
-                </>
-              )}
-              <details className="analysis-notes">
-                <summary>
-                  <TriangleAlert size={14} />
-                  Analysis scope and limitations
-                </summary>
-                {workspace.analysis.warnings.map((w) => (
-                  <p key={w}>{w}</p>
+                    <section className="evidence-section">
+                      <div className="section-title">
+                        <div>
+                          <span className="eyebrow">SOURCE EVIDENCE</span>
+                          <h2>{activeFunction || file.path}</h2>
+                        </div>
+                        <Badge color="gray">
+                          {file.analysis.conflicts.some((c) => c.kind === 'overlap')
+                            ? 'Shared code · behavior unverified'
+                            : 'Generated from TypeScript'}
+                        </Badge>
+                      </div>
+                      <div className="evidence-columns">
+                        {(['a', 'b'] as const).map((side) => {
+                          const e = file.evidence.find(
+                              (e) => e.revision === side && e.function === activeFunction,
+                            ),
+                            base = file.evidence.find(
+                              (e) => e.revision === 'base' && e.function === activeFunction,
+                            ),
+                            sourceLine =
+                              e?.line ??
+                              file.graphs[side].find((n) => n.id === activeFunction)?.line ??
+                              base?.line;
+                          return (
+                            <article className={`evidence-card evidence-${side}`} key={side}>
+                              <div className="evidence-title">
+                                <span>{side.toUpperCase()}</span>
+                                <h3>{review.sources[side].ref.label}</h3>
+                              </div>
+                              {e ? (
+                                <ul>
+                                  {e.observations.map((o) => (
+                                    <li key={o}>{o}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="unchanged-copy">
+                                  {base
+                                    ? 'This function is unchanged from the common base.'
+                                    : 'This function is not present in this snapshot.'}
+                                </p>
+                              )}
+                              <div className="source-ref">
+                                <Code02 />
+                                <code>
+                                  {file.path}:{sourceLine || 1}
+                                </code>
+                                <span>
+                                  {e?.code === '' ? 'removed · base location' : 'source snapshot'}
+                                </span>
+                              </div>
+                              <Source
+                                code={e?.code ?? base?.code ?? ''}
+                                start={sourceLine}
+                                label={`${side.toUpperCase()} source for ${activeFunction}`}
+                              />
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </section>
+                    {file.recommendations.map((rec) => {
+                      const c = file.analysis.conflicts.find((c) => c.id === rec.conflictId)!,
+                        saved = file.decisions[c.id],
+                        selected = choice[c.id] || saved || rec.action;
+                      return (
+                        <section className="decision-section" key={rec.conflictId}>
+                          <div className="decision-heading">
+                            <span className="decision-icon">
+                              <LayersTwo01 />
+                            </span>
+                            <div>
+                              <span className="eyebrow">
+                                {rec.action ? 'RECOMMENDED NEXT STEP' : 'A BEHAVIOR QUESTION'}
+                              </span>
+                              <h2>
+                                {rec.action
+                                  ? rec.actions.find(
+                                      (a) =>
+                                        a.decision.choice === rec.action?.choice &&
+                                        a.decision.order === rec.action?.order,
+                                    )?.label
+                                  : c.title}
+                              </h2>
+                            </div>
+                            {saved && <Badge color="success">Decision saved</Badge>}
+                          </div>
+                          <p className="recommendation-copy">{rec.reason}</p>
+                          {rec.question && <p className="intent-question">{rec.question}</p>}
+                          {c.canCombine && review.status === 'proposed' && (
+                            <div className="intent-controls">
+                              <Input
+                                label="Desired behavior"
+                                placeholder="e.g. Missing fields should get the friendly error first"
+                                value={intentNote}
+                                onChange={setIntentNote}
+                              />
+                              <div>
+                                <Button
+                                  size="sm"
+                                  color="secondary"
+                                  isDisabled={busy || !intentNote.trim()}
+                                  onClick={() =>
+                                    void action(
+                                      () =>
+                                        mutate('intent', {
+                                          intent: { first: 'a', rationale: intentNote },
+                                        }),
+                                      'Intent recorded. Recommendation updated.',
+                                    )
+                                  }
+                                >
+                                  A checks first
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  color="secondary"
+                                  isDisabled={busy || !intentNote.trim()}
+                                  onClick={() =>
+                                    void action(
+                                      () =>
+                                        mutate('intent', {
+                                          intent: { first: 'b', rationale: intentNote },
+                                        }),
+                                      'Intent recorded. Recommendation updated.',
+                                    )
+                                  }
+                                >
+                                  B checks first
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          <div className="resolution-choices" aria-label={`Choices for ${c.id}`}>
+                            {rec.actions.map((a) => (
+                              <Button
+                                key={a.label}
+                                color={
+                                  selected?.choice === a.decision.choice &&
+                                  selected?.order === a.decision.order
+                                    ? 'primary'
+                                    : 'secondary'
+                                }
+                                isDisabled={busy || review.status !== 'proposed'}
+                                onClick={() => setChoice({ ...choice, [c.id]: a.decision })}
+                                aria-pressed={
+                                  selected?.choice === a.decision.choice &&
+                                  selected?.order === a.decision.order
+                                }
+                              >
+                                {a.label}
+                              </Button>
+                            ))}
+                          </div>
+                          {review.status === 'proposed' ? (
+                            <div className="decision-save">
+                              <TextArea
+                                label="Decision rationale"
+                                placeholder="Why does this choice match the desired behavior?"
+                                value={note}
+                                onChange={setNote}
+                                rows={2}
+                              />
+                              <Button
+                                isDisabled={
+                                  !selected || !(note.trim() || selected.note?.trim()) || busy
+                                }
+                                isLoading={busy}
+                                onClick={() =>
+                                  void action(
+                                    () =>
+                                      mutate('decide', {
+                                        path: file.path,
+                                        conflictId: c.id,
+                                        decision: {
+                                          ...selected,
+                                          note: note.trim() || selected?.note,
+                                        },
+                                      }),
+                                    'Decision saved. Preview the complete result next.',
+                                  ).then((r) => {
+                                    if (r) {
+                                      setChoice({});
+                                      setNote('');
+                                    }
+                                  })
+                                }
+                                iconTrailing={CheckCircle}
+                              >
+                                Save decision
+                              </Button>
+                            </div>
+                          ) : (
+                            <p className="saved-rationale">{saved?.note}</p>
+                          )}
+                        </section>
+                      );
+                    })}
+                    {!file.analysis.conflicts.length && (
+                      <section className="clean-change">
+                        <CheckCircle />
+                        <div>
+                          <h2>No differing overlap to resolve.</h2>
+                          <p>
+                            {file.analysis.changedB.length
+                              ? 'Independent or identical edits can be retained. Review the evidence and test the result.'
+                              : 'This change stands on its own. Review the new guards, calls, and return values above.'}
+                          </p>
+                        </div>
+                      </section>
+                    )}
+                    {review.status === 'proposed' && (
+                      <div className="next-step">
+                        <div>
+                          <strong>
+                            {pending
+                              ? `${pending} decision${pending === 1 ? '' : 's'} to save`
+                              : 'Ready to see the complete result'}
+                          </strong>
+                          <p>A preview leaves your source files untouched.</p>
+                        </div>
+                        <Button
+                          isDisabled={
+                            pending > 0 ||
+                            busy ||
+                            review.unsupported.length > 0 ||
+                            review.files.length > 1
+                          }
+                          isLoading={busy}
+                          iconTrailing={ArrowRight}
+                          onClick={() =>
+                            void action(
+                              () => mutate('preview'),
+                              'Result preview generated. Source files are unchanged.',
+                            ).then((r) => {
+                              if (r) setTab('result');
+                            })
+                          }
+                        >
+                          Preview result
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="empty-review">
+                    <CheckCircle />
+                    <h2>No changed TypeScript functions</h2>
+                    <p>Make a change, then run Fuse inspect again to capture it.</p>
+                  </div>
+                )}
+                <details className="limitations">
+                  <summary>Analysis scope and source references</summary>
+                  <p>
+                    TypeScript named top-level functions; direct local calls only. Callbacks,
+                    external calls, dynamic dispatch, and cross-file relationships are not modeled.
+                    Shared code and possible interactions are review evidence, not proven runtime
+                    conflicts.
+                  </p>
+                  <p>
+                    Inputs are pinned snapshots. Run inspect or watch again to capture further work.
+                    Unsupported files require manual review.
+                  </p>
+                  {file?.analysis.warnings.map((w) => (
+                    <p key={w}>{w}</p>
+                  ))}
+                </details>
+              </TabPanel>
+              <TabPanel id="result">
+                {review.preview ? (
+                  <section className="result-section">
+                    <div className="section-title">
+                      <div>
+                        <span className="eyebrow">
+                          {review.status === 'proposed' ? 'BEFORE YOU APPLY' : 'APPLIED RESULT'}
+                        </span>
+                        <h2>
+                          {review.status === 'proposed'
+                            ? 'Read the result. Then make it real.'
+                            : 'The code and its check results.'}
+                        </h2>
+                      </div>
+                      <Badge color={review.status === 'proposed' ? 'gray' : 'success'}>
+                        {review.status}
+                      </Badge>
+                    </div>
+                    <p>
+                      Preview <code>{short(review.preview.token)}</code> · exact output hashes are
+                      saved in the decision record.
+                    </p>
+                    {Object.entries(review.preview.outputs).map(([path, code]) => (
+                      <div className="output-file" key={path}>
+                        <div className="source-ref">
+                          <Code02 />
+                          <code>{path}</code>
+                          <Badge color="gray">
+                            {code === null ? 'delete file' : 'proposed contents'}
+                          </Badge>
+                        </div>
+                        <Source code={code ?? ''} label={`Proposed result for ${path}`} />
+                      </div>
+                    ))}
+                    <section className="checks">
+                      <h3>Configured checks</h3>
+                      {review.preview.checks.length ? (
+                        review.preview.checks.map((c) => (
+                          <div className="check-row" key={c.name}>
+                            <Terminal />
+                            <div>
+                              <strong>{c.name}</strong>
+                              <code>{[c.command, ...c.args].join(' ')}</code>
+                            </div>
+                            <Badge color="gray">{c.timeoutMs / 1000}s limit</Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <p>
+                          No checks configured. Behavior remains unverified. Configure a check
+                          explicitly from the CLI.
+                        </p>
+                      )}
+                      {review.checks.map((c) => (
+                        <details className="check-result" key={c.name} open={c.status !== 'passed'}>
+                          <summary>
+                            <Badge color={c.status === 'passed' ? 'success' : 'error'}>
+                              {c.status}
+                            </Badge>
+                            <strong>{c.name}</strong>
+                            <span>
+                              {c.durationMs} ms · exit {c.exitCode ?? 'none'}
+                            </span>
+                          </summary>
+                          <pre>
+                            {c.stdout}
+                            {c.stderr}
+                          </pre>
+                        </details>
+                      ))}
+                    </section>
+                    {review.status === 'proposed' ? (
+                      <div className="next-step">
+                        <div>
+                          <strong>Apply this exact preview</strong>
+                          <p>
+                            Fuse will verify the inputs and target, then run the commands listed
+                            above.
+                          </p>
+                        </div>
+                        <Button
+                          isDisabled={busy}
+                          onClick={() => setApproveOpen(true)}
+                          iconTrailing={ArrowRight}
+                        >
+                          Approve & apply
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="commit-link">
+                        <h3>{review.commit ? 'Commit linked' : 'Finish in your Git workflow'}</h3>
+                        <p>
+                          {review.commit
+                            ? 'Fuse verified that this commit contains the recorded output.'
+                            : 'Commit the reviewed change with your usual Git tools, then link it here. Applied work is not yet committed or merged.'}
+                        </p>
+                        {!review.commit && (
+                          <>
+                            <pre>
+                              git -C {shellQuote(review.repository)} add --{' '}
+                              {Object.keys(review.preview.outputs).map(shellQuote).join(' ')}
+                              {`\n`}git -C {shellQuote(review.repository)} commit -m "Resolve
+                              checkout review"
+                            </pre>
+                            <div className="link-form">
+                              <Input
+                                label="Resulting Git commit"
+                                value={commitRef}
+                                onChange={setCommitRef}
+                              />
+                              <Button
+                                color="secondary"
+                                isDisabled={busy || !commitRef.trim()}
+                                onClick={() =>
+                                  void action(
+                                    () => mutate('link', { commit: commitRef }),
+                                    'Git commit verified and linked.',
+                                  ).then((r) => {
+                                    if (r) setTab('record');
+                                  })
+                                }
+                              >
+                                Link commit
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </section>
+                ) : (
+                  <div className="empty-review">
+                    <Code02 />
+                    <h2>No result preview yet</h2>
+                    <p>Review the change and save any required decisions first.</p>
+                    <Button color="secondary" onClick={() => setTab('change')}>
+                      Return to the change
+                    </Button>
+                  </div>
+                )}
+              </TabPanel>
+              <TabPanel id="record">
+                <Summary review={review} />
+              </TabPanel>
+            </Tabs>
+            {mode === 'demo' && (
+              <div className="demo-reset">
+                <Button
+                  color="tertiary"
+                  size="sm"
+                  isDisabled={busy}
+                  onClick={() => void demo(false)}
+                >
+                  New checkout demo
+                </Button>
+                <Button
+                  color="tertiary"
+                  size="sm"
+                  isDisabled={busy}
+                  onClick={() => void demo(true)}
+                >
+                  Explore a single change
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </main>
+      <footer>
+        <span>
+          fuse <span>·</span> Understand the change. Keep the context.
+        </span>
+        <a href="https://github.com/Will-Sanz/fuse" target="_blank" rel="noreferrer">
+          Source & setup <ArrowUpRight />
+        </a>
+      </footer>
+      <ModalOverlay isOpen={historyOpen} onOpenChange={setHistoryOpen} isDismissable>
+        <Modal>
+          <Dialog aria-label="Decision history" className="dialog-card">
+            <div className="dialog-heading">
+              <h2>Decision history</h2>
+              <Button
+                color="tertiary"
+                aria-label="Close history"
+                iconLeading={XClose}
+                onClick={() => setHistoryOpen(false)}
+              />
+            </div>
+            <p>Saved locally with input evidence, rationale, and real status.</p>
+            {history.length ? (
+              <div className="history-list">
+                {history.map((r) => (
+                  <Button
+                    key={r.id}
+                    color="secondary"
+                    className="history-item"
+                    onClick={() => {
+                      setHistoryOpen(false);
+                      setTab('record');
+                      void load(r.id);
+                    }}
+                  >
+                    <span>{r.title}</span>
+                    <Badge color="gray">{r.status}</Badge>
+                  </Button>
                 ))}
-                <p>
-                  Snapshots remain fixed until you start a new review. Live agent telemetry and
-                  messaging integrations are not connected in this MVP.
-                </p>
-              </details>
-            </>
-          )}
-        </main>
-        <footer className="page-footer">
-          <span>
-            FUSE <span>·</span> Built for a shared understanding
-          </span>
-          <a href="https://github.com/Will-Sanz/fuse" target="_blank" rel="noreferrer">
-            Project on GitHub
-            <ExternalLink size={12} />
-          </a>
-        </footer>
-      </div>
-      {showNew && (
-        <NewWorkspace
-          onClose={() => setShowNew(false)}
-          onCreated={(w) => {
-            accept(w);
-            setShowNew(false);
-            setLoading(false);
-            setView('overview');
-            setNotice('Review created. All snapshots are saved.');
-            window.scrollTo({ top: 0 });
-            void refreshList().catch((e) => setError(e.message));
-          }}
-        />
-      )}
+              </div>
+            ) : (
+              <p>No reviews saved yet. Inspect a change or try the checkout demo.</p>
+            )}
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+      <ModalOverlay isOpen={approveOpen} onOpenChange={setApproveOpen} isDismissable={!busy}>
+        <Modal>
+          <Dialog aria-label="Approve result" className="dialog-card">
+            <span className="eyebrow">EXPLICIT APPROVAL</span>
+            <h2>Apply this preview?</h2>
+            <p>
+              Write the previewed file to <code>{review?.repository}</code> and run{' '}
+              {review?.preview?.checks.length || 0} explicitly configured checks. Fuse will refuse
+              stale inputs or a target with uncommitted work.
+            </p>
+            <p>This creates local changes. Commit them with your normal Git tools.</p>
+            <div className="dialog-actions">
+              <Button color="secondary" isDisabled={busy} onClick={() => setApproveOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                isLoading={busy}
+                onClick={() =>
+                  void action(
+                    () => mutate('apply', { token: review!.preview!.token }),
+                    'Applied. Actual check results are recorded below.',
+                  ).then(() => setApproveOpen(false))
+                }
+              >
+                Apply approved preview
+              </Button>
+            </div>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
     </div>
   );
 }
