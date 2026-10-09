@@ -1,0 +1,34 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:02.400
+Codex → Fuse MCP
+
+00:00:02.400 --> 00:00:04.800
+Inspect two registered worktrees and read the saved review.
+
+00:00:04.800 --> 00:00:07.200
+CALL fuse_inspect {"sessions":true}
+
+00:00:07.200 --> 00:00:09.600
+PASS fuse_inspect {"sessions":true}
+
+00:00:09.600 --> 00:00:12.000
+CALL fuse_review {"id":"07daaf89-5d32-451d-a768-2f3d904e102e"}
+
+00:00:12.000 --> 00:00:14.400
+PASS fuse_review {"id":"07daaf89-5d32-451d-a768-2f3d904e102e"}
+
+00:00:14.400 --> 00:00:16.800
+Saved review: 07daaf89-5d32-451d-a768-2f3d904e102e
+
+00:00:16.800 --> 00:00:19.200
+File: checkout.ts
+
+00:00:19.200 --> 00:00:21.600
+Review: validateBody (overlap)
+
+00:00:21.600 --> 00:00:26.400
+When both changes in validateBody can affect the result, should A or B run first at their shared insertion points?
+
+00:00:26.400 --> 00:00:28.800
+PASS · Both MCP calls match the saved Git evidence. No source application.

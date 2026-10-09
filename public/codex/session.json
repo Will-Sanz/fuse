@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-09T16:56:59.021Z",
+  "events": [
+    {
+      "atMs": 1,
+      "text": "Codex → Fuse MCP"
+    },
+    {
+      "atMs": 2,
+      "text": "Inspect two registered worktrees and read the saved review."
+    },
+    {
+      "atMs": 8164,
+      "text": "CALL fuse_inspect {\"sessions\":true}"
+    },
+    {
+      "atMs": 9473,
+      "text": "PASS fuse_inspect {\"sessions\":true}"
+    },
+    {
+      "atMs": 12253,
+      "text": "CALL fuse_review {\"id\":\"07daaf89-5d32-451d-a768-2f3d904e102e\"}"
+    },
+    {
+      "atMs": 12256,
+      "text": "PASS fuse_review {\"id\":\"07daaf89-5d32-451d-a768-2f3d904e102e\"}"
+    },
+    {
+      "atMs": 16612,
+      "text": "Saved review: 07daaf89-5d32-451d-a768-2f3d904e102e"
+    },
+    {
+      "atMs": 16612,
+      "text": "File: checkout.ts"
+    },
+    {
+      "atMs": 16612,
+      "text": "Review: validateBody (overlap)"
+    },
+    {
+      "atMs": 16612,
+      "text": "When both changes in validateBody can affect the result, should A or B run first at their shared insertion points?"
+    },
+    {
+      "atMs": 16612,
+      "text": "PASS · Both MCP calls match the saved Git evidence. No source application."
+    }
+  ],
+  "durationMs": 16613,
+  "reviewId": "07daaf89-5d32-451d-a768-2f3d904e102e"
+}

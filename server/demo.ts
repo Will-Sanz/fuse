@@ -54,7 +54,7 @@ console.log('PASS: empty order, valid order, and malformed email');
     review = setIntent(repo, review.id, review.revision, {
       first: 'a',
       rationale:
-        'Fixture expectation: missing fields receive the friendly incomplete-order error before schema details, while malformed email still receives a specific error.',
+        'Missing fields should receive the friendly incomplete-order error first. Malformed email should still receive a specific error.',
     });
   review.demo = true;
   review.title = single ? 'A normal checkout change' : 'Checkout validation';

@@ -58,7 +58,13 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
     ),
   );
   router.get('/mode', (_req, res) =>
-    res.json({ mode: options.repo ? 'local' : 'demo', repository: options.repo }),
+    res.json({
+      mode: options.repo ? 'local' : 'demo',
+      repository: options.repo,
+      node: process.execPath,
+      cli: fileURLToPath(new URL('../cli/run.mjs', import.meta.url)),
+      codexTest: fileURLToPath(new URL('../scripts/codex-verify.mjs', import.meta.url)),
+    }),
   );
   router.post('/demo', (req, res) => {
     if (options.repo)

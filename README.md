@@ -22,7 +22,7 @@ For the browser demo:
 npm start
 ```
 
-Open **http://127.0.0.1:3001** and choose **Explore checkout demo**. This creates a real temporary-style repository under `data/demos/`, two Git worktrees, and explicit session registrations. Edits are labeled as scripted. Analysis, resolution, file application, and checks are real. **See a single change** demonstrates an ordinary edit without an artificial conflict.
+Open **http://127.0.0.1:3001** and choose **Review checkout.ts**. This creates a real temporary-style repository under `data/demos/`, two Git worktrees, and explicit session registrations. The example edits are scripted; analysis, resolution, file application, and checks are real. **Review a single change** demonstrates an ordinary edit without an artificial conflict.
 
 `npm run dev` starts the development interface at **http://127.0.0.1:5173**. Both interfaces bind to loopback. This is a local tool, not a hosted team service.
 
@@ -44,7 +44,7 @@ fuse watch --repo /tmp/my-fuse-demo/checkout --once
 fuse review REVIEW_ID --repo /tmp/my-fuse-demo/checkout --serve --open
 ```
 
-The visual review shows the common base, each session’s actual calls and function edits, an intent-guided recommendation, and supported choices. Save a rationale, preview the full result, then explicitly approve application. The configured fixture checks expect a friendly missing-fields error first. Choosing **B then A** produces a real failed expectation with a specific email error instead; both orders retain the schema validation. Checks execute only after approval.
+The visual review shows the common base, each session’s actual calls and function edits, an intent-guided recommendation, and supported choices. Choose a resolution, add your rationale, select **Preview resolution**, then explicitly approve application. The configured fixture checks expect a friendly missing-fields error first. Choosing **B then A** produces a real failed expectation with a specific email error instead; both orders retain the schema validation. Checks execute only after approval.
 
 Commit the result with your usual Git tools, then use **Link commit** in the review window or:
 
@@ -105,6 +105,27 @@ fuse check list --repo /path/to/project
 ```
 
 Only configure commands you intend to run locally. The preview lists the exact commands. Changing them invalidates approval. Results record actual exit status, stdout/stderr, timestamp, and duration. Failed checks leave the applied file available for inspection; they are never reported as passing. No configured checks means behavior is explicitly unverified.
+
+## Try the real Codex connection
+
+Open **Use with Codex** in the review header to watch the recorded MCP session and copy a test command for the repository you are viewing. The recording replays actual captured Codex events with shortened pauses; it is not a live agent or a screen capture of the Codex desktop app.
+
+For a fresh checkout example, with Node 24 and a signed-in Codex CLI on your PATH:
+
+```sh
+npm run codex:verify
+```
+
+This creates a separate repository, asks the real Codex CLI to call `fuse_inspect` and `fuse_review`, and checks both responses against the persisted Git evidence. It prints `PASS` for both tools and a URL you can open with `npm start`. The browser shows the exact review Codex created. Your code is never applied by this test. It uses your existing Codex account and usage allowance; sign in with `codex login` if necessary.
+
+To test your own working changes:
+
+```sh
+npm run codex:verify -- --repo /absolute/path/to/project
+# Add --sessions to inspect two explicitly registered worktrees.
+```
+
+Captured events and the full client transcript are saved locally under ignored `data/codex/`. The runner uses temporary, per-invocation MCP configuration and approval only for the two inspection tools. It does not change your global Codex configuration. Use `FUSE_CODEX_BIN=/absolute/path/to/codex` if Codex is not on your PATH.
 
 ## Coding-tool integration
 

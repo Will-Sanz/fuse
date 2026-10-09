@@ -103,7 +103,7 @@ function recommendations(file: ReviewFile, intent?: Intent): Recommendation[] {
           note: intent.rationale,
         },
         confidence: 'intent-guided',
-        reason: `Preserve both additive changes and put ${intent.first.toUpperCase()} first at shared insertion points, matching your stated intent: ${intent.rationale}. Static composition is supported; runtime behavior still needs configured checks.`,
+        reason: `Keep both additions, with ${intent.first.toUpperCase()} first where they meet. ${intent.rationale.replace(/[.!?]+$/, '')}. Run the configured checks to verify the behavior.`,
       };
     return {
       conflictId: c.id,

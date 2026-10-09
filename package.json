@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "fuse": "node cli/run.mjs",
-    "demo:verify": "node scripts/acceptance.mjs"
+    "demo:verify": "node scripts/acceptance.mjs",
+    "codex:verify": "node scripts/codex-verify.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

@@ -1,5 +1,22 @@
 # Coding-tool and structured interface
 
+## Run and watch it
+
+The review header’s **Use with Codex** button contains a captioned recording and copyable commands for the open repository. The video in `public/codex/session.webm` is a terminal replay of a real, verified Codex run, with pauses shortened and output reformatted. It is not a desktop screen recording. The adjacent `session.json` preserves observed elapsed times, tool names, arguments, and verification output; the original client transcript remains local in ignored `data/codex/`.
+
+Run `npm run codex:verify` from Fuse for a fresh, controlled checkout repository, or `npm run codex:verify -- --repo /path/to/project --sessions` for your two registered worktrees. Omit `--sessions` for an ordinary working change. You need Node 24 and an authenticated Codex CLI (`codex login`). This is an actual model invocation using your account’s usage allowance, so CI does not run it automatically. CI exercises the real MCP transport without model credentials and verifies video playback in the browser.
+
+Success means both `fuse_inspect` and `fuse_review` return the same review ID and source evidence as the saved Git review. The runner accepts exit code 2 for unresolved review attention. It prints a browser URL for the generated repository and a review-server command for any repository. The test never applies code.
+
+To update the published recording after a successful **controlled-fixture** run:
+
+```sh
+node scripts/render-codex-recording.mjs data/codex/RUN_ID/session.json
+npm run build
+```
+
+The renderer uses the existing Playwright browser installation. It does not contact Codex again. Keep recordings of private repositories local; only the generated checkout fixture is included in the public recording.
+
 ## Codex MCP integration
 
 Fuse uses the standard MCP SDK over stdio. The shared Git/analysis/reconciliation service does not depend on Codex or any other vendor. [Codex’s documented MCP mechanism](https://developers.openai.com/codex/mcp) supports a local command and argument array:

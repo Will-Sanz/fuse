@@ -13,12 +13,13 @@ import {
 import { Button } from './untitledui/components/base/buttons/button';
 import { Input } from './untitledui/components/base/input/input';
 import { TextArea } from './untitledui/components/base/textarea/textarea';
-import { Badge, BadgeWithDot } from './untitledui/components/base/badges/badges';
+import { Badge } from './untitledui/components/base/badges/badges';
 import { Tabs, TabList, Tab, TabPanel } from './untitledui/components/application/tabs/tabs';
 import { Modal, ModalOverlay, Dialog } from './untitledui/components/application/modals/modal';
 import { LoadingIndicator } from './untitledui/components/application/loading-indicator/loading-indicator';
 import { Tooltip, TooltipTrigger } from './untitledui/components/base/tooltip/tooltip';
 import { ChangeGraph } from './components/ChangeGraph';
+import { CodexConnection, type Connection } from './components/CodexConnection';
 import type { Review, ReviewFile } from '../shared/review';
 import type { Decision } from '../shared/types';
 import { shellQuote } from '../shared/shell';
@@ -47,7 +48,32 @@ function Source({ code, start = 1, label }: { code: string; start?: number; labe
           code.split('\n').map((line, i) => (
             <span className="source-line" key={i}>
               <span className="line-number">{i + start}</span>
-              <span>{line || ' '}</span>
+              <span>
+                {(line || ' ')
+                  .split(
+                    /(\/\/.*$|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:export|function|const|let|return|if|else|type|interface|throw|new|import|from|true|false|null|undefined)\b|\b\d+\b)/g,
+                  )
+                  .map((part, token) => (
+                    <span
+                      key={token}
+                      className={
+                        part.startsWith('//')
+                          ? 'syntax-comment'
+                          : /^["']/.test(part)
+                            ? 'syntax-string'
+                            : /^(export|function|const|let|return|if|else|type|interface|throw|new|import|from|true|false|null|undefined)$/.test(
+                                  part,
+                                )
+                              ? 'syntax-keyword'
+                              : /^\d+$/.test(part)
+                                ? 'syntax-number'
+                                : undefined
+                      }
+                    >
+                      {part}
+                    </span>
+                  ))}
+              </span>
             </span>
           ))
         ) : (
@@ -62,8 +88,7 @@ function Summary({ review }: { review: Review }) {
     <section className="record-section">
       <div className="section-title">
         <div>
-          <span className="eyebrow">DECISION RECORD</span>
-          <h2>A result you can retrace.</h2>
+          <h2>Decision history</h2>
         </div>
         <Badge color={review.status === 'proposed' ? 'gray' : 'success'}>{review.status}</Badge>
       </div>
@@ -123,6 +148,9 @@ export default function App() {
   const [review, setReview] = useState<Review>();
   const [history, setHistory] = useState<{ id: string; title: string; status: string }[]>([]);
   const [mode, setMode] = useState('demo');
+  const [connection, setConnection] = useState<Connection>();
+  const [codexOpen, setCodexOpen] = useState(false);
+  const [fullSource, setFullSource] = useState(false);
   const [loading, setLoading] = useState(true),
     [busy, setBusy] = useState(false),
     [error, setError] = useState('');
@@ -163,10 +191,11 @@ export default function App() {
   }
   useEffect(() => {
     let active = true;
-    Promise.all([api<{ mode: string }>('/mode'), api<typeof history>('/reviews')])
+    Promise.all([api<Connection>('/mode'), api<typeof history>('/reviews')])
       .then(([m, h]) => {
         if (!active) return;
         setMode(m.mode);
+        setConnection(m);
         setHistory(h);
         const id = new URLSearchParams(location.search).get('review');
         if (id) void load(id);
@@ -207,10 +236,7 @@ export default function App() {
     setFunctionName('');
     setNote('');
     setIntentNote('');
-    await action(
-      () => api<Review>('/demo', { single }),
-      'Real Git fixture created. The session edits are scripted; the analysis is generated from their worktrees.',
-    );
+    await action(() => api<Review>('/demo', { single }), '');
   }
   const activeFunction =
     functionName ||
@@ -222,11 +248,16 @@ export default function App() {
       <header className="topbar">
         <a className="wordmark" href="/" aria-label="Fuse home">
           <span className="fuse-symbol">f</span>fuse
-          <span className="wordmark-divider" />{' '}
-          <span className="wordmark-caption">A little clarity for your code.</span>
         </a>
         <div className="topbar-actions">
-          <BadgeWithDot color="success">Local companion</BadgeWithDot>
+          <Button
+            size="sm"
+            color="secondary"
+            iconLeading={Terminal}
+            onClick={() => setCodexOpen(true)}
+          >
+            Use with Codex
+          </Button>
           <Button
             size="sm"
             color="tertiary"
@@ -260,72 +291,38 @@ export default function App() {
           </div>
         ) : !review ? (
           <div className="welcome">
-            <div className="welcome-label">
-              <span className="tiny-line" /> YOUR NEXT CHANGE, UNDERSTOOD
-            </div>
-            <h1>
-              Keep the momentum.
-              <br />
-              <span>See where changes meet.</span>
-            </h1>
+            <h1>Changes</h1>
             <p className="welcome-copy">
-              A focused second look at your code. Understand what changed, work through the overlap,
-              and keep the reason behind the result.
+              Open a file review, or connect your repository with Codex.
             </p>
             {mode === 'demo' && (
               <div className="welcome-actions">
-                <Button
-                  size="lg"
-                  isLoading={busy}
-                  onClick={() => void demo(false)}
-                  iconTrailing={ArrowRight}
-                >
-                  Explore checkout demo
+                <Button isLoading={busy} onClick={() => void demo(false)} iconLeading={Code02}>
+                  Review checkout.ts
                 </Button>
-                <Button
-                  size="lg"
-                  color="secondary"
-                  isDisabled={busy}
-                  onClick={() => void demo(true)}
-                >
-                  See a single change
+                <Button color="secondary" isDisabled={busy} onClick={() => void demo(true)}>
+                  Review a single change
                 </Button>
               </div>
             )}
-            <p className="demo-caption">
-              Scripted edits. Real Git worktrees, analysis, and test results. No API keys.
-            </p>
-            <div className="terminal-intro">
-              <div className="terminal-bar">
-                <Terminal />
-                <span>Or start in your own repository</span>
-                <Badge color="gray">TypeScript</Badge>
-              </div>
-              <pre>
-                <span>$</span> fuse inspect{`\n`}
-                <span>$</span> fuse session add request --name "Request validation" --worktree
-                ../request{`\n`}
-                <span>$</span> fuse watch
-              </pre>
-              <p>The CLI and this review window use the same engine.</p>
-            </div>
-            <div className="welcome-steps">
-              <div>
-                <span>01</span>
-                <h3>Notice the change</h3>
-                <p>Actual functions and local calls, with explicit session attribution.</p>
-              </div>
-              <div>
-                <span>02</span>
-                <h3>Make the decision</h3>
-                <p>Source evidence, a behavior question, and a preview you can inspect.</p>
-              </div>
-              <div>
-                <span>03</span>
-                <h3>Keep the context</h3>
-                <p>Recorded choices, real checks, and a link to the resulting commit.</p>
-              </div>
-            </div>
+            {history.length > 0 && (
+              <section className="recent-reviews">
+                <h2>Recent reviews</h2>
+                <div className="history-list">
+                  {history.slice(0, 5).map((r) => (
+                    <Button
+                      key={r.id}
+                      color="secondary"
+                      className="history-item"
+                      onClick={() => void load(r.id)}
+                    >
+                      <span>{r.title}</span>
+                      <Badge color="gray">{r.status}</Badge>
+                    </Button>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         ) : (
           <>
@@ -333,36 +330,15 @@ export default function App() {
               <GitBranch01 />
               <span title={review.repository}>{review.repository.split('/').at(-1)}</span>
               <span>/</span>
-              <code>{file?.path || 'Current changes'}</code>
-              <Badge color="gray">{review.demo ? 'Reproducible demo' : 'Local Git'}</Badge>
+              <span>Changes</span>
             </div>
             <div className="review-heading">
               <div>
-                <h1>
-                  {pending
-                    ? 'Two changes. One decision.'
-                    : review.status !== 'proposed'
-                      ? 'The decision has a history.'
-                      : file
-                        ? 'Your change, in focus.'
-                        : 'Nothing needs your attention.'}
-                </h1>
-                <p>
-                  {pending
-                    ? 'Follow the evidence, choose the behavior, and preview the result.'
-                    : review.status !== 'proposed'
-                      ? 'Review the applied result, check outcomes, and the reasoning that led here.'
-                      : 'A useful explanation doesn’t need a conflict.'}
-                </p>
+                <h1>{file?.path || 'Changes'}</h1>
+                <p>{activeFunction ? `${activeFunction} · TypeScript` : 'Working changes'}</p>
               </div>
               <div className="heading-status">
-                <BadgeWithDot color={pending ? 'warning' : 'success'}>
-                  {review.status !== 'proposed'
-                    ? review.status
-                    : pending
-                      ? `${pending} decision${pending === 1 ? '' : 's'} needed`
-                      : 'No differing overlap'}
-                </BadgeWithDot>
+                {review.status !== 'proposed' && <Badge color="success">{review.status}</Badge>}
                 <span>
                   Base <code>{short(review.baseCommit)}</code>
                 </span>
@@ -374,43 +350,13 @@ export default function App() {
                 {notice}
               </p>
             )}
-            {review.demo && (
-              <div className="demo-note">
-                <Terminal />
-                <p>
-                  <strong>Scripted checkout scenario.</strong> Fuse created a real repository and{' '}
-                  {review.sources.a.ref.sessionId
-                    ? 'two registered worktrees'
-                    : 'an ordinary working change'}
-                  .{' '}
-                  {review.sources.a.ref.sessionId &&
-                    'The configured checks expect a friendly message for missing fields, and a specific error for malformed email.'}
-                </p>
-              </div>
-            )}
             <Tabs selectedKey={tab} onSelectionChange={(key) => setTab(String(key))}>
               <TabList type="underline" aria-label="Review sections" className="review-tabs">
-                <Tab id="change">Change & decision</Tab>
-                <Tab id="result">Result preview {review.preview ? '· ready' : ''}</Tab>
+                <Tab id="change">Code</Tab>
+                <Tab id="result">Result preview</Tab>
                 <Tab id="record">Decision record</Tab>
               </TabList>
               <TabPanel id="change">
-                <div className="session-strip">
-                  {(['a', 'b'] as const).map((side) => (
-                    <div className={`session-summary session-${side}`} key={side}>
-                      <span className="session-avatar">{side.toUpperCase()}</span>
-                      <div>
-                        <strong>{review.sources[side].ref.label}</strong>
-                        <p>
-                          {review.sources[side].ref.sessionId
-                            ? `Registered session · ${review.sources[side].ref.sessionId}`
-                            : 'Revision / working copy · no agent inferred'}
-                        </p>
-                      </div>
-                      <code>{short(review.sources[side].head)}</code>
-                    </div>
-                  ))}
-                </div>
                 {review.unsupported.length > 0 && (
                   <section className="manual-review">
                     <h2>These changes need manual review</h2>
@@ -445,80 +391,18 @@ export default function App() {
                 )}
                 {file ? (
                   <>
-                    <section className="graph-section">
-                      <div className="section-title">
-                        <div>
-                          <span className="eyebrow">THE SHAPE OF THE CHANGE</span>
-                          <h2>
-                            {file.analysis.conflicts[0]?.kind === 'overlap'
-                              ? `The work meets at ${file.analysis.conflicts[0].functions[0]}.`
-                              : file.analysis.conflicts[0]?.kind === 'dependency'
-                                ? 'Connected functions need a closer look.'
-                                : 'Here’s what changed.'}
-                          </h2>
-                        </div>
-                        <Tooltip
-                          title="Static evidence"
-                          description="Arrows show resolved local calls. They do not prove runtime execution order or a behavioral conflict."
-                        >
-                          <TooltipTrigger>
-                            <Badge color="gray">Static call relationships</Badge>
-                          </TooltipTrigger>
-                        </Tooltip>
-                      </div>
-                      <div className="graph-comparison">
-                        {(['base', 'a', 'b'] as const).map((side) => (
-                          <div className={`graph-snapshot snapshot-${side}`} key={side}>
-                            <div className="graph-snapshot-label">
-                              <span>
-                                {side === 'base' ? 'Before' : `Change ${side.toUpperCase()}`}
-                              </span>
-                              <small>
-                                {side === 'base'
-                                  ? short(review.baseCommit)
-                                  : review.sources[side].ref.label}
-                              </small>
-                            </div>
-                            <ChangeGraph
-                              nodes={file.graphs[side]}
-                              changed={
-                                side === 'base'
-                                  ? []
-                                  : file.analysis[side === 'a' ? 'changedA' : 'changedB']
-                              }
-                              focus={[activeFunction || '']}
-                              onSelect={setFunctionName}
-                              label={`${side === 'base' ? 'Before' : `Change ${side.toUpperCase()}`} call graph`}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="graph-footnote">
-                        <span>
-                          <i className="legend-focus" />
-                          Attention point
-                        </span>
-                        <span>
-                          <i className="legend-change" />
-                          Changed function
-                        </span>
-                        <span>
-                          Calls show relationships, not execution order. Select a function for its
-                          source.
-                        </span>
-                      </div>
-                    </section>
                     <section className="evidence-section">
                       <div className="section-title">
                         <div>
-                          <span className="eyebrow">SOURCE EVIDENCE</span>
                           <h2>{activeFunction || file.path}</h2>
                         </div>
-                        <Badge color="gray">
-                          {file.analysis.conflicts.some((c) => c.kind === 'overlap')
-                            ? 'Shared code · behavior unverified'
-                            : 'Generated from TypeScript'}
-                        </Badge>
+                        <Button
+                          size="sm"
+                          color="secondary"
+                          onClick={() => setFullSource(!fullSource)}
+                        >
+                          {fullSource ? 'Changed function' : 'Full file'}
+                        </Button>
                       </div>
                       <div className="evidence-columns">
                         {(['a', 'b'] as const).map((side) => {
@@ -538,6 +422,15 @@ export default function App() {
                                 <span>{side.toUpperCase()}</span>
                                 <h3>{review.sources[side].ref.label}</h3>
                               </div>
+                              <Source
+                                code={
+                                  fullSource
+                                    ? file.input[side === 'a' ? 'agentA' : 'agentB']
+                                    : (e?.code ?? base?.code ?? '')
+                                }
+                                start={fullSource ? 1 : sourceLine}
+                                label={`${side.toUpperCase()} source for ${activeFunction}`}
+                              />
                               {e ? (
                                 <ul>
                                   {e.observations.map((o) => (
@@ -551,20 +444,6 @@ export default function App() {
                                     : 'This function is not present in this snapshot.'}
                                 </p>
                               )}
-                              <div className="source-ref">
-                                <Code02 />
-                                <code>
-                                  {file.path}:{sourceLine || 1}
-                                </code>
-                                <span>
-                                  {e?.code === '' ? 'removed · base location' : 'source snapshot'}
-                                </span>
-                              </div>
-                              <Source
-                                code={e?.code ?? base?.code ?? ''}
-                                start={sourceLine}
-                                label={`${side.toUpperCase()} source for ${activeFunction}`}
-                              />
                             </article>
                           );
                         })}
@@ -582,7 +461,7 @@ export default function App() {
                             </span>
                             <div>
                               <span className="eyebrow">
-                                {rec.action ? 'RECOMMENDED NEXT STEP' : 'A BEHAVIOR QUESTION'}
+                                {rec.action ? 'SUGGESTED RESOLUTION' : 'RESOLUTION'}
                               </span>
                               <h2>
                                 {rec.action
@@ -596,51 +475,60 @@ export default function App() {
                             </div>
                             {saved && <Badge color="success">Decision saved</Badge>}
                           </div>
-                          <p className="recommendation-copy">{rec.reason}</p>
+                          <p className="recommendation-copy">
+                            {rec.reason.replace(/Fixture expectation:\s*/g, '')}
+                          </p>
                           {rec.question && <p className="intent-question">{rec.question}</p>}
                           {c.canCombine && review.status === 'proposed' && (
-                            <div className="intent-controls">
-                              <Input
-                                label="Desired behavior"
-                                placeholder="e.g. Missing fields should get the friendly error first"
-                                value={intentNote}
-                                onChange={setIntentNote}
-                              />
-                              <div>
-                                <Button
-                                  size="sm"
-                                  color="secondary"
-                                  isDisabled={busy || !intentNote.trim()}
-                                  onClick={() =>
-                                    void action(
-                                      () =>
-                                        mutate('intent', {
-                                          intent: { first: 'a', rationale: intentNote },
-                                        }),
-                                      'Intent recorded. Recommendation updated.',
-                                    )
-                                  }
-                                >
-                                  A checks first
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  color="secondary"
-                                  isDisabled={busy || !intentNote.trim()}
-                                  onClick={() =>
-                                    void action(
-                                      () =>
-                                        mutate('intent', {
-                                          intent: { first: 'b', rationale: intentNote },
-                                        }),
-                                      'Intent recorded. Recommendation updated.',
-                                    )
-                                  }
-                                >
-                                  B checks first
-                                </Button>
+                            <details className="intent-editor">
+                              <summary>
+                                {review.intent
+                                  ? 'Change intended behavior'
+                                  : 'Set intended behavior'}
+                              </summary>
+                              <div className="intent-controls">
+                                <Input
+                                  label="Desired behavior"
+                                  placeholder="e.g. Missing fields should get the friendly error first"
+                                  value={intentNote}
+                                  onChange={setIntentNote}
+                                />
+                                <div>
+                                  <Button
+                                    size="sm"
+                                    color="secondary"
+                                    isDisabled={busy || !intentNote.trim()}
+                                    onClick={() =>
+                                      void action(
+                                        () =>
+                                          mutate('intent', {
+                                            intent: { first: 'a', rationale: intentNote },
+                                          }),
+                                        'Intent recorded. Recommendation updated.',
+                                      )
+                                    }
+                                  >
+                                    A checks first
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    color="secondary"
+                                    isDisabled={busy || !intentNote.trim()}
+                                    onClick={() =>
+                                      void action(
+                                        () =>
+                                          mutate('intent', {
+                                            intent: { first: 'b', rationale: intentNote },
+                                          }),
+                                        'Intent recorded. Recommendation updated.',
+                                      )
+                                    }
+                                  >
+                                    B checks first
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
+                            </details>
                           )}
                           <div className="resolution-choices" aria-label={`Choices for ${c.id}`}>
                             {rec.actions.map((a) => (
@@ -667,7 +555,7 @@ export default function App() {
                             <div className="decision-save">
                               <TextArea
                                 label="Decision rationale"
-                                placeholder="Why does this choice match the desired behavior?"
+                                placeholder="Why should these changes be kept?"
                                 value={note}
                                 onChange={setNote}
                                 rows={2}
@@ -677,8 +565,8 @@ export default function App() {
                                   !selected || !(note.trim() || selected.note?.trim()) || busy
                                 }
                                 isLoading={busy}
-                                onClick={() =>
-                                  void action(
+                                onClick={async () => {
+                                  const updated = await action(
                                     () =>
                                       mutate('decide', {
                                         path: file.path,
@@ -688,17 +576,36 @@ export default function App() {
                                           note: note.trim() || selected?.note,
                                         },
                                       }),
-                                    'Decision saved. Preview the complete result next.',
-                                  ).then((r) => {
-                                    if (r) {
-                                      setChoice({});
-                                      setNote('');
+                                    'Decision saved.',
+                                  );
+                                  if (updated) {
+                                    setChoice({});
+                                    setNote('');
+                                    if (
+                                      updated.files.length === 1 &&
+                                      !updated.unsupported.length &&
+                                      updated.files.every((f) =>
+                                        f.analysis.conflicts.every((c) => f.decisions[c.id]),
+                                      )
+                                    ) {
+                                      const ready = await action(
+                                        () =>
+                                          api<Review>(`/reviews/${updated.id}/preview`, {
+                                            revision: updated.revision,
+                                          }),
+                                        '',
+                                      );
+                                      if (ready) setTab('result');
                                     }
-                                  })
-                                }
-                                iconTrailing={CheckCircle}
+                                  }
+                                }}
+                                iconTrailing={ArrowRight}
                               >
-                                Save decision
+                                {pending <= 1 &&
+                                review.files.length === 1 &&
+                                !review.unsupported.length
+                                  ? 'Preview resolution'
+                                  : 'Save selection'}
                               </Button>
                             </div>
                           ) : (
@@ -707,11 +614,77 @@ export default function App() {
                         </section>
                       );
                     })}
+                    <details className="call-map">
+                      <summary>Call relationships</summary>
+                      <section className="graph-section">
+                        <div className="section-title">
+                          <div>
+                            <span className="eyebrow">THE SHAPE OF THE CHANGE</span>
+                            <h2>
+                              {file.analysis.conflicts[0]?.kind === 'overlap'
+                                ? `The work meets at ${file.analysis.conflicts[0].functions[0]}.`
+                                : file.analysis.conflicts[0]?.kind === 'dependency'
+                                  ? 'Connected functions need a closer look.'
+                                  : 'Here’s what changed.'}
+                            </h2>
+                          </div>
+                          <Tooltip
+                            title="Static evidence"
+                            description="Arrows show resolved local calls. They do not prove runtime execution order or a behavioral conflict."
+                          >
+                            <TooltipTrigger>
+                              <Badge color="gray">Static call relationships</Badge>
+                            </TooltipTrigger>
+                          </Tooltip>
+                        </div>
+                        <div className="graph-comparison">
+                          {(['base', 'a', 'b'] as const).map((side) => (
+                            <div className={`graph-snapshot snapshot-${side}`} key={side}>
+                              <div className="graph-snapshot-label">
+                                <span>
+                                  {side === 'base' ? 'Before' : `Change ${side.toUpperCase()}`}
+                                </span>
+                                <small>
+                                  {side === 'base'
+                                    ? short(review.baseCommit)
+                                    : review.sources[side].ref.label}
+                                </small>
+                              </div>
+                              <ChangeGraph
+                                nodes={file.graphs[side]}
+                                changed={
+                                  side === 'base'
+                                    ? []
+                                    : file.analysis[side === 'a' ? 'changedA' : 'changedB']
+                                }
+                                focus={[activeFunction || '']}
+                                onSelect={setFunctionName}
+                                label={`${side === 'base' ? 'Before' : `Change ${side.toUpperCase()}`} call graph`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="graph-footnote">
+                          <span>
+                            <i className="legend-focus" />
+                            Attention point
+                          </span>
+                          <span>
+                            <i className="legend-change" />
+                            Changed function
+                          </span>
+                          <span>
+                            Calls show relationships, not execution order. Select a function for its
+                            source.
+                          </span>
+                        </div>
+                      </section>
+                    </details>
                     {!file.analysis.conflicts.length && (
                       <section className="clean-change">
                         <CheckCircle />
                         <div>
-                          <h2>No differing overlap to resolve.</h2>
+                          <h2>No overlapping edits</h2>
                           <p>
                             {file.analysis.changedB.length
                               ? 'Independent or identical edits can be retained. Review the evidence and test the result.'
@@ -720,15 +693,13 @@ export default function App() {
                         </div>
                       </section>
                     )}
-                    {review.status === 'proposed' && (
+                    {review.status === 'proposed' && pending === 0 && (
                       <div className="next-step">
                         <div>
                           <strong>
-                            {pending
-                              ? `${pending} decision${pending === 1 ? '' : 's'} to save`
-                              : 'Ready to see the complete result'}
+                            {pending ? 'Save your selection to continue' : 'Ready to preview'}
                           </strong>
-                          <p>A preview leaves your source files untouched.</p>
+                          <p>Preview changes before applying.</p>
                         </div>
                         <Button
                           isDisabled={
@@ -761,7 +732,23 @@ export default function App() {
                   </div>
                 )}
                 <details className="limitations">
-                  <summary>Analysis scope and source references</summary>
+                  <summary>Repository details</summary>
+                  <p>
+                    <code>{review.repository}</code>
+                  </p>
+                  <p>
+                    Base commit: <code>{review.baseCommit}</code>
+                  </p>
+                  {(['a', 'b'] as const).map((side) => (
+                    <p key={side}>
+                      {side.toUpperCase()} · {review.sources[side].ref.label}
+                      {review.sources[side].ref.sessionId
+                        ? ` · registered session ${review.sources[side].ref.sessionId}`
+                        : ' · unattributed'}
+                      <br />
+                      <code>{review.sources[side].ref.value}</code>
+                    </p>
+                  ))}
                   <p>
                     TypeScript named top-level functions; direct local calls only. Callbacks,
                     external calls, dynamic dispatch, and cross-file relationships are not modeled.
@@ -782,13 +769,8 @@ export default function App() {
                   <section className="result-section">
                     <div className="section-title">
                       <div>
-                        <span className="eyebrow">
-                          {review.status === 'proposed' ? 'BEFORE YOU APPLY' : 'APPLIED RESULT'}
-                        </span>
                         <h2>
-                          {review.status === 'proposed'
-                            ? 'Read the result. Then make it real.'
-                            : 'The code and its check results.'}
+                          {review.status === 'proposed' ? 'Proposed changes' : 'Applied changes'}
                         </h2>
                       </div>
                       <Badge color={review.status === 'proposed' ? 'gray' : 'success'}>
@@ -922,26 +904,6 @@ export default function App() {
                 <Summary review={review} />
               </TabPanel>
             </Tabs>
-            {mode === 'demo' && (
-              <div className="demo-reset">
-                <Button
-                  color="tertiary"
-                  size="sm"
-                  isDisabled={busy}
-                  onClick={() => void demo(false)}
-                >
-                  New checkout demo
-                </Button>
-                <Button
-                  color="tertiary"
-                  size="sm"
-                  isDisabled={busy}
-                  onClick={() => void demo(true)}
-                >
-                  Explore a single change
-                </Button>
-              </div>
-            )}
           </>
         )}
       </main>
@@ -954,7 +916,7 @@ export default function App() {
         </a>
       </footer>
       <ModalOverlay isOpen={historyOpen} onOpenChange={setHistoryOpen} isDismissable>
-        <Modal>
+        <Modal className="dialog-modal">
           <Dialog aria-label="Decision history" className="dialog-card">
             <div className="dialog-heading">
               <h2>Decision history</h2>
@@ -985,15 +947,14 @@ export default function App() {
                 ))}
               </div>
             ) : (
-              <p>No reviews saved yet. Inspect a change or try the checkout demo.</p>
+              <p>No reviews saved yet. Inspect a repository or open checkout.ts.</p>
             )}
           </Dialog>
         </Modal>
       </ModalOverlay>
       <ModalOverlay isOpen={approveOpen} onOpenChange={setApproveOpen} isDismissable={!busy}>
-        <Modal>
+        <Modal className="dialog-modal">
           <Dialog aria-label="Approve result" className="dialog-card">
-            <span className="eyebrow">EXPLICIT APPROVAL</span>
             <h2>Apply this preview?</h2>
             <p>
               Write the previewed file to <code>{review?.repository}</code> and run{' '}
@@ -1020,6 +981,12 @@ export default function App() {
           </Dialog>
         </Modal>
       </ModalOverlay>
+      <CodexConnection
+        open={codexOpen}
+        onClose={() => setCodexOpen(false)}
+        connection={connection}
+        review={review}
+      />
     </div>
   );
 }
