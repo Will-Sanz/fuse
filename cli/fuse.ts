@@ -38,6 +38,8 @@ fuse history [--repo PATH] [--json]
 fuse link ID --commit REF [--repo PATH]
 fuse merged ID --into REF [--repo PATH]
 fuse demo --dir NEW_DIRECTORY [--single] [--json]
+fuse demo --dir NEW_DIRECTORY --merge [--scenario checkout|shipping] [--json]
+fuse visualize ID [--regenerate] [--repo PATH] [--json]
 fuse mcp --repo PATH
 
 Use --revision N on mutations to reject stale tool/browser state. Apply always requires
@@ -126,6 +128,9 @@ export async function main(args = process.argv.slice(2)) {
       serve: { type: 'boolean' },
       open: { type: 'boolean' },
       port: { type: 'string' },
+      merge: { type: 'boolean' },
+      scenario: { type: 'string' },
+      regenerate: { type: 'boolean' },
     },
   });
   const required = (name: keyof typeof v) => {
@@ -152,6 +157,11 @@ export async function main(args = process.argv.slice(2)) {
     return 0;
   }
   switch (p[0]) {
+    case 'visualize': {
+      const { generateVisual } = await import('../server/visual-ai');
+      result = await generateVisual(v.repo!, p[1] || '', { regenerate: v.regenerate });
+      break;
+    }
     case 'inspect':
       result = inspect(opts);
       break;
@@ -256,7 +266,13 @@ export async function main(args = process.argv.slice(2)) {
       break;
     }
     case 'demo': {
-      const d = createDemo(required('dir'), v.single);
+      if (v.scenario && !['checkout', 'shipping'].includes(v.scenario))
+        throw new InputError('Choose checkout or shipping.');
+      const d = createDemo(required('dir'), v.single, {
+        scenario: v.scenario as 'checkout' | 'shipping' | undefined,
+        merge: v.merge,
+        presentation: v.merge,
+      });
       print(
         d,
         `Scripted Git fixture created at ${d.repo}\n${d.expectation || ''}\n${describe(d.review)}`,

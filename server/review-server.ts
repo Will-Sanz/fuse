@@ -20,6 +20,8 @@ import {
 } from './local';
 import { InputError } from './engine';
 import { commonDir } from './git';
+import { generateVisual } from './visual-ai';
+import { renderVisual, visualPng } from './visual-renderer';
 
 export function createReviewApp(options: { repo?: string; dataDir?: string } = {}) {
   const directory = resolve(options.dataDir || 'data/demos');
@@ -63,7 +65,9 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
       repository: options.repo,
       node: process.execPath,
       cli: fileURLToPath(new URL('../cli/run.mjs', import.meta.url)),
-      codexTest: fileURLToPath(new URL('../scripts/codex-verify.mjs', import.meta.url)),
+      meetingScript: fileURLToPath(new URL('../scripts/meeting.mjs', import.meta.url)),
+      aiConfigured: Boolean(process.env.OPENAI_API_KEY),
+      model: process.env.FUSE_AI_MODEL || 'gpt-6-luna',
     }),
   );
   router.post('/demo', (req, res) => {
@@ -71,10 +75,41 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
       throw new InputError(
         'Demo creation is available from npm start, not a repository review server.',
       );
-    const { single } = z.object({ single: z.boolean().optional() }).strict().parse(req.body);
-    res.status(201).json(createDemo(join(directory, randomUUID()), single).review);
+    const { single, scenario } = z
+      .object({
+        single: z.boolean().optional(),
+        scenario: z.enum(['checkout', 'shipping']).optional(),
+      })
+      .strict()
+      .parse(req.body);
+    res
+      .status(201)
+      .json(
+        createDemo(join(directory, randomUUID()), single, { scenario, presentation: true }).review,
+      );
   });
   router.get('/reviews/:id', (req, res) => res.json(find(req.params.id).review));
+  router.post('/reviews/:id/visual', async (req, res) => {
+    const { regenerate } = z
+      .object({ regenerate: z.boolean().optional() })
+      .strict()
+      .parse(req.body);
+    const { store } = find(req.params.id);
+    res.json(await generateVisual(store.repo, req.params.id, { regenerate }));
+  });
+  router.get('/reviews/:id/visual.svg', (req, res) => {
+    const { review } = find(req.params.id);
+    if (!review.visual) throw new InputError('Generate a visual first.');
+    res
+      .type('image/svg+xml')
+      .set('Content-Security-Policy', "default-src 'none'; style-src 'none'; sandbox")
+      .send(renderVisual(review.visual));
+  });
+  router.get('/reviews/:id/visual.png', (req, res) => {
+    const { review } = find(req.params.id);
+    if (!review.visual) throw new InputError('Generate a visual first.');
+    res.type('image/png').send(visualPng(review.visual));
+  });
   const version = z.object({ revision: z.number().int().nonnegative() });
   router.post('/reviews/:id/intent', (req, res) => {
     const b = version.extend({ intent: intentSchema }).strict().parse(req.body),

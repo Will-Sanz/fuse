@@ -168,6 +168,34 @@ export function snapshot(repo: string, base: string, ref: SourceRef): Snapshot {
 }
 export const isClean = (repo: string) =>
   !git(repo, ['status', '--porcelain=v1', '--untracked-files=all']);
+export function mergeState(repo: string) {
+  const index = git(repo, ['ls-files', '--unmerged', '-z']);
+  if (!index) return undefined;
+  const otherHead = commit(repo, 'MERGE_HEAD');
+  const paths = [
+    ...new Set(
+      index
+        .split('\0')
+        .filter(Boolean)
+        .map((row) => row.slice(row.indexOf('\t') + 1)),
+    ),
+  ].sort();
+  const contents = paths.map((path) => {
+    const full = safePath(repo, path);
+    return existsSync(full) ? readFileSync(full, 'utf8') : null;
+  });
+  return {
+    otherHead,
+    paths,
+    fingerprint: hash(
+      JSON.stringify({
+        index,
+        contents,
+        otherHead,
+      }),
+    ),
+  };
+}
 export function worktrees(repo: string) {
   return git(repo, ['worktree', 'list', '--porcelain', '-z'])
     .split('\0')

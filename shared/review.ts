@@ -1,4 +1,5 @@
 import type { Analysis, Decision, GraphNode, Input } from './types';
+import type { Visual } from './visual';
 
 export type ResolutionState = 'proposed' | 'applied' | 'committed' | 'merged';
 export interface Session {
@@ -109,6 +110,8 @@ export interface Review {
   commit?: string;
   mergedInto?: string;
   demo?: boolean;
+  visual?: Visual;
+  merge?: { otherHead: string; paths: string[]; fingerprint: string };
 }
 export interface InspectOptions {
   repo: string;

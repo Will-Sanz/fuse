@@ -4,3 +4,5 @@ data
 playwright-report
 test-results
 package-lock.json
+public/showcase
+.vercel

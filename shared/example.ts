@@ -46,3 +46,23 @@ export const checkoutExample: Input = {
   if (!schema.ok) return schema;`,
   ),
 };
+const shippingBase = `export function shippingCost(subtotal: number, discount: number): number {
+  return 10;
+}
+
+export function orderTotal(subtotal: number, discount: number): number {
+  return subtotal - discount + shippingCost(subtotal, discount);
+}
+`;
+export const shippingExample: Input = {
+  title: 'Free shipping after discounts',
+  fileName: 'shipping.ts',
+  nameA: 'Discounted subtotal',
+  nameB: 'Original subtotal',
+  base: shippingBase,
+  agentA: shippingBase.replace(
+    '  return 10;',
+    '  const eligibleTotal = subtotal - discount;\n  return eligibleTotal >= 100 ? 0 : 10;',
+  ),
+  agentB: shippingBase.replace('  return 10;', '  return subtotal >= 100 ? 0 : 10;'),
+};

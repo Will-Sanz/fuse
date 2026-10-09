@@ -22,3 +22,6 @@ data/
 playwright-report/
 test-results/
 *.sqlite*
+.vercel/
+public/showcase/
+.vercel

@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { register } from 'tsx/esm/api';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+const envFile = fileURLToPath(new URL('../.env', import.meta.url));
+if (existsSync(envFile)) process.loadEnvFile(envFile);
 register({ tsconfig: fileURLToPath(new URL('../tsconfig.json', import.meta.url)) });
 const { main } = await import('./fuse.ts');
 try {

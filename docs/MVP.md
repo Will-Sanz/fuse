@@ -1,33 +1,31 @@
-# Fuse local companion release
+# Fuse visual explanation release
 
-Fuse explains the current TypeScript change and helps a developer decide how explicitly registered worktree sessions should fit together. A terminal tool and a compact browser review share the deterministic ts-morph analysis, constrained reconciliation, and persistent decision service. The core workflow needs no paid API keys.
+The product flow is **original code and highlighted conflict → custom visual explanation → choose the intended behavior → create the matching change**. The public website can use prepared examples. The real MCP must inspect a repository, call real AI, and generate the explanation image.
 
-## Milestones
+## Implemented milestones
 
-1. **Baseline and plan.** Inspect the clean checkout, remote branches, PRs, and CI; preserve existing changes. Record baseline build, engine/API and browser results. Work on `feat/local-companion` with reviewed, tested checkpoints before integrating into main.
-2. **Local Git and CLI.** Inspect revisions or working changes, register named worktrees, attribute changes only through registration, explain ordinary edits, and detect shared-function edits separately from possible call-path interactions. Expose versioned JSON and meaningful exit codes. Watch changes with persistent alert deduplication.
-3. **Review and application.** Persist pinned inputs, evidence, supported actions, intent, recommendations, previews, reviewer attribution, and real configured check results. Require preview approval; refuse stale reviews and dirty targets. Track proposed, applied, committed, and verified Git ancestry separately. Unsupported files remain visible and block application rather than disappearing.
-4. **Compact visual review and reproducible demo.** Use actual open-source Untitled UI components and design tokens. Show before/after calls, exact attention points, source evidence, a targeted intent question, choices, result preview, checks, and Git-linked history. Generate the checkout fixture with real branches and worktrees; label scripted changes. Keep legacy snapshot/import APIs available for safe read-only review.
-5. **Integration and acceptance.** Provide one documented Codex MCP integration over the vendor-independent engine and invoke it through the real coding tool. Exercise the CLI against temporary repositories, inspect the browser visually, run the full relevant suite, check GitHub CI, and deliver verified code on the shared main branch with accurate setup instructions.
+1. Preserve the Git/worktree/CLI engine, explicit attribution, source freshness, deterministic reconciliation, checks, and persistent decision history.
+2. Replace the browser dashboard with the focused three-step flow and actual source. Use distinct prepared visual metaphors for validation order and shipping eligibility. Remove demo narration and old Codex CLI playback.
+3. Add real OpenAI Responses API generation with `gpt-6-luna`, bounded repository context, strict scene/action validation, safe SVG/PNG rendering, real response provenance, and explicit failures. No Codex CLI dependency.
+4. Add actual active Git merge inspection and constrained, freshness-checked application/staging. Preserve unrelated or newer work.
+5. Provide a one-command meeting runner using actual MCP transport, fresh disposable conflicts, fresh AI images, browser choice, application, and real checks. Include a captured real MCP image and teammate setup instructions.
+6. Host the prepared browser experience on Vercel with downloadable engine-produced source, no API key, no local filesystem assumptions, and no fabricated test outcomes.
 
 ## Acceptance criteria
 
-- An ordinary local edit receives a useful source-linked explanation without an invented conflict.
-- Two registered sessions show the functions they changed. Independent edits, identical/shared edits, differing edits in one function, and possible interactions have distinct evidence.
-- Static calls never imply runtime order or a proven behavioral conflict. A recommendation uses explicit intent or controlled fixture expectations; otherwise Fuse asks a focused question.
-- Keep A, Keep B, and supported additive composition with an explicit order are previewable. Tests demonstrate different checkout outcomes for the two orders.
-- Deleted functions, comments, malformed inputs, unsupported files/constructs, revision selection, and missing worktrees are handled safely.
-- A new overlap produces an alert and review link. Unchanged overlaps do not alert repeatedly; further edits refresh the analysis and alert evidence.
-- Application requires explicit approval of the current preview and checks both source worktrees and target state. Newer or uncommitted target work is preserved.
-- Only explicitly configured commands run, without a shell; imported code and repository scripts are never auto-discovered or executed. Results include actual status, output, duration, and command.
-- Decisions survive restarts and include input/output hashes, rationale, local reviewer attribution, status, and a verified commit reference. An exported file is never described as merged.
-- The browser has tested loading, error, empty, success, and narrow-screen states. CLI JSON, exit codes, and real MCP invocation are verified.
-- From a clean checkout: create fixture → register two worktrees → detect overlap → open focused review → answer intent → preview → approve/apply → run configured tests → commit → revisit decision history. Also demonstrate one ordinary change.
+- The first thing shown is actual original code and highlighted competing edits.
+- Validation order and shipping thresholds have different visual explanations and meaningful behavior choices.
+- The local MCP uses the configured OpenAI API key, reads pinned code context, and returns an actual generated PNG image plus structured review data.
+- Unsupported model actions, invalid scenes, provider failures, and stale generation cannot silently become successful explanations.
+- The user chooses; preview shows the exact resulting code. Explicit creation writes only supported, current source and runs explicitly configured checks.
+- A real merge conflict is resolved and staged without a commit. New conflict edits and unrelated work are preserved.
+- The live runner works with Node 24, Git, and an API key, independently of any particular coding assistant.
+- Both live scenarios pass MCP → OpenAI → image → decision → source application → checks.
+- The hosted page works without an API server, downloads the correct selected source, and does not claim it changed a Git repository or ran checks.
+- Ordinary changes, worktree overlaps/interactions, watcher deduplication, CLI JSON/exit codes, persistence, Git linking, and legacy safety checks remain covered.
+- Browser loading/error/success, responsive layouts, portable setup, downloads, and actual local application pass end-to-end checks.
+- Ship directly to main after verification, without opening a PR, as requested.
 
-## Boundaries
+## Current boundaries
 
-First language: TypeScript; direct local calls and named top-level functions. Composition remains deliberately constrained. Non-TypeScript/binary/mode changes and unsupported reconciliation require a safe manual path. No autonomous merges, CRDT, hosted team authentication, or broad service integrations. Git identity is local attribution, not verified authentication. The application binds to loopback.
-
-## Verification record
-
-The baseline passed 18 engine/API tests and four browser workflows. The release adds real Git, CLI, HTTP, MCP, browser, and executable checkout acceptance coverage. The actual Codex invocation is recorded in `docs/integration.md`; `npm run demo:verify` reproduces the terminal acceptance sequence from a clean fixture. Dedicated Untitled UI Alerts are PRO-only; the public implementation uses accessible plain error text and the MIT controls. See README for the explicit one-file application limit and local-only boundaries.
+The analysis and automatic application scope remain deliberately narrow: TypeScript top-level named functions and one-file supported resolution. The compact browser focuses on one conflict. AI improves explanation and visual design; deterministic code generation constrains application. Local Git attribution is not authenticated identity. Public hosting serves prepared examples; live API credentials and repository changes remain local.

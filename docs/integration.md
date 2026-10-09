@@ -1,113 +1,86 @@
-# Coding-tool and structured interface
+# MCP and structured interfaces
 
-## Run and watch it
+Fuse's stdio server uses the official MCP SDK and a launch-selected repository. It has no dependency on Codex CLI. The AI layer calls OpenAI's Responses API directly, defaulting to `gpt-6-luna`, with structured JSON output and `store: false`. Core inspection and reconciliation are deterministic and do not need an API key.
 
-The review header’s **Use with Codex** button contains a captioned recording and copyable commands for the open repository. The video in `public/codex/session.webm` is a terminal replay of a real, verified Codex run, with pauses shortened and output reformatted. It is not a desktop screen recording. The adjacent `session.json` preserves observed elapsed times, tool names, arguments, and verification output; the original client transcript remains local in ignored `data/codex/`.
+## Configuration
 
-Run `npm run codex:verify` from Fuse for a fresh, controlled checkout repository, or `npm run codex:verify -- --repo /path/to/project --sessions` for your two registered worktrees. Omit `--sessions` for an ordinary working change. You need Node 24 and an authenticated Codex CLI (`codex login`). This is an actual model invocation using your account’s usage allowance, so CI does not run it automatically. CI exercises the real MCP transport without model credentials and verifies video playback in the browser.
+Install with Node 24 and `npm ci`. Copy `.env.example` to `.env` and set `OPENAI_API_KEY`; optionally set `FUSE_AI_MODEL`. `cli/run.mjs` loads the Fuse installation's `.env`, not the target repository's environment file. Existing process environment values take precedence.
 
-Success means both `fuse_inspect` and `fuse_review` return the same review ID and source evidence as the saved Git review. The runner accepts exit code 2 for unresolved review attention. It prints a browser URL for the generated repository and a review-server command for any repository. The test never applies code.
+Configure a stdio MCP client with executable `node` and argument array:
 
-To update the published recording after a successful **controlled-fixture** run:
-
-```sh
-node scripts/render-codex-recording.mjs data/codex/RUN_ID/session.json
-npm run build
+```json
+["/absolute/path/to/fuse/cli/run.mjs", "mcp", "--repo", "/absolute/path/to/project"]
 ```
 
-The renderer uses the existing Playwright browser installation. It does not contact Codex again. Keep recordings of private repositories local; only the generated checkout fixture is included in the public recording.
+Use an absolute Node executable if the client does not inherit your shell's PATH. Client-specific configuration wrappers vary; the review window provides a common `mcpServers` example. Ask the client to call `fuse_explain`, present the returned image, and ask which behavior the developer wants. Do not infer their intent.
 
-## Codex MCP integration
+## Verified live path
 
-Fuse uses the standard MCP SDK over stdio. The shared Git/analysis/reconciliation service does not depend on Codex or any other vendor. [Codex’s documented MCP mechanism](https://developers.openai.com/codex/mcp) supports a local command and argument array:
+`npm run meeting` launches a real stdio MCP client, creates a controlled repository with committed branches and a true Git merge conflict, calls `fuse_explain`, verifies the returned PNG and provider response ID, saves the artifacts, and opens the browser review. `npm run meeting:verify` additionally chooses, previews, applies, and checks the result. Both checkout and shipping scenarios passed live with `gpt-6-luna` on 2026-10-09. The screenshot in `public/mcp/checkout.png` came directly from the MCP image response.
 
-```sh
-codex mcp add fuse -- node /absolute/path/to/fuse/cli/run.mjs mcp --repo /absolute/path/to/project
-codex mcp get fuse
-```
+The runner requires only Node, Git, and the API key. It does not install or change global client configuration. Its disposable artifacts stay under ignored `data/meetings/`. CI tests real stdio transport without paid model requests; visual model tests inject bounded responses to test failures, unsupported choices, caching, and stale-input protection. Specific coding-client image presentation is not guaranteed by the transport tests.
 
-Run `npm ci && npm run build` in the Fuse checkout first. `mcp get` verifies configuration only. To verify actual use, ask Codex to call `fuse_inspect` and then `fuse_review` for the returned ID. Registration must already exist when using `sessions: true`.
+## AI contract
 
-Inspection writes a saved review, so it is not falsely marked read-only. Approve that tool call when the client asks. In noninteractive `codex exec`, the default approval policy can reject it. For an explicitly authorized verification invocation, use invocation-scoped settings:
+`fuse_explain` inspects current working changes, an active merge, selected revisions, or registered worktrees. The generator reads pinned before/A/B source, static observations, intent if provided, a bounded tree listing, and up to ten README/package/test/direct-import context files from the pinned target commit. Common secret/config paths, vendor folders, and oversized source are excluded. Context selection is bounded and is not whole-repository semantic analysis.
 
-```sh
-codex exec --ignore-user-config --ephemeral --sandbox read-only --json \
-  -C /absolute/path/to/project \
-  -c 'mcp_servers.fuse.command="node"' \
-  -c 'mcp_servers.fuse.args=["/absolute/path/to/fuse/cli/run.mjs","mcp","--repo","/absolute/path/to/project"]' \
-  -c 'mcp_servers.fuse.required=true' \
-  -c 'mcp_servers.fuse.tools.fuse_inspect.approval_mode="approve"' \
-  -c 'mcp_servers.fuse.tools.fuse_review.approval_mode="approve"' \
-  'Call fuse_inspect with sessions=true, then fuse_review for the returned ID. Report the registered session IDs, overlapping function, and targeted intent question. Do not modify source or apply changes.'
-```
+The model chooses a visual metaphor, coordinates, labels, and behavior descriptions in a strict scene schema. It can draw panels, text, arrows, bars, and circles on a 1000×500 canvas. Raw HTML/SVG, scripts, URLs, tools, and arbitrary executable code are not accepted. Text is escaped; geometry and text fit are checked. A malformed design gets one repair attempt, then a visible error. Legal action IDs come from the deterministic reconciler; invented actions are rejected.
 
-These settings apply to this invocation and these inspection tools only. This verification uses an existing authenticated Codex account; the Fuse engine and demo themselves require no paid API key.
+Fuse renders the validated scene to SVG and PNG with resvg. This is AI-designed vector imagery, not a separate raster-image-model call. Responses include model name, actual response ID, generation time, context file names, and a source fingerprint. Only matching AI results can be reused from cache; `regenerate: true` makes a fresh request. Source changes during generation prevent the result from being saved as current. Provider failure never becomes a prepared-image success.
 
-### Actual verification
+AI text remains an explanation, not evidence that tests ran. Source is sent to OpenAI only when a live generation tool/action is invoked. The renderer and reconciliation engine never execute model output.
 
-Verified on 2026-10-09 through the installed Codex CLI, not only an SDK test:
+## Tools
 
-| Completed MCP call                                         | Observed result                                                                                                           |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `fuse_inspect({sessions:true})`                            | Review `77441bed-fc0d-40a8-8bbc-011e2d256ac8`; registered sessions `request` and `schema`; shared function `validateBody` |
-| `fuse_review({id:"77441bed-fc0d-40a8-8bbc-011e2d256ac8"})` | Same pinned sources and targeted question asking whether A or B should run first at shared insertion points               |
+Successful text content is `{ "schemaVersion": 1, "data": ... }`. `fuse_explain` and `fuse_visualize` additionally return an MCP `image` block with base64 PNG data. Failures are MCP error results. See `shared/review.ts` and `shared/visual.ts` for types.
 
-Both calls emitted `item.completed`, `type: mcp_tool_call`, `server: fuse`, `status: completed`, and no error. The first attempt correctly rejected an unapproved inspection under the noninteractive approval policy; the authorized invocation-scoped configuration above succeeded. No source was modified by the MCP calls.
+| Tool              | Arguments                                          | Effect                                                           |
+| ----------------- | -------------------------------------------------- | ---------------------------------------------------------------- |
+| `fuse_explain`    | optional `base`, `a`, `b`, `sessions`              | Inspect and generate a new source-grounded image; persist review |
+| `fuse_visualize`  | `id`, optional `regenerate`                        | Generate/reuse a visual for a saved review                       |
+| `fuse_inspect`    | optional `base`, `a`, `b`, `sessions`              | Read Git and save deterministic analysis without AI              |
+| `fuse_watch_once` | none                                               | Refresh registered worktrees and return overlap attention        |
+| `fuse_review`     | `id`                                               | Read saved evidence, image specification, decisions, and checks  |
+| `fuse_history`    | none                                               | List reviews and verified Git references                         |
+| `fuse_intent`     | `id`, `revision`, `intent: {first, rationale}`     | Record developer-stated precedence                               |
+| `fuse_decide`     | `id`, `revision`, `path`, `conflictId`, `decision` | Save a supported proposed choice and rationale                   |
+| `fuse_preview`    | `id`, `revision`                                   | Save exact output, hashes, checks, and approval token            |
 
-The automated `tests/integration.test.ts` additionally starts the real executable through an MCP stdio client, lists its tools, records intent and a proposed choice, generates an exact preview, reads it back, and verifies stale-input errors. There is deliberately **no MCP application or command-execution tool**.
+There is no MCP application or command-execution tool. Use the local browser or CLI to explicitly apply a preview and run configured checks. Inspection writes a saved record and generation calls a paid API, so these are not marked read-only.
 
-## Tool contracts
-
-Each successful tool returns text containing `{ "schemaVersion": 1, "data": ... }`. Failures are MCP error results. Full TypeScript structures are defined in `shared/review.ts`.
-
-| Tool              | Arguments                                          | Effect                                                                    |
-| ----------------- | -------------------------------------------------- | ------------------------------------------------------------------------- |
-| `fuse_inspect`    | optional `base`, `a`, `b`, `sessions`              | Read Git and persist analysis                                             |
-| `fuse_watch_once` | none                                               | Refresh two registered worktrees; return `alert`, `updated`, and `review` |
-| `fuse_review`     | `id`                                               | Read exact saved evidence and outcomes                                    |
-| `fuse_history`    | none                                               | Read review IDs, status, and commit references                            |
-| `fuse_intent`     | `id`, `revision`, `intent: {first, rationale}`     | Record a developer-stated A/B precedence preference                       |
-| `fuse_decide`     | `id`, `revision`, `path`, `conflictId`, `decision` | Save a supported proposed choice with a required rationale                |
-| `fuse_preview`    | `id`, `revision`                                   | Persist exact output, hashes, configured commands, and approval token     |
-
-The server binds to one repository at launch. Tools cannot provide arbitrary repository paths or configure commands. Code and comments are untrusted evidence, not instructions. A coding tool should present the targeted question instead of fabricating the developer’s intent, use the returned supported action list, and leave source application to the human.
-
-## CLI JSON and exit codes
+## CLI and HTTP
 
 ```sh
-fuse inspect --sessions --repo /path/to/project --json
-fuse watch --once --repo /path/to/project --json
-fuse review REVIEW_ID --repo /path/to/project --json
+npm run fuse -- inspect --repo /path/to/project --json
+npm run fuse -- visualize REVIEW_ID --repo /path/to/project --regenerate --json
+npm run fuse -- review REVIEW_ID --repo /path/to/project --serve --open
 ```
 
-A review contains pinned Git heads, a common base, registered source identities or explicit non-attribution, input fingerprints, changed functions, base/A/B graphs, observations with file/line/code references, supported actions, recommendation confidence, decisions, preview hashes, actual checks, local reviewer identity, events, and lifecycle state.
+CLI commands emit one versioned JSON object with `--json`; watch emits JSONL. `mcp` uses protocol messages on stdout. The review server prints a loopback URL and stays running until stopped.
 
-The CLI emits one JSON object per command. Continuous watch emits JSONL with `alert` and `updated`; unchanged state has `alert: false`. Treat stdout as structured data when `--json` is selected. Node diagnostic warnings may appear on stderr. `review --serve` prints the local URL and stays running until stopped; `mcp` uses protocol messages instead of CLI JSON.
+| Exit | Meaning                                                         |
+| ---- | --------------------------------------------------------------- |
+| 0    | Successful command or no new watch alert                        |
+| 1    | Invalid input, unsupported action, provider/operational failure |
+| 2    | Unresolved review attention or new overlap alert                |
+| 3    | Stale input/revision, dirty target, wrong preview token         |
+| 4    | A configured check failed, timed out, or could not start        |
 
-| Exit | Meaning                                                                            |
-| ---- | ---------------------------------------------------------------------------------- |
-| 0    | Successful command or no new watch alert                                           |
-| 1    | Invalid input, unsupported action, or operational failure                          |
-| 2    | Unresolved review attention / new watch alert                                      |
-| 3    | Stale revision, changed source/registration, dirty target, or wrong approval token |
-| 4    | One or more configured checks failed, timed out, or could not start                |
+Mutations accept `--revision N`. Apply always requires the exact preview token. Normal working edits cannot be overwritten; an active merge may be resolved only when its conflict/index fingerprint still matches and no unrelated work is present.
 
-Mutations support `--revision N`; tools should use it to reject stale state. Application always requires the exact current preview token. The preview token also pins configured command arguments.
+The local server binds to loopback and the launch-selected repository. Demo mode allows only its controlled fixture registry. Unexpected Host headers and cross-origin mutations are rejected. JSON is required for mutations.
 
-## Local HTTP interface
+| Method | Endpoint                                | Body                                         |
+| ------ | --------------------------------------- | -------------------------------------------- |
+| GET    | `/api/reviews/:id`                      | —                                            |
+| POST   | `/api/demo`                             | optional `scenario: checkout` or `shipping`  |
+| POST   | `/api/reviews/:id/visual`               | optional `regenerate`                        |
+| GET    | `/api/reviews/:id/visual.svg` or `.png` | —                                            |
+| POST   | `/api/reviews/:id/intent`               | `revision`, `intent`                         |
+| POST   | `/api/reviews/:id/decide`               | `revision`, `path`, `conflictId`, `decision` |
+| POST   | `/api/reviews/:id/preview`              | `revision`                                   |
+| POST   | `/api/reviews/:id/apply`                | `revision`, `token`                          |
+| POST   | `/api/reviews/:id/link`                 | `revision`, `commit`                         |
+| GET    | `/api/reviews/:id/audit`                | —                                            |
 
-The visual server is bound to loopback and one repository when started by `fuse review --serve`. `npm start` uses only generated demo repositories. Browser requests never select arbitrary local paths or define executable commands. JSON is required for mutations; unexpected Host headers and cross-origin mutations are rejected.
-
-| Method | Endpoint                   | Body                                         |
-| ------ | -------------------------- | -------------------------------------------- |
-| GET    | `/api/reviews`             | —                                            |
-| GET    | `/api/reviews/:id`         | —                                            |
-| POST   | `/api/demo`                | optional `single` (demo server only)         |
-| POST   | `/api/reviews/:id/intent`  | `revision`, `intent`                         |
-| POST   | `/api/reviews/:id/decide`  | `revision`, `path`, `conflictId`, `decision` |
-| POST   | `/api/reviews/:id/preview` | `revision`                                   |
-| POST   | `/api/reviews/:id/apply`   | `revision`, exact `token`                    |
-| POST   | `/api/reviews/:id/link`    | `revision`, `commit`                         |
-| GET    | `/api/reviews/:id/audit`   | —                                            |
-
-Malformed fields return 400; missing reviews 404; stale state 409; unsupported analysis/actions 422. No endpoint creates commits or silently upgrades local work to merged status.
+These endpoints are local-only. The Vercel build has a browser adapter for prepared examples and downloadable engine outputs, with no backend, credentials, Git application, or invented check results.

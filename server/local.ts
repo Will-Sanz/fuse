@@ -18,7 +18,18 @@ import {
   previewDecision,
   resolve as reconcile,
 } from './engine';
-import { blob, commit, commonDir, git, isClean, root, safePath, snapshot, worktrees } from './git';
+import {
+  blob,
+  commit,
+  commonDir,
+  git,
+  isClean,
+  mergeState,
+  root,
+  safePath,
+  snapshot,
+  worktrees,
+} from './git';
 import { LocalStore } from './local-store';
 import type { Decision } from '../shared/types';
 import type {
@@ -174,7 +185,13 @@ export function inspect(options: InspectOptions, persist = true): Review {
   const store = new LocalStore(options.repo),
     repo = store.repo;
   let refs: SourceRef[];
-  if (options.sessions) {
+  const merge = !options.sessions && !options.a && !options.b ? mergeState(repo) : undefined;
+  if (merge) {
+    refs = [
+      { kind: 'revision', value: commit(repo, 'HEAD'), label: 'Current branch' },
+      { kind: 'revision', value: merge.otherHead, label: 'Incoming branch' },
+    ];
+  } else if (options.sessions) {
     if (options.a || options.b)
       throw new InputError('Choose registered sessions or revision flags.');
     const sessions = store.config().sessions;
@@ -274,6 +291,7 @@ export function inspect(options: InspectOptions, persist = true): Review {
     files,
     unsupported,
     status: 'proposed',
+    ...(merge ? { merge } : {}),
     createdAt: now,
     updatedAt: now,
     checks: [],
@@ -303,6 +321,8 @@ function current(store: LocalStore, id: string, revision: number) {
   return review;
 }
 export function assertFresh(review: Review) {
+  if (review.merge && mergeState(review.repository)?.fingerprint !== review.merge.fingerprint)
+    throw stale('Merge conflict or index changed. Inspect again before resolving it.');
   const registered = new LocalStore(review.repository).config().sessions;
   for (const source of Object.values(review.sources))
     if (
@@ -440,20 +460,39 @@ export function applyReview(repo: string, id: string, revision: number, token: s
     if (r.status !== 'proposed' || !r.preview || token !== r.preview.token)
       throw stale('Approve the exact current preview token before applying.');
     assertFresh(r);
-    if (!isClean(r.repository))
+    if (!r.merge && !isClean(r.repository))
       throw stale(
         'Target has uncommitted or untracked work. Commit or preserve it before applying; Fuse will not overwrite it.',
       );
-    if (r.targetHead !== r.baseCommit)
+    if (!r.merge && r.targetHead !== r.baseCommit)
       throw new InputError(
         'Apply from a clean target checkout at the common base. Create a base worktree and inspect there.',
       );
     if (JSON.stringify(store.config().checks) !== JSON.stringify(r.preview.checks))
       throw stale('Configured checks changed. Generate and approve a new preview.');
     const changes = Object.entries(r.preview.outputs);
-    for (const [path] of changes)
-      if (readTarget(r.repository, path) !== blob(r.repository, r.baseCommit, path).code)
-        throw stale('Target content differs from the common base.');
+    if (r.merge) {
+      const changedPaths = [
+        ...new Set(
+          [
+            ...git(repo, ['diff', '--name-only', '-z']).split('\0'),
+            ...git(repo, ['diff', '--cached', '--name-only', '-z']).split('\0'),
+            ...git(repo, ['ls-files', '--others', '--exclude-standard', '-z']).split('\0'),
+          ].filter(Boolean),
+        ),
+      ];
+      if (
+        r.merge.paths.length !== changes.length ||
+        changedPaths.some((p) => !r.merge!.paths.includes(p)) ||
+        changes.some(([p]) => !r.merge!.paths.includes(p))
+      )
+        throw stale(
+          'This merge has additional changes. Preserve or review them before resolving this file.',
+        );
+    } else
+      for (const [path] of changes)
+        if (readTarget(r.repository, path) !== blob(r.repository, r.baseCommit, path).code)
+          throw stale('Target content differs from the common base.');
     const staged: {
       path: string;
       full: string;
@@ -478,13 +517,18 @@ export function applyReview(repo: string, id: string, revision: number, token: s
         if (edit.temporary) renameSync(edit.temporary, edit.full);
         else if (existsSync(edit.full)) unlinkSync(edit.full);
       }
+      if (r.merge) git(repo, ['add', '--', ...changes.map(([path]) => path)]);
     } finally {
       for (const edit of staged)
         if (edit.temporary && existsSync(edit.temporary)) unlinkSync(edit.temporary);
     }
     r.status = 'applied';
     r.revision++;
-    event(r, 'Applied', `Approved preview ${token}; changes are local and uncommitted.`);
+    event(
+      r,
+      'Applied',
+      `Approved preview ${token}; changes are local and uncommitted.${r.merge ? ' Resolved merge files are staged.' : ''}`,
+    );
     store.save(r);
     r.checks = r.preview.checks.map((check) => {
       const start = Date.now();
