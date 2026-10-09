@@ -1,6 +1,6 @@
 {
   "name": "fuse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -15,18 +15,29 @@
     "test:e2e": "playwright test",
     "check": "npm run build && npm test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "fuse": "node cli/run.mjs"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@tailwindcss/typography": "^0.5.20",
+    "@untitledui/icons": "^0.0.23",
     "express": "^5.2.1",
     "lucide-react": "^1.52.0",
     "react": "^19.3.0",
+    "react-aria-components": "^1.22.0",
     "react-dom": "^19.3.0",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
+    "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-react-aria-components": "^2.2.0",
     "ts-morph": "^28.0.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.1",
     "@types/react": "^19.3.0",
@@ -43,5 +54,8 @@
   },
   "overrides": {
     "shell-quote": "^1.11.0"
+  },
+  "bin": {
+    "fuse": "cli/run.mjs"
   }
 }

@@ -39,7 +39,7 @@ const decisionSchema = z
   .strict();
 export function createApp(
   store: Store,
-  options: { githubToken?: string; request?: typeof fetch } = {},
+  options: { githubToken?: string; request?: typeof fetch; reviewRouter?: express.Router } = {},
 ) {
   const app = express();
   app.disable('x-powered-by');
@@ -58,6 +58,7 @@ export function createApp(
       if (
         origin &&
         ![
+          `http://${req.get('host')}`,
           'http://127.0.0.1:5173',
           'http://localhost:5173',
           `http://127.0.0.1:${process.env.PORT || 3001}`,
@@ -200,6 +201,7 @@ export function createApp(
     res.setHeader('Content-Disposition', 'attachment; filename="fuse-review.json"');
     res.json(w);
   });
+  if (options.reviewRouter) app.use('/api', options.reviewRouter);
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Endpoint not found.' }));
   app.use(
     (error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -207,7 +209,10 @@ export function createApp(
         return res
           .status(400)
           .json({ error: error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') });
-      if (error instanceof InputError) return res.status(422).json({ error: error.message });
+      if (error instanceof InputError)
+        return res
+          .status((error as InputError & { status?: number }).status || 422)
+          .json({ error: error.message });
       const e = error as { status?: number; type?: string; name?: string; message?: string };
       if (e.status === 413)
         return res

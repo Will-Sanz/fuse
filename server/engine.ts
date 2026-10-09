@@ -416,3 +416,49 @@ export function previewDecision(input: Input, conflict: Conflict, decision: Deci
     decision.order,
   );
 }
+
+/** Source-linked observations for humans and tools, including ordinary one-sided changes. */
+export function explain(input: Input) {
+  const snapshots = [input.base, input.agentA, input.agentB].map(
+    (code, i) => parse(code, ['Base', 'A', 'B'][i]).source,
+  );
+  const maps = snapshots.map(functions);
+  const evidence = maps.flatMap((map, index) =>
+    [...map].flatMap(([name, fn]) => {
+      if (index !== 0 && text(fn) === text(maps[0].get(name))) return [];
+      return [
+        {
+          revision: (['base', 'a', 'b'] as const)[index],
+          file: input.fileName,
+          function: name,
+          line: fn.getStartLineNumber(),
+          endLine: fn.getEndLineNumber(),
+          code: text(fn),
+          observations: index === 0 ? [] : observations(maps[0].get(name), fn),
+        },
+      ];
+    }),
+  );
+  for (const side of [1, 2])
+    for (const [name, fn] of maps[0])
+      if (!maps[side].has(name))
+        evidence.push({
+          revision: side === 1 ? 'a' : 'b',
+          file: input.fileName,
+          function: name,
+          line: fn.getStartLineNumber(),
+          endLine: fn.getEndLineNumber(),
+          code: '',
+          observations: ['Removes this function; source location refers to the common base.'],
+        });
+  const graphs = maps.map((map) =>
+    [...map].map(([id, fn]) => ({
+      id,
+      label: id,
+      line: fn.getStartLineNumber(),
+      calls: calls(fn),
+      changedBy: [],
+    })),
+  );
+  return { evidence, graphs: { base: graphs[0], a: graphs[1], b: graphs[2] } };
+}
