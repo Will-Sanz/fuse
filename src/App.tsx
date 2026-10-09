@@ -303,7 +303,7 @@ export default function App() {
                     {visual.origin === 'ai' ? (
                       <>
                         <span className="ai-dot" />
-                        Generated with {visual.model} · {visual.metaphor}
+                        Generated with {visual.model}
                         <a
                           href={`/api/reviews/${review.id}/visual.png`}
                           target="_blank"
