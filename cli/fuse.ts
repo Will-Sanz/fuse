@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { InputError } from '../server/engine';
 import {
   applyReview,
@@ -22,6 +23,8 @@ import { shellQuote } from '../shared/shell';
 
 export const help = `Fuse — understand and reconcile local TypeScript changes
 
+fuse [--repo PATH]                         Inspect, generate a visual, and open the review
+fuse explain [--repo PATH] [--base REF] [--a REF --b REF | --sessions] [--no-open] [--port 0] [--json]
 fuse inspect [--repo PATH] [--base REF] [--a REF --b REF | --sessions] [--json]
 fuse session add ID --name NAME --worktree PATH [--repo PATH]
 fuse session list | remove ID [--repo PATH]
@@ -40,7 +43,8 @@ fuse merged ID --into REF [--repo PATH]
 fuse demo --dir NEW_DIRECTORY [--single] [--json]
 fuse demo --dir NEW_DIRECTORY --merge [--scenario checkout|shipping] [--json]
 fuse visualize ID [--regenerate] [--repo PATH] [--json]
-fuse mcp --repo PATH
+fuse mcp [--repo PATH]
+fuse meeting [--scenario checkout|shipping] [--no-open] [--verify]
 
 Use --revision N on mutations to reject stale tool/browser state. Apply always requires
 the current preview token. Checks run only after explicit configuration and approval.
@@ -95,11 +99,20 @@ export const attention = (r: Review) =>
   r.unsupported.length > 0 ||
   r.files.some((f) => f.analysis.conflicts.some((c) => !f.decisions[c.id]));
 export async function main(args = process.argv.slice(2)) {
+  if (args[0] === 'meeting') {
+    const result = spawnSync(
+      process.execPath,
+      [fileURLToPath(new URL('../scripts/meeting.mjs', import.meta.url)), ...args.slice(1)],
+      { stdio: 'inherit' },
+    );
+    if (result.error) throw result.error;
+    return result.status ?? 1;
+  }
   const { values: v, positionals: p } = parseArgs({
     args,
     allowPositionals: true,
     options: {
-      repo: { type: 'string', default: process.cwd() },
+      repo: { type: 'string' },
       json: { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       base: { type: 'string' },
@@ -131,6 +144,7 @@ export async function main(args = process.argv.slice(2)) {
       merge: { type: 'boolean' },
       scenario: { type: 'string' },
       regenerate: { type: 'boolean' },
+      'no-open': { type: 'boolean' },
     },
   });
   const required = (name: keyof typeof v) => {
@@ -144,22 +158,44 @@ export async function main(args = process.argv.slice(2)) {
         ? JSON.stringify({ schemaVersion: 1, data })
         : readable || JSON.stringify(data, null, 2),
     );
-  const opts = { repo: v.repo!, base: v.base, a: v.a, b: v.b, sessions: v.sessions };
-  const review = () => new LocalStore(v.repo!).get(p[1] || '');
+  const selectedRepo = v.repo || process.cwd();
+  const opts = { repo: selectedRepo, base: v.base, a: v.a, b: v.b, sessions: v.sessions };
+  const review = () => new LocalStore(selectedRepo).get(p[1] || '');
   const rev = (r: Review) => {
     const n = v.revision === undefined ? r.revision : Number(v.revision);
     if (!Number.isInteger(n) || n < 0) throw new InputError('Invalid revision.');
     return n;
   };
   let result: Review | undefined;
-  if (v.help || !p.length) {
+  if (v.help) {
     console.log(help);
     return 0;
   }
-  switch (p[0]) {
+  switch (p[0] || 'explain') {
+    case 'explain': {
+      if (!v.json) console.log('Reading your Git changes…');
+      result = inspect(opts);
+      if (!result.files.length) {
+        print(result, describe(result));
+        return attention(result) ? 2 : 0;
+      }
+      if (!v.json) console.log('Fuse is designing your visual…');
+      const { generateVisual } = await import('../server/visual-ai');
+      result = await generateVisual(result.repository, result.id);
+      if (v.json) {
+        print(result);
+        return attention(result) ? 2 : 0;
+      }
+      console.log(
+        `${result.visual!.title}\nChoose a behavior in the browser. Press Ctrl+C here when finished.`,
+      );
+      const { serveReview } = await import('../server/review-server');
+      await serveReview(result.repository, result.id, Number(v.port || 0), !v['no-open']);
+      return 0;
+    }
     case 'visualize': {
       const { generateVisual } = await import('../server/visual-ai');
-      result = await generateVisual(v.repo!, p[1] || '', { regenerate: v.regenerate });
+      result = await generateVisual(selectedRepo, p[1] || '', { regenerate: v.regenerate });
       break;
     }
     case 'inspect':
@@ -167,9 +203,9 @@ export async function main(args = process.argv.slice(2)) {
       break;
     case 'session':
       if (p[1] === 'add')
-        print(registerSession(v.repo!, p[2] || '', required('name'), required('worktree')));
-      else if (p[1] === 'list') print(new LocalStore(v.repo!).config().sessions);
-      else if (p[1] === 'remove') print(removeSession(v.repo!, p[2] || ''));
+        print(registerSession(selectedRepo, p[2] || '', required('name'), required('worktree')));
+      else if (p[1] === 'list') print(new LocalStore(selectedRepo).config().sessions);
+      else if (p[1] === 'remove') print(removeSession(selectedRepo, p[2] || ''));
       else throw new InputError('Use session add, list, or remove.');
       return 0;
     case 'watch': {
@@ -199,13 +235,13 @@ export async function main(args = process.argv.slice(2)) {
       result = review();
       if (v.serve) {
         const { serveReview } = await import('../server/review-server');
-        await serveReview(v.repo!, result.id, Number(v.port || 3001), Boolean(v.open));
+        await serveReview(selectedRepo, result.id, Number(v.port || 3001), Boolean(v.open));
         return 0;
       }
       break;
     case 'intent': {
       const r = review();
-      result = setIntent(v.repo!, r.id, rev(r), {
+      result = setIntent(selectedRepo, r.id, rev(r), {
         first: required('first') as 'a' | 'b',
         rationale: required('note'),
       });
@@ -213,7 +249,7 @@ export async function main(args = process.argv.slice(2)) {
     }
     case 'decide': {
       const r = review();
-      result = decide(v.repo!, r.id, rev(r), required('file'), required('conflict'), {
+      result = decide(selectedRepo, r.id, rev(r), required('file'), required('conflict'), {
         choice: required('choice') as 'a',
         order: v.order as 'a-first' | 'b-first' | undefined,
         note: required('note'),
@@ -222,19 +258,19 @@ export async function main(args = process.argv.slice(2)) {
     }
     case 'preview': {
       const r = review();
-      result = preview(v.repo!, r.id, rev(r));
+      result = preview(selectedRepo, r.id, rev(r));
       break;
     }
     case 'apply': {
       const r = review();
-      result = applyReview(v.repo!, r.id, rev(r), required('approve'));
+      result = applyReview(selectedRepo, r.id, rev(r), required('approve'));
       break;
     }
     case 'check':
-      if (p[1] === 'list') print(new LocalStore(v.repo!).config().checks);
+      if (p[1] === 'list') print(new LocalStore(selectedRepo).config().checks);
       else if (p[1] === 'add')
         print(
-          configureCheck(v.repo!, {
+          configureCheck(selectedRepo, {
             name: p[2] || '',
             command: required('command'),
             args: v.arg || [],
@@ -245,7 +281,7 @@ export async function main(args = process.argv.slice(2)) {
       return 0;
     case 'history':
       print(
-        new LocalStore(v.repo!).list().map((r) => ({
+        new LocalStore(selectedRepo).list().map((r) => ({
           id: r.id,
           title: r.title,
           status: r.status,
@@ -257,12 +293,12 @@ export async function main(args = process.argv.slice(2)) {
       return 0;
     case 'link': {
       const r = review();
-      result = linkCommit(v.repo!, r.id, rev(r), required('commit'));
+      result = linkCommit(selectedRepo, r.id, rev(r), required('commit'));
       break;
     }
     case 'merged': {
       const r = review();
-      result = markMerged(v.repo!, r.id, rev(r), required('into'));
+      result = markMerged(selectedRepo, r.id, rev(r), required('into'));
       break;
     }
     case 'demo': {
@@ -281,7 +317,7 @@ export async function main(args = process.argv.slice(2)) {
     }
     case 'mcp': {
       const { serveMcp } = await import('../server/mcp');
-      await serveMcp(v.repo!);
+      await serveMcp(v.repo);
       return 0;
     }
     default:

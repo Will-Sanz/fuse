@@ -40,19 +40,17 @@ test('hosted setup includes the captured MCP image and usable teammate instructi
   await page.screenshot({ path: info.outputPath('hosted-checkout.png'), fullPage: true });
   await page.getByRole('button', { name: 'Run live MCP' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toContainText('The website uses prepared examples');
-  await expect(page.getByLabel('Meeting command')).toHaveText('npm run meeting');
+  await expect(dialog).toContainText('No API key or environment file is needed');
+  await expect(page.getByLabel('MCP prompt')).toContainText('Use Fuse to explain');
   const image = page.getByRole('img', { name: /captured from a real fuse_explain/ });
   await image.scrollIntoViewIfNeeded();
   await expect(image).toBeVisible();
   await expect
     .poll(() => image.evaluate((e: HTMLImageElement) => e.naturalWidth))
     .toBeGreaterThan(0);
-  await expect(dialog).toContainText('npm run build');
+  await expect(dialog).not.toContainText('npm run build');
   await page.getByText('Show MCP configuration', { exact: true }).click();
-  await expect(page.getByLabel('MCP configuration')).toContainText(
-    '/absolute/path/to/your/project',
-  );
+  await expect(page.getByLabel('MCP configuration')).toContainText('github:Will-Sanz/fuse#main');
   await expect(dialog).not.toContainText('/Users/willsanz');
   await page.getByRole('button', { name: 'Close MCP setup' }).click();
   await page.setViewportSize({ width: 390, height: 844 });

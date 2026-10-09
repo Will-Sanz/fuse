@@ -2,98 +2,79 @@
 
 Fuse explains code changes with a visual designed for the decision in front of you: **original code and highlighted conflict → visual explanation → choose the behavior → create the change**.
 
-The local MCP reads real Git changes, sends bounded source context to the OpenAI API, and asks **gpt-6-luna** to design an image and meaningful choices. Fuse renders that design as SVG and PNG. The deterministic TypeScript engine checks which resolutions are supported; the human chooses before any source is applied. No Codex CLI is needed.
+The local MCP reads real Git changes, sends bounded source context through the shared Fuse AI service to OpenAI, and asks **gpt-6-luna** to design an image and meaningful choices. Fuse renders that design as SVG and PNG. The deterministic TypeScript engine checks which resolutions are supported; the human chooses before any source is applied. No Codex CLI is needed.
 
-## Show it working
+## Connect once
 
-Use **Node.js 24**, Git, and an OpenAI API key with access to `gpt-6-luna`.
-
-```sh
-git clone https://github.com/Will-Sanz/fuse.git
-cd fuse
-npm ci
-npm run build
-cp .env.example .env
-```
-
-Open `.env` in your editor and set `OPENAI_API_KEY`. `FUSE_AI_MODEL` defaults to `gpt-6-luna`; it can select another Responses API model supporting structured output and low reasoning effort. Keep the key local. It is ignored by Git and excluded from Vercel uploads.
-
-```sh
-npm run meeting
-```
-
-This creates a disposable repository with a **real Git merge conflict**, calls the actual `fuse_explain` tool over MCP, waits for a fresh OpenAI-generated image, and opens the review on **http://127.0.0.1:3002**. Show the conflict, explain the image, choose the desired behavior, then click **Create this change**. Fuse writes and stages the resolution and runs the configured checks. It leaves the merge uncommitted for inspection. Stop with Ctrl+C.
-
-For a different decision and visual:
-
-```sh
-npm run meeting -- --scenario shipping
-```
-
-The validation example asks which error an empty order should see first. The shipping example asks whether a discount removes free shipping: a $120 basket with a $30 discount costs either $90 or $100. Each run creates a fresh repository, review, and AI request. See the [meeting walkthrough](docs/meeting.md) for the presentation script and troubleshooting.
-
-## Browser examples and hosting
-
-```sh
-npm start                     # after npm run build; http://127.0.0.1:3001
-npm run dev                   # development UI; http://127.0.0.1:5173
-```
-
-The local browser examples use prepared, distinct visuals and real disposable Git worktrees, analysis, application, and checks. No API key is needed for these examples. **Run live MCP** opens the live instructions and an image captured from an actual MCP run.
-
-The Vercel build (`npm run build:showcase`, configured in `vercel.json`) is a static website. Its examples use the same analyzer and reconciler at build time. Choices produce the corresponding downloadable source file and persist within the browser tab. It does not access your repository, run checks, or call OpenAI. Use the local MCP for fresh AI explanations and real Git changes. The API key is never included in the hosted build.
-
-## Use the MCP in your coding tool
-
-Add a stdio MCP server using your client's configuration UI or file:
+Fuse is publicly installable from this GitHub repository. Teammates use a **private team MCP configuration** that already includes access to the shared AI service. They do not need an OpenAI account, API key, environment file, or local Fuse checkout. Node.js **24** and Git are prerequisites.
 
 ```json
 {
   "mcpServers": {
     "fuse": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/fuse/cli/run.mjs",
-        "mcp",
-        "--repo",
-        "/absolute/path/to/your/project"
-      ]
+      "command": "npx",
+      "args": ["--yes", "--prefer-online", "github:Will-Sanz/fuse#main", "mcp"],
+      "env": { "FUSE_SERVICE_TOKEN": "YOUR_TEAM_ACCESS_TOKEN" }
     }
   }
 }
 ```
 
-Replace both paths. The CLI reads `.env` from the Fuse installation, so your teammates only need their own key. Ask the client: **“Use fuse_explain to explain my current change or merge conflict. Show the image and ask which behavior I want.”** The tool returns the saved review and a PNG. Client configuration formats and image display vary; the meeting runner is the verified, client-independent route.
+The project owner supplies the complete configuration privately, including the team access value. The public download never contains that value or the OpenAI API key. Different clients wrap this configuration differently; see [connection details](docs/integration.md), including Codex. Allow 180 seconds for startup and 300 seconds for tool calls. The first launch installs and builds Fuse automatically. Restarting the MCP checks the current GitHub `main` commit and updates the cached package when it changes. A running process stays on its current version until restarted.
 
-To open a returned review, use its ID and repository:
+## Try it on real code
+
+Open a Git repository with a TypeScript edit or merge conflict and ask your coding assistant:
+
+> Use Fuse to explain the change in this repository. Show the generated image, ask which behavior I want, and open the visual review.
+
+The assistant calls `fuse_explain` with the project's absolute `repo` path. The MCP reads your local repository, sends bounded source context to the hosted Fuse AI service, and returns a fresh image with meaningful choices. `fuse_open_review` supplies a local browser link. Choose the behavior, inspect the proposed code, and explicitly click **Create this change**. No source is changed by the MCP tools themselves.
+
+One connection works across repositories: pass `repo` on each tool call. An optional `--repo PATH` launch argument restricts a connection to one repository. Inspection without AI is available through `fuse_inspect`.
+
+## Show it working in a meeting
+
+For maintainers with the repository's ignored `.env` already configured:
 
 ```sh
-node /absolute/path/to/fuse/cli/run.mjs review REVIEW_ID --repo /path/to/project --serve --open
+npm run meeting
+npm run meeting -- --scenario shipping
 ```
 
-The MCP can inspect, generate images, record intent and choices, and preview outputs. Application and check execution remain explicit browser/CLI actions. See [tool contracts and integration details](docs/integration.md).
+This creates a disposable repository with a real Git merge conflict, calls `fuse_explain` over MCP, generates an image, and opens the review on an available local port. Files and provider provenance are saved in the temporary directory printed by the runner. See the [meeting walkthrough](docs/meeting.md).
 
-## Inspect actual work from the terminal
+The packaged equivalent is `npx --yes --prefer-online github:Will-Sanz/fuse#main meeting`; it uses `FUSE_SERVICE_TOKEN` supplied by the environment. A configured MCP does not automatically export its environment into your shell.
 
-Use `npm run fuse --` instead of the optional global `fuse` command:
+## Terminal use
+
+From a changed repository, with team access available in the process environment:
 
 ```sh
-npm run fuse -- inspect --repo /path/to/project
+npx --yes --prefer-online github:Will-Sanz/fuse#main
+```
+
+This inspects the change, generates a visual, and opens the review. Use `--repo /path/to/project` to select another repository. Advanced commands remain available:
+
+```sh
+npm run fuse -- inspect --repo /path/to/project --json
 npm run fuse -- inspect --repo /path/to/project --a feature/request --b feature/schema
-npm run fuse -- visualize REVIEW_ID --repo /path/to/project
-npm run fuse -- review REVIEW_ID --repo /path/to/project --serve --open
-```
-
-An active Git merge is detected automatically using HEAD, MERGE_HEAD, and the common base. Ordinary working changes are also explained without inventing a conflict. Working changes are unattributed unless you explicitly register sessions:
-
-```sh
 npm run fuse -- session add request --repo /path/to/project --name 'Request validation' --worktree /path/to/request-worktree
 npm run fuse -- session add schema --repo /path/to/project --name 'Schema validation' --worktree /path/to/schema-worktree
 npm run fuse -- inspect --repo /path/to/project --sessions
-npm run fuse -- watch --repo /path/to/project
 ```
 
-The first registration is A and the second B. Watch reports new overlap evidence without repeatedly alerting for unchanged work. Inspection and core CLI acceptance work without an API key; image generation requires one.
+## Development and hosting
+
+```sh
+npm ci
+npm run dev
+```
+
+The local browser examples use prepared visuals and real disposable Git worktrees. The Vercel website uses prepared examples with downloadable resolved source. Live AI is accessed by the local MCP through `/api/visual`; Git operations and application stay on the developer's computer.
+
+The Vercel project owner configures `OPENAI_API_KEY` and `FUSE_SERVICE_TOKEN` as production secrets and `FUSE_AI_MODEL=gpt-6-luna` as server configuration. The shared endpoint fails closed when access is unconfigured, requires the team token, bounds requests, fixes the model and output budget on the server, and never returns provider errors or credentials. It does not log source context. Teammates share the service access token; it is not an OpenAI key. Keep it private and rotate it on Vercel and in team connections if it leaks. Model usage is billed to the owner's API account; team authorization is not a spending cap.
+
+For direct local development, an installation `.env` may contain `OPENAI_API_KEY`; the CLI never loads the target repository's environment file. `FUSE_AI_URL` optionally points to a self-hosted HTTPS service. Explicit service configuration takes precedence over a local OpenAI key. See `.env.example`.
 
 ## Application and checks
 
@@ -129,7 +110,7 @@ npm run meeting:verify        # real MCP → OpenAI → image → real merge res
 npm run meeting:verify -- --scenario shipping
 ```
 
-The last two commands use your API key and incur model usage. CI runs the other checks. Live verification has passed for both checkout and shipping; the captured checkout image is in `public/mcp/checkout.png`.
+The last two commands incur model usage through the configured shared service or a direct local API key. CI runs the other checks. Live verification has passed for both checkout and shipping; the captured checkout image is in `public/mcp/checkout.png`.
 
 ## Current scope
 

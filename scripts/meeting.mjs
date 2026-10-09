@@ -1,10 +1,10 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { tmpdir } from 'node:os';
 import { parseArgs } from 'node:util';
 import assert from 'node:assert/strict';
 const installation = fileURLToPath(new URL('../', import.meta.url));
@@ -15,13 +15,9 @@ const { values } = parseArgs({
     scenario: { type: 'string', default: 'checkout' },
     verify: { type: 'boolean' },
     'no-open': { type: 'boolean' },
-    port: { type: 'string', default: '3002' },
+    port: { type: 'string', default: '0' },
   },
 });
-if (!process.env.OPENAI_API_KEY) {
-  console.error(`Add OPENAI_API_KEY to ${join(installation, '.env')} and run this command again.`);
-  process.exit(1);
-}
 const command = (...args) => {
   const r = spawnSync(process.execPath, [cli, ...args, '--json'], {
     encoding: 'utf8',
@@ -30,8 +26,7 @@ const command = (...args) => {
   assert.ok([0, 2].includes(r.status), r.stderr || r.stdout || 'Fuse command failed');
   return JSON.parse(r.stdout).data;
 };
-const output = join(installation, 'data/meetings', randomUUID());
-mkdirSync(output, { recursive: true });
+const output = mkdtempSync(join(tmpdir(), 'fuse-meeting-'));
 console.log('\nFUSE · LIVE VISUAL EXPLANATION\n');
 const d = command('demo', '--dir', join(output, 'repo'), '--merge', '--scenario', values.scenario);
 const before = execFileSync('git', ['-C', d.repo, 'status', '--short'], {
@@ -44,12 +39,17 @@ const transport = new StdioClientTransport({
   command: process.execPath,
   args: [cli, 'mcp', '--repo', d.repo],
   stderr: 'pipe',
+  env: Object.fromEntries(
+    ['FUSE_SERVICE_TOKEN', 'FUSE_AI_URL', 'OPENAI_API_KEY', 'FUSE_AI_MODEL']
+      .filter((key) => process.env[key])
+      .map((key) => [key, process.env[key]]),
+  ),
 });
 const started = Date.now();
 let review;
 try {
   await client.connect(transport);
-  console.log(`2. MCP → fuse_explain → OpenAI / ${process.env.FUSE_AI_MODEL || 'gpt-6-luna'}`);
+  console.log('2. MCP → fuse_explain → Fuse AI');
   console.log('   Reading the codebase and designing a custom visual…');
   const timer = setInterval(
     () => console.log(`   Generating · ${Math.round((Date.now() - started) / 1000)}s`),

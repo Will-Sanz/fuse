@@ -110,10 +110,10 @@ test('meeting setup is portable and exposes no API key', async ({ page }, info) 
   await page.getByRole('button', { name: 'Run live MCP' }).click();
   const dialog = page.getByRole('dialog', { name: 'Run Fuse with MCP' });
   await expect(dialog).toBeVisible();
-  await expect(page.getByLabel('Meeting command')).toContainText('scripts/meeting.mjs');
-  await expect(dialog).toContainText('OpenAI API directly');
+  await expect(page.getByLabel('MCP prompt')).toContainText('Use Fuse to explain');
+  await expect(dialog).toContainText('shared AI service');
   await page.getByText('Show MCP configuration', { exact: true }).click();
-  await expect(page.getByLabel('MCP configuration')).toContainText('cli/run.mjs');
+  await expect(page.getByLabel('MCP configuration')).toContainText('github:Will-Sanz/fuse#main');
   await expect(dialog).not.toContainText('codex exec');
   await page.screenshot({ path: info.outputPath('meeting-setup.png'), fullPage: true });
   await page.getByRole('button', { name: 'Close MCP setup' }).click();

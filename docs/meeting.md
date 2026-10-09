@@ -30,7 +30,7 @@ git -C /printed/repository/path diff --cached -- checkout.ts
 
 `UU` is gone, and the staged diff contains the chosen order. The UI reports actual check results. The checks cover an empty order, valid checkout, and malformed email.
 
-Stop the review server with Ctrl+C. Run `npm run meeting` again for a fresh conflict and new model request. Artifacts remain under ignored `data/meetings/<run-id>/`: `visual.png`, `visual.json`, and `session.json` plus the fixture repository. The image record includes the real model response ID and the source-context fingerprint.
+Stop the review server with Ctrl+C. Run `npm run meeting` again for a fresh conflict and new model request. Artifacts remain in the temporary directory printed by the command: `visual.png`, `visual.json`, and `session.json` plus the fixture repository. The image record includes the real model response ID and the source-context fingerprint.
 
 ## Show why visuals must vary
 
@@ -46,7 +46,7 @@ The AI chooses the visual structure from the code; the behavior options must mat
 
 ## Use your own coding client
 
-The **Run live MCP** button contains a copyable stdio configuration and prompt. Configure your coding client to run `node /absolute/path/to/fuse/cli/run.mjs mcp --repo /your/project`, then ask it to call `fuse_explain` and show the image. For registered worktrees pass `sessions: true`; for an active merge or ordinary working change use `{}`.
+The **Run live MCP** button contains a copyable stdio configuration and prompt. Use the private team MCP configuration from the owner. Ask it to call `fuse_explain` with `repo` set to your project’s absolute path, show the image, and call `fuse_open_review` for the browser link. For registered worktrees pass `sessions: true`; for an active merge or ordinary working change pass only `repo`.
 
 The meeting command itself is an actual MCP client using the official SDK, so the live path is demonstrable without installing a particular coding assistant. Other clients may display image tool results differently. Open the saved review with the `review --serve --open` command in the README when needed.
 
@@ -54,13 +54,13 @@ The meeting command itself is an actual MCP client using the official SDK, so th
 
 Use the hosted page for an immediate explanation: original code → conflict → prepared visual → choice → downloadable resolved file. Switch between **Validation order** and **Shipping policy**. **Run live MCP** contains installation instructions and a captured real MCP image.
 
-The public website uses prepared examples; it does not have your API key or access to a local Git repository. The terminal walkthrough is the fresh AI and real Git demonstration.
+The public website uses prepared examples. The shared AI backend keeps the owner’s key on Vercel and receives bounded context from the local MCP; it has no direct access to a local Git repository. The terminal walkthrough is the fresh AI and real Git demonstration.
 
 ## If something fails
 
 - **Missing key:** edit `.env` in the Fuse checkout and set `OPENAI_API_KEY`. Restart the runner.
 - **401 / quota / unavailable model:** check your key's API project, billing, and access to the configured model. Provider errors are shown; Fuse does not silently substitute a prepared visual.
-- **Port 3002 in use:** stop the earlier walkthrough, or run `npm run meeting -- --port 3003`.
+- **Local port:** the runner chooses a free port. Use `--port 3003` only when a fixed port is useful.
 - **No automatic browser opening:** follow the printed URL, or use `--no-open` and open it manually.
 - **Stale review:** editing the conflict after inspection intentionally blocks application. Start a fresh walkthrough or inspect the changed repository again.
 - **Offline presentation:** the hosted examples and the captured image explain the product; fresh AI generation needs internet access and a valid key.

@@ -123,4 +123,35 @@ describe('shared review API and MCP transport', () => {
       await client.close();
     }
   });
+  it('connects once outside a repository, accepts repo per call, and serves the local review without stdout corruption', async () => {
+    const d = createDemo(join(temp(), 'demo'));
+    const client = new Client({ name: 'fuse-portable-test', version: '1' });
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [resolve('cli/run.mjs'), 'mcp'],
+      cwd: temp(),
+      stderr: 'pipe',
+    });
+    await client.connect(transport);
+    try {
+      expect((await client.callTool({ name: 'fuse_inspect', arguments: {} })).isError).toBe(true);
+      const result = await client.callTool({
+        name: 'fuse_inspect',
+        arguments: { repo: d.repo, sessions: true },
+      });
+      expect(result.isError).not.toBe(true);
+      const review = JSON.parse((result.content as { text: string }[])[0].text).data as Review;
+      const link = await client.callTool({
+        name: 'fuse_open_review',
+        arguments: { repo: d.repo, id: review.id },
+      });
+      expect(link.isError).not.toBe(true);
+      const { url } = JSON.parse((link.content as { text: string }[])[0].text).data;
+      expect(url).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/\?review=/);
+      expect((await fetch(url)).status).toBe(200);
+      expect((await client.listTools()).tools.map((t) => t.name)).not.toContain('fuse_apply');
+    } finally {
+      await client.close();
+    }
+  });
 });

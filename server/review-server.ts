@@ -66,7 +66,7 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
       node: process.execPath,
       cli: fileURLToPath(new URL('../cli/run.mjs', import.meta.url)),
       meetingScript: fileURLToPath(new URL('../scripts/meeting.mjs', import.meta.url)),
-      aiConfigured: Boolean(process.env.OPENAI_API_KEY),
+      aiConfigured: Boolean(process.env.OPENAI_API_KEY || process.env.FUSE_SERVICE_TOKEN),
       model: process.env.FUSE_AI_MODEL || 'gpt-6-luna',
     }),
   );
@@ -162,37 +162,51 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
   }
   return { app, close: () => legacyStore.close() };
 }
-export async function serveReview(repo: string, id: string, port: number, open: boolean) {
-  if (!Number.isInteger(port) || port < 1024 || port > 65535)
-    throw new InputError('Use a port between 1024 and 65535.');
-  const dist = fileURLToPath(new URL('../dist/index.html', import.meta.url));
-  if (!existsSync(dist))
+export async function startReview(repo: string, port = 0) {
+  if (!Number.isInteger(port) || (port !== 0 && (port < 1024 || port > 65535)))
+    throw new InputError('Choose port 0 or a port from 1024 through 65535.');
+  if (!existsSync(fileURLToPath(new URL('../dist/index.html', import.meta.url))))
     throw new InputError('Build the visual review first: npm run build in the Fuse installation.');
   const { app, close } = createReviewApp({ repo });
-  await new Promise<void>((accept, reject) => {
+  return new Promise<{ url: string; close: () => void }>((accept, reject) => {
     const server = app.listen(port, '127.0.0.1', () => {
-      const url = `http://127.0.0.1:${port}/?review=${id}`;
-      console.log(`Fuse visual review: ${url}`);
-      if (open) {
-        const command =
-          process.platform === 'darwin'
-            ? 'open'
-            : process.platform === 'win32'
-              ? 'explorer.exe'
-              : 'xdg-open';
-        const child = spawn(command, [url], { stdio: 'ignore' });
-        child.on('error', () => console.error(`Open this link in your browser: ${url}`));
-      }
+      const listeningPort = (server.address() as { port: number }).port;
+      accept({
+        url: `http://127.0.0.1:${listeningPort}`,
+        close: () => {
+          server.close();
+          server.closeAllConnections();
+          close();
+        },
+      });
     });
     server.on('error', (error) => {
       close();
       reject(error);
     });
-    const stop = () =>
-      server.close(() => {
-        close();
-        accept();
-      });
+  });
+}
+export async function serveReview(repo: string, id: string, port = 3001, open = false) {
+  const viewer = await startReview(repo, port);
+  const url = `${viewer.url}/?review=${id}`;
+  console.log(`Fuse visual review: ${url}`);
+  if (open) {
+    const command =
+      process.platform === 'darwin'
+        ? 'open'
+        : process.platform === 'win32'
+          ? 'explorer.exe'
+          : 'xdg-open';
+    const child = spawn(command, [url], { stdio: 'ignore' });
+    child.on('error', () => console.error(`Open this link in your browser: ${url}`));
+  }
+  await new Promise<void>((accept) => {
+    const stop = () => {
+      process.off('SIGINT', stop);
+      process.off('SIGTERM', stop);
+      viewer.close();
+      accept();
+    };
     process.once('SIGINT', stop);
     process.once('SIGTERM', stop);
   });
