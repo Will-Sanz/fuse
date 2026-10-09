@@ -1,15 +1,29 @@
-# MVP scope
+# Fuse local companion release
 
-Source: Fuse Senior Design – Group 11 presentation, slides 5–7 and milestone plan on slide 9.
+Fuse explains the current TypeScript change and helps a developer decide how explicitly registered worktree sessions should fit together. A terminal tool and a compact browser review share the deterministic ts-morph analysis, constrained reconciliation, and persistent decision service. The core workflow needs no paid API keys.
 
-The first release implements the flagship TypeScript example across three persistent surfaces: agent overview, conflict resolution, and decision history. It accepts a common base and two agent revisions, extracts named top-level functions with ts-morph, compares function changes, and shows the local call graph. Shared-function edits become decisions. Changes on the same call path become review candidates, not claims of a proven semantic conflict.
+## Milestones
 
-Resolution keeps A, keeps B, or composes insertions into an otherwise unchanged function body. Composition requires an explicit order where insertions share an anchor. Unsupported compositions stay blocked. Completed resolutions produce downloadable TypeScript and a decision record with the exact input and output hashes. Source is parsed and type-checked, never executed by the app.
+1. **Baseline and plan.** Inspect the clean checkout, remote branches, PRs, and CI; preserve existing changes. Record baseline build, engine/API and browser results. Work on `feat/local-companion` with reviewed, tested checkpoints.
+2. **Local Git and CLI.** Inspect revisions or working changes, register named worktrees, attribute changes only through registration, explain ordinary edits, and detect shared-function edits separately from possible call-path interactions. Expose versioned JSON and meaningful exit codes. Watch changes with persistent alert deduplication.
+3. **Review and application.** Persist pinned inputs, evidence, supported actions, intent, recommendations, previews, reviewer attribution, and real configured check results. Require preview approval; refuse stale reviews and dirty targets. Track proposed, applied, committed, and verified Git ancestry separately. Unsupported files remain visible and block application rather than disappearing.
+4. **Compact visual review and reproducible demo.** Use actual open-source Untitled UI components and design tokens. Show before/after calls, exact attention points, source evidence, a targeted intent question, choices, result preview, checks, and Git-linked history. Generate the checkout fixture with real branches and worktrees; label scripted changes. Keep legacy snapshot/import APIs available for safe read-only review.
+5. **Integration and acceptance.** Provide one documented Codex MCP integration over the vendor-independent engine and invoke it through the real coding tool. Exercise the CLI against temporary repositories, inspect the browser visually, run the full relevant suite, check GitHub CI, and deliver a reviewable PR and accurate setup instructions.
 
-React + Vite UI; TypeScript + Express API; local SQLite persistence. A no-key checkout example is fully interactive. GitHub import reads one file at three pinned commits; private repositories require a server-side token. Linear, Slack, Teams, autonomous agent execution, AI semantic judgments, multi-file resolution, and hosted multi-user authentication are follow-on work. The MVP is a local reviewer workspace and must bind to loopback.
+## Acceptance criteria
 
-Delivery checkpoints:
+- An ordinary local edit receives a useful source-linked explanation without an invented conflict.
+- Two registered sessions show the functions they changed. Independent edits, identical/shared edits, differing edits in one function, and possible interactions have distinct evidence.
+- Static calls never imply runtime order or a proven behavioral conflict. A recommendation uses explicit intent or controlled fixture expectations; otherwise Fuse asks a focused question.
+- Keep A, Keep B, and supported additive composition with an explicit order are previewable. Tests demonstrate different checkout outcomes for the two orders.
+- Deleted functions, comments, malformed inputs, unsupported files/constructs, revision selection, and missing worktrees are handled safely.
+- A new overlap produces an alert and review link. Unchanged overlaps do not alert repeatedly; further edits refresh the analysis and alert evidence.
+- Application requires explicit approval of the current preview and checks both source worktrees and target state. Newer or uncommitted target work is preserved.
+- Only explicitly configured commands run, without a shell; imported code and repository scripts are never auto-discovered or executed. Results include actual status, output, duration, and command.
+- Decisions survive restarts and include input/output hashes, rationale, local reviewer attribution, status, and a verified commit reference. An exported file is never described as merged.
+- The browser has tested loading, error, empty, success, and narrow-screen states. CLI JSON, exit codes, and real MCP invocation are verified.
+- From a clean checkout: create fixture → register two worktrees → detect overlap → open focused review → answer intent → preview → approve/apply → run configured tests → commit → revisit decision history. Also demonstrate one ordinary change.
 
-1. AST analysis, constrained composition, and engine tests.
-2. Persistent API, GitHub import, and API tests.
-3. Three-surface UI, browser tests, production build, and team setup documentation.
+## Boundaries
+
+First language: TypeScript; direct local calls and named top-level functions. Composition remains deliberately constrained. Non-TypeScript/binary/mode changes and unsupported reconciliation require a safe manual path. No autonomous merges, CRDT, hosted team authentication, or broad service integrations. Git identity is local attribution, not verified authentication. The application binds to loopback.
