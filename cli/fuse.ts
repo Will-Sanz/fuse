@@ -234,16 +234,14 @@ export async function main(args = process.argv.slice(2)) {
       return 0;
     case 'history':
       print(
-        new LocalStore(v.repo!)
-          .list()
-          .map((r) => ({
-            id: r.id,
-            title: r.title,
-            status: r.status,
-            updatedAt: r.updatedAt,
-            commit: r.commit,
-            checks: r.checks.map((c) => ({ name: c.name, status: c.status })),
-          })),
+        new LocalStore(v.repo!).list().map((r) => ({
+          id: r.id,
+          title: r.title,
+          status: r.status,
+          updatedAt: r.updatedAt,
+          commit: r.commit,
+          checks: r.checks.map((c) => ({ name: c.name, status: c.status })),
+        })),
       );
       return 0;
     case 'link': {
