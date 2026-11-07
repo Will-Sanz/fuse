@@ -1,5 +1,14 @@
 # MCP and structured interfaces
 
+## MCP-first behavioral proposals
+
+Fuse now supports **saved issue → human behavior confirmation → host-agent proposal
+→ isolated baseline/candidate checks → exact preview → second human approval →
+applied receipt**. This is separate from the preserved legacy A/B and active-merge
+flows described below. See [the behavioral workflow](behavioral-review.md) for setup, tool contracts,
+limits and a complete checkout walkthrough. Current verification evidence and
+remaining blockers are in [verification](verification.md).
+
 Fuse's stdio server uses the official MCP SDK and a repository selected per tool call (or an optional launch restriction). It has no dependency on Codex CLI. The hosted AI layer calls OpenAI's Responses API, defaulting to `gpt-6-luna`, with structured JSON output and `store: false`. Core inspection and reconciliation are deterministic and do not need an API key.
 
 ## Configuration
@@ -54,7 +63,7 @@ Successful text content is `{ "schemaVersion": 1, "data": ... }`. `fuse_explain`
 
 `fuse_open_review` accepts `repo` and `id` and returns a loopback URL where the human can select and apply the resolution. The viewer stays available while the MCP connection runs.
 
-There is no MCP application or command-execution tool. Use the local browser or CLI to explicitly apply a preview and run configured checks. Inspection writes a saved record and generation calls a paid API, so these are not marked read-only.
+There is no MCP application or arbitrary-command tool. `fuse_verify` runs only preconfigured isolated checks for behavioral proposals. Use the local browser or CLI to explicitly apply a preview and run configured checks. Inspection writes a saved record and generation calls a paid API, so these are not marked read-only.
 
 ## CLI and HTTP
 
@@ -92,3 +101,20 @@ The local server binds to loopback and the launch-selected repository. Demo mode
 | GET    | `/api/reviews/:id/audit`                | —                                            |
 
 These endpoints are local-only. The Vercel website has a browser adapter for prepared examples and downloadable engine outputs. Its `/api/visual` backend is separate from local review endpoints: it authorizes the team token, bounds the request, calls the fixed server-side model, and returns the scene and provider provenance. It cannot read or change a local repository. The shared OpenAI key remains a Vercel secret; team access is not a spending cap.
+
+## Behavioral tool additions
+
+- `fuse_report_issues`: `id`, `revision`, `report` with `sourceVersion`, assessment,
+  explanation and optional issue (path, summary, rationale, evidence indexes and
+  behavior labels/descriptions). The backend assigns IDs; it never accepts test claims.
+- `fuse_submit_proposal`: `id`, `revision`, `proposal` with sourceVersion, issueId,
+  behaviorId, exact path/source and rationale. Requires panel-confirmed intent.
+- `fuse_verify`: `id`, `revision` only. Uses configured checks and image; no commands
+  or trusted results can be supplied. MCP cancellation aborts the current run.
+
+Behavioral reviews cannot use legacy intent/decision tools to bypass these gates.
+Visual generation preserves the saved issue and registers final scene actions
+against backend behavior IDs. Wire action slots keep the existing hosted service
+compatible; they are mapped and validated before persistence. The agent returns
+to `fuse_review` after each human interaction. The packaged
+`skills/fuse-review/SKILL.md` supplies portable host instructions.

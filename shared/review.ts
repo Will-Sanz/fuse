@@ -17,6 +17,7 @@ export interface CheckCommand {
 export interface LocalConfig {
   sessions: Session[];
   checks: CheckCommand[];
+  verificationImage?: string;
 }
 export interface SourceRef {
   kind: 'revision' | 'worktree';
@@ -89,6 +90,7 @@ export interface Preview {
 }
 export interface Review {
   schemaVersion: 1;
+  sourceVersion?: string;
   id: string;
   revision: number;
   title: string;
@@ -103,6 +105,7 @@ export interface Review {
   createdAt: string;
   updatedAt: string;
   intent?: Intent;
+  behavioral?: BehavioralReview;
   preview?: Preview;
   checks: CheckResult[];
   events: ReviewEvent[];
@@ -119,4 +122,36 @@ export interface InspectOptions {
   a?: string;
   b?: string;
   sessions?: boolean;
+}
+
+export interface BehaviorIssue {
+  id: string;
+  summary: string;
+  rationale: string;
+  path: string;
+  evidence: number[];
+  options: { id: string; label: string; description: string }[];
+}
+export interface BehavioralReview {
+  sourceVersion: string;
+  assessment: 'suspected' | 'no-issue' | 'insufficient-evidence';
+  explanation: string;
+  issue?: BehaviorIssue;
+  intent?: { issueId: string; behaviorId: string; confirmedAt: string; origin: 'human-panel' };
+  proposal?: { path: string; source: string; hash: string; rationale: string; submittedAt: string };
+  verification?: {
+    id: string;
+    binding: string;
+    image: string;
+    status: 'running' | 'passed' | 'failed' | 'error' | 'cancelled';
+    baselineHash: string;
+    candidateHash: string;
+    projectHash: string;
+    checks: CheckCommand[];
+    baseline: CheckResult[];
+    candidate: CheckResult[];
+    startedAt: string;
+    completedAt?: string;
+    error?: string;
+  };
 }

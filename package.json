@@ -17,7 +17,12 @@
     "docs/meeting.md",
     "docs/integration.md",
     "src/untitledui/LICENSE",
-    "src/untitledui/PROVENANCE.md"
+    "src/untitledui/PROVENANCE.md",
+    "skills",
+    "verification",
+    "examples/semantic-checkout",
+    "docs/behavioral-review.md",
+    "docs/verification.md"
   ],
   "type": "module",
   "engines": {
@@ -40,7 +45,8 @@
     "demo:verify": "node scripts/acceptance.mjs",
     "meeting": "node scripts/meeting.mjs",
     "meeting:verify": "node scripts/meeting.mjs --verify --no-open",
-    "package:check": "npm run build && node scripts/verify-package.mjs"
+    "package:check": "npm run build && node scripts/verify-package.mjs",
+    "test:containers": "node -e \"if (!process.env.FUSE_TEST_IMAGE) { console.error('Set FUSE_TEST_IMAGE to a prepared Docker image ID.'); process.exit(1); }\" && vitest run tests/behavioral.test.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

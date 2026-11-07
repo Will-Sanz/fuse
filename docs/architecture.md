@@ -1,5 +1,14 @@
 # Fuse architecture
 
+## MCP-first behavioral proposals
+
+Fuse now supports **saved issue → human behavior confirmation → host-agent proposal
+→ isolated baseline/candidate checks → exact preview → second human approval →
+applied receipt**. This is separate from the preserved legacy A/B and active-merge
+flows described below. See [the behavioral workflow](behavioral-review.md) for setup, tool contracts,
+limits and a complete checkout walkthrough. Current verification evidence and
+remaining blockers are in [verification](verification.md).
+
 Fuse separates source evidence, AI explanation, human intent, and deterministic code application.
 
 ```mermaid
@@ -25,7 +34,7 @@ flowchart TD
 - `server/local-store.ts`: atomic JSON records under the common Git directory's `fuse/` folder and a per-repository mutation lock.
 - `server/visual-ai.ts`: bounded pinned context, OpenAI Responses API request, schema/action validation, one repair attempt, cache/provenance, and freshness checks before saving. `.env` loading belongs to the installation entry point. Errors are explicit; prepared visuals are never a silent AI fallback.
 - `server/visual-renderer.ts`: escaped text and fixed drawing primitives, geometry/text-fit validation, SVG rendering, and resvg PNG output. No arbitrary model HTML or code execution.
-- `server/mcp.ts`: vendor-independent stdio interface. AI tools return text data plus an actual PNG image. Source application and command execution are intentionally absent from MCP.
+- `server/mcp.ts`: vendor-independent stdio interface. AI tools return text data plus an actual PNG image. Source application and human confirmation are absent from MCP. Behavioral verification executes only configured container checks.
 - `cli/`: executable, JSON and exit codes, inspection/watch tools, and the loopback review server. `scripts/meeting.mjs` is the portable live MCP client and disposable-conflict walkthrough.
 - `server/review-server.ts`: repository-bound browser API; retains legacy snapshot/import routes. Mutations enforce local origin and Host restrictions.
 - `src/`: the three-step source/visual/choice review. Standard buttons, dialogs, and loading indicators use the MIT Untitled UI implementation with provenance retained under `src/untitledui/`.
@@ -42,7 +51,7 @@ The reconciler preserves unilateral edits and can select whole functions or comb
 
 Preview pins decisions, source fingerprints, output hashes, and configured check commands. Apply rechecks source, review revision, target HEAD, target contents, and token immediately before writing. An active merge additionally pins MERGE_HEAD, unresolved index entries, and marker-file contents. Unrelated staged, unstaged, or untracked work blocks merge application. The approved file is atomically replaced and staged for the unresolved merge; no merge commit is made. Another editor can still race outside Fuse's lock, so this is optimistic validation rather than a filesystem-wide transaction.
 
-Checks are explicitly configured executable/argument arrays, run without a shell after application, with time and output bounds. Actual failures remain recorded; no checks means unverified. The record preserves inputs, AI context/provenance, rationale, outputs, actual check results, and local Git identity. It is local attribution, not authenticated identity or a tamper-proof audit.
+Legacy checks are explicitly configured executable/argument arrays, run without a shell after application, with time and output bounds. Actual failures remain recorded; no checks means unverified. The record preserves inputs, AI context/provenance, rationale, outputs, actual check results, and local Git identity. It is local attribution, not authenticated identity or a tamper-proof audit.
 
 Statuses progress from proposed to applied to a verified descendant commit and then a verified merge commit. Git commit/merge linking requires the exact recorded output. A download is never a verified Git commit or merge. The review service does not commit or push; fixture construction and acceptance scripts commit only controlled disposable repositories.
 

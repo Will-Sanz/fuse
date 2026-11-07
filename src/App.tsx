@@ -1,3 +1,4 @@
+import { BehaviorReview } from './components/BehaviorReview';
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle, Code02, RefreshCw01, Terminal } from '@untitledui/icons';
 import { Button } from './untitledui/components/base/buttons/button';
@@ -139,7 +140,12 @@ export default function App() {
     file?.analysis.conflicts[0];
   const focus = conflict?.functions[0] || file?.analysis.changedA[0] || file?.analysis.changedB[0];
   const source = (side: 'base' | 'a' | 'b') =>
-    file?.evidence.find((e) => e.revision === side && e.function === focus);
+    file?.evidence.find(
+      (e) =>
+        e.revision === side &&
+        e.function ===
+          (side === 'b' && conflict?.kind === 'dependency' ? conflict.functions.at(-1) : focus),
+    );
   const code = (side: 'base' | 'a' | 'b') =>
     source(side)?.code ??
     (side === 'base' ? file?.input.base : side === 'a' ? file?.input.agentA : file?.input.agentB) ??
@@ -226,9 +232,11 @@ export default function App() {
                 <div>
                   <h2 id="code-heading">The change</h2>
                   <p>
-                    {conflict
-                      ? `Both edits meet in ${focus || file?.path}.`
-                      : 'Compare the original code with your change.'}
+                    {conflict?.kind === 'dependency'
+                      ? `These edits may interact through ${conflict.functions.join(' and ')}.`
+                      : conflict
+                        ? `Both edits meet in ${focus || file?.path}.`
+                        : 'Compare the original code with your change.'}
                   </p>
                 </div>
                 <span className="file-label">
@@ -300,6 +308,9 @@ export default function App() {
                     alt={`${visual.title}. ${visual.summary}`}
                   />
                   <figcaption>
+                    {review.behavioral && (
+                      <span>Illustrative explanation. Executed results appear below.</span>
+                    )}
                     {visual.origin === 'ai' ? (
                       <>
                         <span className="ai-dot" />
@@ -351,7 +362,8 @@ export default function App() {
                 </Button>
               )}
             </section>
-            {visual && (
+            {review.behavioral && <BehaviorReview review={review} busy={busy} action={action} />}
+            {visual && !review.behavioral && (
               <section className="step-section decision-section" aria-labelledby="choice-heading">
                 <div className="section-heading">
                   <span className="step-number">03</span>

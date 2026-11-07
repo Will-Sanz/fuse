@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { checkoutExample, shippingExample } from '../shared/example';
@@ -113,4 +114,53 @@ console.log('PASS: shipping boundaries; discounted basket total = $' + orderTota
       ? undefined
       : 'Empty orders show the friendly incomplete-order message; malformed email still gets a specific error.',
   };
+}
+
+/** Separate clean-merge fixture. Oracle files are never included in agent investigation context. */
+export function createSemanticDemo(directory: string, compatible = false) {
+  const dir = resolve(directory);
+  if (existsSync(dir)) throw new InputError('Demo destination must not exist.');
+  const repo = join(dir, 'checkout');
+  mkdirSync(repo, { recursive: true });
+  execFileSync('git', ['init', '-b', 'main', repo], { stdio: 'pipe' });
+  git(repo, ['config', 'user.name', 'Fuse Acceptance']);
+  git(repo, ['config', 'user.email', 'acceptance@fuse.local']);
+  const fixture = fileURLToPath(new URL('../examples/semantic-checkout/', import.meta.url));
+  for (const name of ['checkout.ts', 'README.md', 'branch.test.mjs', 'policy.test.mjs'])
+    writeFileSync(join(repo, name), readFileSync(join(fixture, name)));
+  writeFileSync(join(repo, 'package.json'), '{"type":"module"}\n');
+  const base = readFileSync(join(repo, 'checkout.ts'), 'utf8');
+  git(repo, ['add', '.']);
+  git(repo, ['commit', '-m', 'Original checkout and business requirements']);
+  const baseCommit = git(repo, ['rev-parse', 'HEAD']);
+  git(repo, ['checkout', '-b', 'feature/coupons']);
+  writeFileSync(
+    join(repo, 'checkout.ts'),
+    base.replace('return cart.subtotalCents;', 'return cart.subtotalCents - cart.couponCents;'),
+  );
+  git(repo, ['commit', '-am', 'Apply coupon to merchandise']);
+  git(repo, ['checkout', '-b', 'feature/shipping', baseCommit]);
+  writeFileSync(
+    join(repo, 'checkout.ts'),
+    base.replace(
+      'return 1000;',
+      `return ${compatible ? 'cart.subtotalCents' : 'merchandiseTotal(cart)'} >= 10000 ? 0 : 1000;`,
+    ),
+  );
+  git(repo, ['commit', '-am', 'Free shipping threshold']);
+  git(repo, ['checkout', 'main']);
+  configureCheck(repo, {
+    name: 'Compile',
+    command: 'tsc',
+    args: ['--noEmit', '--strict', '--target', 'ES2023', 'checkout.ts'],
+    timeoutMs: 15000,
+  });
+  configureCheck(repo, {
+    name: 'Business policy',
+    command: 'node',
+    args: ['--test', 'policy.test.mjs'],
+    timeoutMs: 10000,
+  });
+  const review = inspect({ repo, a: 'feature/coupons', b: 'feature/shipping' });
+  return { repo, review, baseCommit, scripted: true };
 }

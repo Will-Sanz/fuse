@@ -1,3 +1,4 @@
+import { configureVerification } from '../server/proposals';
 import { parseArgs } from 'node:util';
 import { resolve } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
@@ -17,7 +18,7 @@ import {
   watchOnce,
 } from '../server/local';
 import { LocalStore } from '../server/local-store';
-import { createDemo } from '../server/demo';
+import { createSemanticDemo, createDemo } from '../server/demo';
 import type { Review } from '../shared/review';
 import { shellQuote } from '../shared/shell';
 
@@ -37,6 +38,8 @@ fuse preview ID [--repo PATH] [--json]
 fuse apply ID --approve PREVIEW_TOKEN [--repo PATH] [--json]
 fuse check add NAME --command EXECUTABLE [--arg VALUE ...] [--timeout 10000]
 fuse check list [--repo PATH]
+fuse verifier IMAGE_SHA256 [--repo PATH]
+fuse semantic-demo --dir NEW_DIRECTORY [--json]
 fuse history [--repo PATH] [--json]
 fuse link ID --commit REF [--repo PATH]
 fuse merged ID --into REF [--repo PATH]
@@ -266,6 +269,19 @@ export async function main(args = process.argv.slice(2)) {
       result = applyReview(selectedRepo, r.id, rev(r), required('approve'));
       break;
     }
+    case 'verifier':
+      print(configureVerification(selectedRepo, p[1]));
+      return 0;
+    case 'semantic-demo':
+      print(
+        createSemanticDemo(
+          v.dir ||
+            (() => {
+              throw new InputError('Pass --dir NEW_DIRECTORY.');
+            })(),
+        ),
+      );
+      return 0;
     case 'check':
       if (p[1] === 'list') print(new LocalStore(selectedRepo).config().checks);
       else if (p[1] === 'add')

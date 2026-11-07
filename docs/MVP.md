@@ -1,5 +1,14 @@
 # Fuse visual explanation release
 
+## MCP-first behavioral proposals
+
+Fuse now supports **saved issue → human behavior confirmation → host-agent proposal
+→ isolated baseline/candidate checks → exact preview → second human approval →
+applied receipt**. This is separate from the preserved legacy A/B and active-merge
+flows described below. See [the behavioral workflow](behavioral-review.md) for setup, tool contracts,
+limits and a complete checkout walkthrough. Current verification evidence and
+remaining blockers are in [verification](verification.md).
+
 The product flow is **original code and highlighted conflict → custom visual explanation → choose the intended behavior → create the matching change**. The public website can use prepared examples. The real MCP must inspect a repository, call real AI, and generate the explanation image.
 
 ## Implemented milestones
@@ -24,7 +33,7 @@ The product flow is **original code and highlighted conflict → custom visual e
 - The hosted page works without an API server, downloads the correct selected source, and does not claim it changed a Git repository or ran checks.
 - Ordinary changes, worktree overlaps/interactions, watcher deduplication, CLI JSON/exit codes, persistence, Git linking, and legacy safety checks remain covered.
 - Browser loading/error/success, responsive layouts, portable setup, downloads, and actual local application pass end-to-end checks.
-- Ship directly to main after verification, without opening a PR, as requested.
+- Keep this milestone local on its feature branch; no deployment, push or merge is part of acceptance.
 
 ## Current boundaries
 

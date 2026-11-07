@@ -1,3 +1,4 @@
+import { confirmBehavior } from './proposals';
 import express from 'express';
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
@@ -111,6 +112,14 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
     res.type('image/png').send(visualPng(review.visual));
   });
   const version = z.object({ revision: z.number().int().nonnegative() });
+  router.post('/reviews/:id/behavior', (req, res) => {
+    const b = version
+      .extend({ behaviorId: z.string().uuid(), confirmed: z.literal(true) })
+      .strict()
+      .parse(req.body);
+    const { store } = find(req.params.id);
+    res.json(confirmBehavior(store.repo, req.params.id, b.revision, b.behaviorId));
+  });
   router.post('/reviews/:id/intent', (req, res) => {
     const b = version.extend({ intent: intentSchema }).strict().parse(req.body),
       { store } = find(req.params.id);
