@@ -17,6 +17,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run format:check
+      - run: docker build -t fuse-verifier:ci verification
+      - run: echo "FUSE_TEST_IMAGE=$(docker image inspect --format '{{.Id}}' fuse-verifier:ci)" >> "$GITHUB_ENV"
       - run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

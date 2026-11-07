@@ -1,3 +1,4 @@
+import { assertVerified, sourceVersion } from './proposals';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import {
@@ -298,6 +299,7 @@ export function inspect(options: InspectOptions, persist = true): Review {
     events: [],
     attribution: localIdentity(repo),
   };
+  review.sourceVersion = sourceVersion(review);
   event(
     review,
     'Inspected',
@@ -360,6 +362,8 @@ export function decide(
     if (r.status !== 'proposed')
       throw new InputError('Applied reviews are immutable. Start a new review.');
     assertFresh(r);
+    if (r.behavioral)
+      throw new InputError('Use the behavioral review panel and proposal workflow.');
     const file = r.files.find((f) => f.path === path),
       conflict = file?.analysis.conflicts.find((c) => c.id === conflictId);
     if (!file || !conflict) throw new InputError('Unknown file or decision.');
@@ -383,6 +387,7 @@ export function setIntent(repo: string, id: string, revision: number, intent: In
     const r = current(store, id, revision);
     if (r.status !== 'proposed') throw new InputError('Applied reviews are immutable.');
     assertFresh(r);
+    if (r.behavioral) throw new InputError('Confirm behavior in the human review panel.');
     r.intent = intent;
     delete r.preview;
     r.revision++;
@@ -407,10 +412,13 @@ export function preview(repo: string, id: string, revision: number) {
       throw new InputError(
         'Automatic application supports one TypeScript file per review. Review all files in the evidence, then reconcile this multi-file change manually.',
       );
+    if (r.behavioral) assertVerified(r, store);
     const outputs: Record<string, string | null> = {},
       hashes: Record<string, string> = {};
     for (const f of r.files) {
-      const output = reconcile(f.input, f.decisions, f.analysis);
+      const output = r.behavioral
+        ? r.behavioral.proposal!.source
+        : reconcile(f.input, f.decisions, f.analysis);
       // An empty source is distinct from deletion: use the selected source's presence.
       const side = f.decisions.file?.choice;
       const deleted =
@@ -428,6 +436,7 @@ export function preview(repo: string, id: string, revision: number) {
       token: hash(
         JSON.stringify({
           outputs,
+          verification: r.behavioral?.verification,
           checks,
           sources: r.sources,
           decisions: r.files.map((f) => f.decisions),
@@ -470,6 +479,12 @@ export function applyReview(repo: string, id: string, revision: number, token: s
       );
     if (JSON.stringify(store.config().checks) !== JSON.stringify(r.preview.checks))
       throw stale('Configured checks changed. Generate and approve a new preview.');
+    if (r.behavioral) {
+      assertVerified(r, store);
+      const p = r.behavioral.proposal!;
+      if (Object.keys(r.preview.outputs).length !== 1 || r.preview.outputs[p.path] !== p.source)
+        throw stale('Preview differs from verified candidate.');
+    }
     const changes = Object.entries(r.preview.outputs);
     if (r.merge) {
       const changedPaths = [
@@ -530,6 +545,11 @@ export function applyReview(repo: string, id: string, revision: number, token: s
       `Approved preview ${token}; changes are local and uncommitted.${r.merge ? ' Resolved merge files are staged.' : ''}`,
     );
     store.save(r);
+    if (r.behavioral) {
+      r.checks = r.behavioral.verification!.candidate;
+      store.save(r);
+      return r;
+    }
     r.checks = r.preview.checks.map((check) => {
       const start = Date.now();
       const result = spawnSync(check.command, check.args, {

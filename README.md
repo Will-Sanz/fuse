@@ -1,5 +1,14 @@
 # Fuse
 
+## MCP-first behavioral proposals
+
+Fuse now supports **saved issue → human behavior confirmation → host-agent proposal
+→ isolated baseline/candidate checks → exact preview → second human approval →
+applied receipt**. This is separate from the preserved legacy A/B and active-merge
+flows described below. See [the behavioral workflow](docs/behavioral-review.md) for setup, tool contracts,
+limits and a complete checkout walkthrough. Current verification evidence and
+remaining blockers are in [verification](docs/verification.md).
+
 Fuse explains code changes with a visual designed for the decision in front of you: **original code and highlighted conflict → visual explanation → choose the behavior → create the change**.
 
 The local MCP reads real Git changes, sends bounded source context through the shared Fuse AI service to OpenAI, and asks **gpt-6-luna** to design an image and meaningful choices. Fuse renders that design as SVG and PNG. The deterministic TypeScript engine checks which resolutions are supported; the human chooses before any source is applied. No Codex CLI is needed.

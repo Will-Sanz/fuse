@@ -1,5 +1,14 @@
 # Show Fuse in a meeting
 
+## MCP-first behavioral proposals
+
+Fuse now supports **saved issue → human behavior confirmation → host-agent proposal
+→ isolated baseline/candidate checks → exact preview → second human approval →
+applied receipt**. This is separate from the preserved legacy A/B and active-merge
+flows described below. See [the behavioral workflow](behavioral-review.md) for setup, tool contracts,
+limits and a complete checkout walkthrough. Current verification evidence and
+remaining blockers are in [verification](verification.md).
+
 The short story is: **“Two edits can both be reasonable. Fuse shows what each choice does, lets us choose the behavior, and creates the matching code.”**
 
 ## Before the meeting

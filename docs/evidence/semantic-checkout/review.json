@@ -1,0 +1,591 @@
+{
+  "schemaVersion": 1,
+  "id": "f21acae5-c6e4-433a-b3a4-0096902df3c6",
+  "revision": 8,
+  "title": "Revision review",
+  "repository": "/private/tmp/fuse-live-behavioral-20261107/checkout",
+  "commonDir": "/private/tmp/fuse-live-behavioral-20261107/checkout/.git",
+  "baseCommit": "98a51f0ba4cf09314c8af03f70eccfda7ec60e7d",
+  "targetHead": "98a51f0ba4cf09314c8af03f70eccfda7ec60e7d",
+  "sources": {
+    "a": {
+      "ref": {
+        "kind": "revision",
+        "value": "800b45daafbdd7469b3d2b7f897e9c1bf53c109e",
+        "label": "feature/coupons"
+      },
+      "head": "800b45daafbdd7469b3d2b7f897e9c1bf53c109e",
+      "files": {
+        "checkout.ts": {
+          "code": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents - cart.couponCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n",
+          "hash": "16ef04e10e0b0786accd3cc6358e22aace86baf5e018b77726aebf956d744a27",
+          "mode": "100644"
+        }
+      },
+      "fingerprint": "2a2b488ab0eacd4f270c553326732e59d281fda3f67a91ffefcd1825404d49e5"
+    },
+    "b": {
+      "ref": {
+        "kind": "revision",
+        "value": "0b22fd7268611c5f1be40b8347d2789c805a03f8",
+        "label": "feature/shipping"
+      },
+      "head": "0b22fd7268611c5f1be40b8347d2789c805a03f8",
+      "files": {
+        "checkout.ts": {
+          "code": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return merchandiseTotal(cart) >= 10000 ? 0 : 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n",
+          "hash": "4a7117aa65cfc9bf8c45d58e84c2335201aebde74046b8557bf3e768104a882b",
+          "mode": "100644"
+        }
+      },
+      "fingerprint": "b745e0296f0baa72b5f37c6d10ef073839e3fa054d189ebda08ca641aba2d506"
+    }
+  },
+  "files": [
+    {
+      "path": "checkout.ts",
+      "input": {
+        "title": "checkout.ts",
+        "fileName": "checkout.ts",
+        "base": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n",
+        "agentA": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents - cart.couponCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n",
+        "agentB": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return merchandiseTotal(cart) >= 10000 ? 0 : 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n",
+        "nameA": "feature/coupons",
+        "nameB": "feature/shipping"
+      },
+      "analysis": {
+        "nodes": [
+          {
+            "id": "merchandiseTotal",
+            "label": "merchandiseTotal",
+            "line": 6,
+            "changedBy": ["a"],
+            "calls": []
+          },
+          {
+            "id": "shippingFee",
+            "label": "shippingFee",
+            "line": 10,
+            "changedBy": ["b"],
+            "calls": ["merchandiseTotal"]
+          },
+          {
+            "id": "orderTotal",
+            "label": "orderTotal",
+            "line": 14,
+            "changedBy": [],
+            "calls": ["merchandiseTotal", "shippingFee"]
+          }
+        ],
+        "conflicts": [
+          {
+            "id": "dependency:merchandiseTotal:shippingFee",
+            "kind": "dependency",
+            "functions": ["merchandiseTotal", "shippingFee"],
+            "title": "Review merchandiseTotal with shippingFee",
+            "explanation": "Different functions changed along a shared possible call path. Review their assumptions and ordering together. Reachability alone does not establish a behavior conflict.",
+            "canCombine": false,
+            "combineReason": "Both independent edits are retained after you acknowledge this review.",
+            "base": "export function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return 1000;\n}",
+            "a": "export function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents - cart.couponCents;\n}",
+            "b": "export function shippingFee(cart: Cart): number {\n  return merchandiseTotal(cart) >= 10000 ? 0 : 1000;\n}"
+          }
+        ],
+        "changedA": ["merchandiseTotal"],
+        "changedB": ["shippingFee"],
+        "warnings": [
+          "Call edges are a union of the three snapshots, not a runtime trace. Conditions, callbacks, dynamic dispatch, and external calls are not modeled.",
+          "Path warnings are conservative review candidates. This MVP does not prove semantic equivalence or infer distributed happens-before relationships."
+        ],
+        "hashes": {
+          "base": "65c48a02c7a3167d90dfab608d3ce8a13ed0bd3d8e7f6d466791ec19080f4463",
+          "a": "b2d722cd6d36468941c97e3e583e6089e8407270209956c2c60bbadb3ad30ebc",
+          "b": "fe17fa2a507ab08d05a2d43845965ac5dc2f64d89bf359582bb1242af34745b0"
+        }
+      },
+      "evidence": [
+        {
+          "revision": "base",
+          "file": "checkout.ts",
+          "function": "merchandiseTotal",
+          "line": 6,
+          "endLine": 8,
+          "code": "export function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents;\n}",
+          "observations": []
+        },
+        {
+          "revision": "base",
+          "file": "checkout.ts",
+          "function": "shippingFee",
+          "line": 10,
+          "endLine": 12,
+          "code": "export function shippingFee(cart: Cart): number {\n  return 1000;\n}",
+          "observations": []
+        },
+        {
+          "revision": "base",
+          "file": "checkout.ts",
+          "function": "orderTotal",
+          "line": 14,
+          "endLine": 16,
+          "code": "export function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}",
+          "observations": []
+        },
+        {
+          "revision": "a",
+          "file": "checkout.ts",
+          "function": "merchandiseTotal",
+          "line": 6,
+          "endLine": 8,
+          "code": "export function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents - cart.couponCents;\n}",
+          "observations": [
+            "Changes this function’s implementation. Inspect the source to review its behavior."
+          ]
+        },
+        {
+          "revision": "b",
+          "file": "checkout.ts",
+          "function": "shippingFee",
+          "line": 10,
+          "endLine": 12,
+          "code": "export function shippingFee(cart: Cart): number {\n  return merchandiseTotal(cart) >= 10000 ? 0 : 1000;\n}",
+          "observations": ["Adds calls to merchandiseTotal."]
+        }
+      ],
+      "graphs": {
+        "base": [
+          {
+            "id": "merchandiseTotal",
+            "label": "merchandiseTotal",
+            "line": 6,
+            "calls": [],
+            "changedBy": []
+          },
+          {
+            "id": "shippingFee",
+            "label": "shippingFee",
+            "line": 10,
+            "calls": [],
+            "changedBy": []
+          },
+          {
+            "id": "orderTotal",
+            "label": "orderTotal",
+            "line": 14,
+            "calls": ["merchandiseTotal", "shippingFee"],
+            "changedBy": []
+          }
+        ],
+        "a": [
+          {
+            "id": "merchandiseTotal",
+            "label": "merchandiseTotal",
+            "line": 6,
+            "calls": [],
+            "changedBy": []
+          },
+          {
+            "id": "shippingFee",
+            "label": "shippingFee",
+            "line": 10,
+            "calls": [],
+            "changedBy": []
+          },
+          {
+            "id": "orderTotal",
+            "label": "orderTotal",
+            "line": 14,
+            "calls": ["merchandiseTotal", "shippingFee"],
+            "changedBy": []
+          }
+        ],
+        "b": [
+          {
+            "id": "merchandiseTotal",
+            "label": "merchandiseTotal",
+            "line": 6,
+            "calls": [],
+            "changedBy": []
+          },
+          {
+            "id": "shippingFee",
+            "label": "shippingFee",
+            "line": 10,
+            "calls": ["merchandiseTotal"],
+            "changedBy": []
+          },
+          {
+            "id": "orderTotal",
+            "label": "orderTotal",
+            "line": 14,
+            "calls": ["merchandiseTotal", "shippingFee"],
+            "changedBy": []
+          }
+        ]
+      },
+      "decisions": {},
+      "recommendations": [
+        {
+          "conflictId": "dependency:merchandiseTotal:shippingFee",
+          "actions": [
+            {
+              "label": "Acknowledge possible interaction",
+              "decision": {
+                "choice": "reviewed",
+                "note": ""
+              }
+            }
+          ],
+          "confidence": "static",
+          "reason": "Both edits can be retained, but a shared possible call path needs review. This is not proof of a runtime conflict.",
+          "question": "Are the changed return values and caller assumptions compatible?"
+        }
+      ]
+    }
+  ],
+  "unsupported": [],
+  "status": "applied",
+  "createdAt": "2026-11-07T21:08:23.016Z",
+  "updatedAt": "2026-11-07T21:15:10.855Z",
+  "checks": [
+    {
+      "name": "Compile",
+      "command": "tsc",
+      "args": ["--noEmit", "--strict", "--target", "ES2023", "checkout.ts"],
+      "timeoutMs": 15000,
+      "status": "passed",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "durationMs": 1737,
+      "at": "2026-11-07T21:14:32.465Z"
+    },
+    {
+      "name": "Business policy",
+      "command": "node",
+      "args": ["--test", "policy.test.mjs"],
+      "timeoutMs": 10000,
+      "status": "passed",
+      "exitCode": 0,
+      "stdout": "PASS: coupon, original-subtotal eligibility, exact/below threshold and zero coupon\n✔ original-subtotal policy and preserved coupon feature (105.684083ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 218.123875\n",
+      "stderr": "",
+      "durationMs": 1504,
+      "at": "2026-11-07T21:14:33.969Z"
+    }
+  ],
+  "events": [
+    {
+      "at": "2026-11-07T21:08:23.122Z",
+      "action": "Inspected",
+      "detail": "1 changed files; 1 review decisions. Explicit registration is the only source of session attribution.",
+      "reviewer": "Fuse Acceptance (local Git attribution; unverified)"
+    },
+    {
+      "at": "2026-11-07T21:08:43.638Z",
+      "action": "Issue assessment saved",
+      "detail": "README requires free shipping at original subtotal >= 10000 regardless of coupons. Branch A changes merchandiseTotal to a discounted amount; branch B uses merchandiseTotal to determine shipping eligibility. Their combination therefore changes eligibility contrary to the requirement.",
+      "reviewer": "Agent submission / backend validation"
+    },
+    {
+      "at": "2026-11-07T21:13:12.999Z",
+      "action": "Behavior confirmed",
+      "detail": "{\"issueId\":\"64963908-3619-4322-8cab-26f78c21ec69\",\"behaviorId\":\"e4ec1aff-4630-40ac-9923-6d72cb9c55b0\",\"confirmedAt\":\"2026-11-07T21:13:12.999Z\",\"origin\":\"human-panel\"}",
+      "reviewer": "Human panel confirmation (local; not identity verified)"
+    },
+    {
+      "at": "2026-11-07T21:13:57.486Z",
+      "action": "Exact proposal saved",
+      "detail": "24ad33b22077a78820e4aefb55826d445c441fbd72d6b965f7f6d775a43e8a4f",
+      "reviewer": "Agent submission / backend validation"
+    },
+    {
+      "at": "2026-11-07T21:14:24.631Z",
+      "action": "Isolated verification started",
+      "detail": "24ad33b22077a78820e4aefb55826d445c441fbd72d6b965f7f6d775a43e8a4f",
+      "reviewer": "Agent submission / backend validation"
+    },
+    {
+      "at": "2026-11-07T21:14:33.969Z",
+      "action": "Isolated verification completed",
+      "detail": "passed; baseline 11016964d7c274298c305fbae9d2d3e58cee52a30b463ed1728f9b501774ddd3; candidate 24ad33b22077a78820e4aefb55826d445c441fbd72d6b965f7f6d775a43e8a4f; image sha256:021cd24f58f5414255e9e4b8be8ba443101596a3b1b2012c29253ada0b471c7e",
+      "reviewer": "Fuse backend execution"
+    },
+    {
+      "at": "2026-11-07T21:15:09.882Z",
+      "action": "Result previewed",
+      "detail": "Preview b182f665af55ab3ab8275f357dab3a199ce2475a8a8cc7fb679312aa144376e5; 2 explicitly configured checks.",
+      "reviewer": "Fuse Acceptance (local Git attribution; unverified)"
+    },
+    {
+      "at": "2026-11-07T21:15:10.855Z",
+      "action": "Applied",
+      "detail": "Approved preview b182f665af55ab3ab8275f357dab3a199ce2475a8a8cc7fb679312aa144376e5; changes are local and uncommitted.",
+      "reviewer": "Fuse Acceptance (local Git attribution; unverified)"
+    }
+  ],
+  "attribution": {
+    "kind": "local-git",
+    "name": "Fuse Acceptance",
+    "email": "acceptance@fuse.local",
+    "verified": false
+  },
+  "sourceVersion": "aa103996e2e53bb39b6207452713b12f2f0a44cdc4bfb676646becc6f24467ab",
+  "behavioral": {
+    "sourceVersion": "aa103996e2e53bb39b6207452713b12f2f0a44cdc4bfb676646becc6f24467ab",
+    "assessment": "suspected",
+    "explanation": "README requires free shipping at original subtotal >= 10000 regardless of coupons. Branch A changes merchandiseTotal to a discounted amount; branch B uses merchandiseTotal to determine shipping eligibility. Their combination therefore changes eligibility contrary to the requirement.",
+    "issue": {
+      "summary": "Coupon discount can incorrectly revoke free shipping",
+      "rationale": "With subtotalCents=12000 and couponCents=3000, combining the edits makes merchandiseTotal 9000 and shippingFee 1000, yielding orderTotal 10000. README requires orderTotal 9000 because the original subtotal qualifies for free shipping. Keep both features but determine eligibility from the original subtotal.",
+      "path": "checkout.ts",
+      "evidence": [2, 3, 4],
+      "options": [
+        {
+          "label": "Original subtotal determines shipping",
+          "description": "Apply coupons to merchandise and use cart.subtotalCents >= 10000 for free shipping, so a 12000 subtotal with a 3000 coupon totals 9000, matching the README.",
+          "id": "e4ec1aff-4630-40ac-9923-6d72cb9c55b0"
+        },
+        {
+          "label": "Discounted total determines shipping",
+          "description": "Apply coupons before shipping eligibility; the example totals 10000. This changes the documented policy and would require a requirements change.",
+          "id": "5a29dbac-dac2-470d-aaa8-18d33f6bb56a"
+        }
+      ],
+      "id": "64963908-3619-4322-8cab-26f78c21ec69"
+    },
+    "intent": {
+      "issueId": "64963908-3619-4322-8cab-26f78c21ec69",
+      "behaviorId": "e4ec1aff-4630-40ac-9923-6d72cb9c55b0",
+      "confirmedAt": "2026-11-07T21:13:12.999Z",
+      "origin": "human-panel"
+    },
+    "proposal": {
+      "path": "checkout.ts",
+      "source": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents - cart.couponCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return cart.subtotalCents >= 10000 ? 0 : 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n",
+      "hash": "24ad33b22077a78820e4aefb55826d445c441fbd72d6b965f7f6d775a43e8a4f",
+      "rationale": "Preserve the coupon subtraction from feature/coupons and free-shipping threshold and fee from feature/shipping. Read original cart.subtotalCents directly for eligibility so discounts cannot revoke free shipping. Preserve the Cart contract and orderTotal composition; README guarantees valid coupons in the supported domain.",
+      "submittedAt": "2026-11-07T21:13:57.485Z"
+    },
+    "verification": {
+      "id": "e839aaa2-cabd-42aa-992e-fd301d80f63d",
+      "binding": "965f0f49a570f5d15c618d8aa96b1feb8ea6554e9788fdbb21eea1666f3738b3",
+      "image": "sha256:021cd24f58f5414255e9e4b8be8ba443101596a3b1b2012c29253ada0b471c7e",
+      "status": "passed",
+      "baselineHash": "11016964d7c274298c305fbae9d2d3e58cee52a30b463ed1728f9b501774ddd3",
+      "candidateHash": "24ad33b22077a78820e4aefb55826d445c441fbd72d6b965f7f6d775a43e8a4f",
+      "projectHash": "5bbbc4d9d80e41c388590e152497af4ca14106eabdcfbf85d58cd93e4a3468a0",
+      "checks": [
+        {
+          "name": "Compile",
+          "command": "tsc",
+          "args": ["--noEmit", "--strict", "--target", "ES2023", "checkout.ts"],
+          "timeoutMs": 15000
+        },
+        {
+          "name": "Business policy",
+          "command": "node",
+          "args": ["--test", "policy.test.mjs"],
+          "timeoutMs": 10000
+        }
+      ],
+      "baseline": [
+        {
+          "name": "Compile",
+          "command": "tsc",
+          "args": ["--noEmit", "--strict", "--target", "ES2023", "checkout.ts"],
+          "timeoutMs": 15000,
+          "status": "passed",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "",
+          "durationMs": 3566,
+          "at": "2026-11-07T21:14:28.199Z"
+        },
+        {
+          "name": "Business policy",
+          "command": "node",
+          "args": ["--test", "policy.test.mjs"],
+          "timeoutMs": 10000,
+          "status": "failed",
+          "exitCode": 1,
+          "stdout": "✖ original-subtotal policy and preserved coupon feature (111.928833ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 314.7965\n\n✖ failing tests:\n\ntest at policy.test.mjs:3:1\n✖ original-subtotal policy and preserved coupon feature (111.928833ms)\n  AssertionError [ERR_ASSERTION]: original-subtotal eligibility: 12000/3000\n  \n  1000 !== 0\n  \n      at TestContext.<anonymous> (file:///project/policy.test.mjs:16:12)\n      at async Test.run (node:internal/test_runner/test:1069:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:332:3) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: 1000,\n    expected: 0,\n    operator: 'strictEqual'\n  }\n",
+          "stderr": "",
+          "durationMs": 2526,
+          "at": "2026-11-07T21:14:30.725Z"
+        }
+      ],
+      "candidate": [
+        {
+          "name": "Compile",
+          "command": "tsc",
+          "args": ["--noEmit", "--strict", "--target", "ES2023", "checkout.ts"],
+          "timeoutMs": 15000,
+          "status": "passed",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": "",
+          "durationMs": 1737,
+          "at": "2026-11-07T21:14:32.465Z"
+        },
+        {
+          "name": "Business policy",
+          "command": "node",
+          "args": ["--test", "policy.test.mjs"],
+          "timeoutMs": 10000,
+          "status": "passed",
+          "exitCode": 0,
+          "stdout": "PASS: coupon, original-subtotal eligibility, exact/below threshold and zero coupon\n✔ original-subtotal policy and preserved coupon feature (105.684083ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 218.123875\n",
+          "stderr": "",
+          "durationMs": 1504,
+          "at": "2026-11-07T21:14:33.969Z"
+        }
+      ],
+      "startedAt": "2026-11-07T21:14:24.630Z",
+      "completedAt": "2026-11-07T21:14:33.969Z"
+    }
+  },
+  "visual": {
+    "title": "Coupon changes the shipping threshold",
+    "summary": "Should free-shipping eligibility use the original subtotal or the discounted merchandise total?",
+    "metaphor": "Follow one cart’s amounts from coupon to shipping decision, then compare the resulting totals.",
+    "elements": [
+      {
+        "type": "text",
+        "x": 24,
+        "y": 20,
+        "width": 952,
+        "height": 62,
+        "text": "One cart, two shipping decisions",
+        "detail": "Illustrative example from the documented policy; not executed test evidence.",
+        "tone": "neutral"
+      },
+      {
+        "type": "panel",
+        "x": 24,
+        "y": 105,
+        "width": 220,
+        "height": 145,
+        "text": "Cart input",
+        "detail": "Original subtotal: 12,000¢\nCoupon: 3,000¢",
+        "tone": "neutral"
+      },
+      {
+        "type": "arrow",
+        "x": 244,
+        "y": 175,
+        "width": 42,
+        "height": 0,
+        "text": "",
+        "detail": "",
+        "tone": "neutral"
+      },
+      {
+        "type": "panel",
+        "x": 286,
+        "y": 105,
+        "width": 300,
+        "height": 145,
+        "text": "A · Apply coupon",
+        "detail": "merchandiseTotal = 12,000¢ − 3,000¢\n= 9,000¢",
+        "tone": "a"
+      },
+      {
+        "type": "arrow",
+        "x": 586,
+        "y": 175,
+        "width": 42,
+        "height": 0,
+        "text": "",
+        "detail": "",
+        "tone": "neutral"
+      },
+      {
+        "type": "panel",
+        "x": 628,
+        "y": 105,
+        "width": 348,
+        "height": 145,
+        "text": "B · Check discounted amount",
+        "detail": "9,000¢ is below 10,000¢\nShipping fee: 1,000¢",
+        "tone": "b"
+      },
+      {
+        "type": "arrow",
+        "x": 500,
+        "y": 250,
+        "width": 0,
+        "height": 42,
+        "text": "",
+        "detail": "",
+        "tone": "warning"
+      },
+      {
+        "type": "panel",
+        "x": 54,
+        "y": 310,
+        "width": 420,
+        "height": 145,
+        "text": "Combined A + B",
+        "detail": "Discounted merchandise 9,000¢ + shipping 1,000¢\nOrder total: 10,000¢ — coupon removes free shipping.",
+        "tone": "warning"
+      },
+      {
+        "type": "panel",
+        "x": 526,
+        "y": 310,
+        "width": 420,
+        "height": 145,
+        "text": "Use original subtotal for eligibility",
+        "detail": "12,000¢ qualifies for free shipping; coupon still reduces merchandise to 9,000¢.\nOrder total: 9,000¢ — matches the documented policy.",
+        "tone": "success"
+      }
+    ],
+    "options": [
+      {
+        "action": "e4ec1aff-4630-40ac-9923-6d72cb9c55b0",
+        "label": "Original subtotal determines shipping",
+        "description": "Apply coupons to merchandise and use cart.subtotalCents >= 10000 for free shipping, so a 12000 subtotal with a 3000 coupon totals 9000, matching the README."
+      },
+      {
+        "action": "5a29dbac-dac2-470d-aaa8-18d33f6bb56a",
+        "label": "Discounted total determines shipping",
+        "description": "Apply coupons before shipping eligibility; the example totals 10000. This changes the documented policy and would require a requirements change."
+      }
+    ],
+    "path": "checkout.ts",
+    "conflictId": "dependency:merchandiseTotal:shippingFee",
+    "origin": "ai",
+    "provider": "OpenAI",
+    "model": "gpt-6-luna",
+    "responseId": "resp_00bf24093bd46d27016aef940b845c87d28ddcccbb995e1a3f",
+    "generatedAt": "2026-11-07T21:11:51.894Z",
+    "generationId": "6e88bb71-3984-4e7f-bb86-dc78d76c4476",
+    "durationMs": 13247,
+    "inputHash": "a4fc71fce6b59fe4c07cbc92d9d70221e9a52d430f1192f94415f6386a3cd2cb",
+    "contextFiles": ["README.md", "package.json"]
+  },
+  "preview": {
+    "token": "b182f665af55ab3ab8275f357dab3a199ce2475a8a8cc7fb679312aa144376e5",
+    "outputs": {
+      "checkout.ts": "export interface Cart {\n  subtotalCents: number;\n  couponCents: number;\n}\n\nexport function merchandiseTotal(cart: Cart): number {\n  return cart.subtotalCents - cart.couponCents;\n}\n\nexport function shippingFee(cart: Cart): number {\n  return cart.subtotalCents >= 10000 ? 0 : 1000;\n}\n\nexport function orderTotal(cart: Cart): number {\n  return merchandiseTotal(cart) + shippingFee(cart);\n}\n"
+    },
+    "hashes": {
+      "checkout.ts": "c2048dca40989485204c08df066a25a9704db055d40e35711acc1f8ef1c7a807"
+    },
+    "checks": [
+      {
+        "name": "Compile",
+        "command": "tsc",
+        "args": ["--noEmit", "--strict", "--target", "ES2023", "checkout.ts"],
+        "timeoutMs": 15000
+      },
+      {
+        "name": "Business policy",
+        "command": "node",
+        "args": ["--test", "policy.test.mjs"],
+        "timeoutMs": 10000
+      }
+    ],
+    "createdAt": "2026-11-07T21:15:09.882Z"
+  }
+}

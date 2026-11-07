@@ -20,7 +20,22 @@ try {
     run(npm, ['pack', '--ignore-scripts', '--json', '--pack-destination', directory], resolve('.')),
   );
   const files = pack.files.map((f) => f.path);
-  for (const required of ['dist/index.html', 'cli/run.mjs', 'server/mcp.ts', 'scripts/meeting.mjs'])
+  for (const required of [
+    'dist/index.html',
+    'cli/run.mjs',
+    'server/mcp.ts',
+    'scripts/meeting.mjs',
+    'server/proposals.ts',
+    'server/verification.ts',
+    'verification/Dockerfile',
+    'skills/fuse-review/SKILL.md',
+    'docs/behavioral-review.md',
+    'docs/verification.md',
+    'examples/semantic-checkout/checkout.ts',
+    'examples/semantic-checkout/README.md',
+    'examples/semantic-checkout/branch.test.mjs',
+    'examples/semantic-checkout/policy.test.mjs',
+  ])
     assert.ok(files.includes(required), `${required} missing`);
   assert.ok(
     !files.some((p) => /(^|\/)(\.env|data\/|\.vercel\/|team-mcp)/.test(p)),
@@ -46,6 +61,17 @@ try {
       '--json',
     ]),
   ).data;
+  const semantic = JSON.parse(
+    run(process.execPath, [
+      executable,
+      'semantic-demo',
+      '--dir',
+      join(directory, 'semantic'),
+      '--json',
+    ]),
+  ).data;
+  assert.equal(semantic.review.files[0].path, 'checkout.ts');
+  assert.equal(semantic.review.sources.a.ref.kind, 'revision');
   const client = new Client({ name: 'fuse-package-check', version: '1' });
   await client.connect(
     new StdioClientTransport({
@@ -56,6 +82,23 @@ try {
     }),
   );
   try {
+    const names = (await client.listTools()).tools.map((t) => t.name);
+    for (const name of ['fuse_report_issues', 'fuse_submit_proposal', 'fuse_verify'])
+      assert.ok(names.includes(name));
+    const assessment = await client.callTool({
+      name: 'fuse_report_issues',
+      arguments: {
+        repo: semantic.repo,
+        id: semantic.review.id,
+        revision: semantic.review.revision,
+        report: {
+          sourceVersion: semantic.review.sourceVersion,
+          assessment: 'insufficient-evidence',
+          explanation: 'Package smoke test only; no agent investigation performed.',
+        },
+      },
+    });
+    assert.ok(!assessment.isError, JSON.stringify(assessment));
     const result = await client.callTool({ name: 'fuse_inspect', arguments: { repo: demo.repo } });
     assert.ok(!result.isError);
     const review = JSON.parse(result.content[0].text).data;

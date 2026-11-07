@@ -26,7 +26,7 @@ export const visualSchema = z
       .array(
         z
           .object({
-            action: z.enum(['a', 'b', 'a-first', 'b-first', 'reviewed']),
+            action: z.string().min(1).max(100),
             label: z.string().min(1).max(70),
             description: z.string().min(1).max(240),
           })
@@ -50,7 +50,12 @@ export type Visual = VisualSpec & {
   inputHash: string;
   contextFiles: string[];
 };
-export const actionDecision = (action: VisualSpec['options'][number]['action']) =>
-  action === 'a-first' || action === 'b-first'
-    ? { choice: 'both' as const, order: action }
-    : { choice: action };
+export function actionDecision(action: string): {
+  choice: 'a' | 'b' | 'both' | 'reviewed';
+  order?: 'a-first' | 'b-first';
+} {
+  if (action === 'a-first' || action === 'b-first')
+    return { choice: 'both' as const, order: action };
+  if (action === 'a' || action === 'b' || action === 'reviewed') return { choice: action };
+  throw new Error('Behavior IDs require human panel confirmation.');
+}
