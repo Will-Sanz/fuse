@@ -13,8 +13,9 @@ in containers, and applies only the human-approved exact verified candidate.
    behavior alternatives. `no-issue` and `insufficient-evidence` are valid outcomes.
 2. `fuse_visualize` explains that saved issue. The panel shows evidence from both
    affected functions. The visual is illustrative; executed results are separate.
-3. `fuse_open_review` returns a local panel link. The developer confirms a registered
-   behavior there and returns to chat. This records `human-panel` intent; a model
+3. `fuse_present_review` presents the saved review inline in a compatible host.
+   The developer confirms a registered behavior in the component and returns to chat.
+   An explicitly requested browser fallback uses `fuse_open_review`. This records `human-panel` intent; a model
    statement or legacy `fuse_intent` call cannot substitute for it.
 4. The agent reads `fuse_review`, drafts a correction, and calls
    `fuse_submit_proposal` with the exact entire replacement file as data. It never
@@ -30,13 +31,16 @@ in containers, and applies only the human-approved exact verified candidate.
    those bytes atomically, retains execution evidence and decision history, and
    makes no commit or push. It does not rerun candidate code on the host.
 
-The MCP has no human-confirmation, application, check-configuration or arbitrary
-command tool. An unrestricted local process can still invoke HTTP or change local
+Model-callable MCP tools have no human-confirmation, application, check-configuration
+or arbitrary-command authority. Component actions use a separate private, review-bound
+capability bridge and reuse the same verification/application guards. An unrestricted local process can still invoke HTTP or change local
 records. Panel confirmation is an explicit local interaction, not authenticated
 identity or a security boundary against the user's other tools. Follow the portable
 [host skill](../skills/fuse-review/SKILL.md). Install/copy it only in a client scope
 chosen by the developer; this release does not change global client settings.
-There is no automatic chat resume, standalone agent platform or embedded MCP App.
+The inline MCP App is a candidate integration; its exact client support and remaining
+native rendering acceptance are tracked in [inline review](inline-review.md). There is
+no automatic chat resume or standalone agent platform.
 
 ## Prepare the verifier
 

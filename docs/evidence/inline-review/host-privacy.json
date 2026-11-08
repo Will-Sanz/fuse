@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-08",
+  "desktopDistribution": "26.1027.61615",
+  "observedEngineClient": {
+    "name": "codex-mcp-client",
+    "title": "Codex",
+    "version": "0.166.0-alpha.5.1"
+  },
+  "nativeRendering": "UNVERIFIED: native Computer Use access denied; no bypass attempted",
+  "provider": "Deterministic local fake Responses provider; actual installed Codex engine and MCP transport",
+  "projection": {
+    "publicContentPresent": true,
+    "publicStructuredPresent": true,
+    "exactPrivateMarkerAbsent": true,
+    "privateMarkerKeyAbsent": true,
+    "rawRequestSha256": "ee65dacb7f4967388eb44cb857de03ab269d7ce7cf2b78e9e9c8d94d61ca6aed"
+  },
+  "uiActionHistory": {
+    "successfulAndRejectedDirectActionAsserted": true,
+    "handlerWrittenArgumentMatchedNativeMarker": true,
+    "publicPriorOutputPresent": true,
+    "exactPrivateArgumentAbsent": true,
+    "uiActionNameAbsent": true,
+    "uiActionResultAbsent": true,
+    "rawRequestSha256": "0ec4e502a6d4a6146fe5ef737307c217e499ca1ccc58391ed29b770cafa1eb98"
+  },
+  "independentReview": "Reviewer independently matched markers in original captures and verified both model-input exclusions. Portable scripts include assertions and were rerun successfully.",
+  "rawArtifacts": "Kept locally; full model request bodies and native transport metadata are not published."
+}

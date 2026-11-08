@@ -55,7 +55,7 @@ The AI chooses the visual structure from the code; the behavior options must mat
 
 ## Use your own coding client
 
-The **Run live MCP** button contains a copyable stdio configuration and prompt. Use the private team MCP configuration from the owner. Ask it to call `fuse_explain` with `repo` set to your project’s absolute path, show the image, and call `fuse_open_review` for the browser link. For registered worktrees pass `sessions: true`; for an active merge or ordinary working change pass only `repo`.
+The **Run live MCP** button contains a copyable stdio configuration and prompt. Use the private team MCP configuration from the owner. Ask it to call `fuse_explain` with `repo` set to your project’s absolute path, show the image, and call `fuse_present_review` for the saved inline card on a compatible client. Use `fuse_open_review` only for explicitly requested browser fallback. Native-interface acceptance is tracked in [inline review](inline-review.md). For registered worktrees pass `sessions: true`; for an active merge or ordinary working change pass only `repo`.
 
 The meeting command itself is an actual MCP client using the official SDK, so the live path is demonstrable without installing a particular coding assistant. Other clients may display image tool results differently. Open the saved review with the `review --serve --open` command in the README when needed.
 

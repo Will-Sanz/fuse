@@ -22,7 +22,11 @@
     "verification",
     "examples/semantic-checkout",
     "docs/behavioral-review.md",
-    "docs/verification.md"
+    "docs/verification.md",
+    "docs/inline-review.md",
+    "src/liquidglass/PROVENANCE.md",
+    "src/liquidglass/vendor/HTML-TO-IMAGE-LICENSE",
+    "src/liquidglass/vendor/upstream-package.json"
   ],
   "type": "module",
   "engines": {
@@ -30,7 +34,7 @@
   },
   "scripts": {
     "dev": "concurrently -k -n api,web \"tsx watch --env-file-if-exists=.env server/index.ts\" \"vite --host 127.0.0.1\"",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && vite build --config vite.inline.config.ts",
     "prepare": "npm run build",
     "build:showcase": "node scripts/build-showcase.mjs && tsc --noEmit && vite build --mode showcase",
     "start": "tsx --env-file-if-exists=.env server/index.ts",
