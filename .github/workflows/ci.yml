@@ -17,6 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run format:check
+      - run: npm run benchmark:test
       - run: docker build -t fuse-verifier:ci verification
       - run: echo "FUSE_TEST_IMAGE=$(docker image inspect --format '{{.Id}}' fuse-verifier:ci)" >> "$GITHUB_ENV"
       - run: npm run check

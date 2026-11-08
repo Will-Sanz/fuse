@@ -36,6 +36,8 @@
     "start": "tsx --env-file-if-exists=.env server/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "benchmark:run": "node scripts/benchmark/run.mjs",
+    "benchmark:test": "node --test scripts/benchmark/test/*.test.mjs",
     "test:e2e": "playwright test",
     "test:showcase": "playwright test --config playwright.showcase.config.ts",
     "check": "npm run build && npm test",
