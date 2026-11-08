@@ -115,22 +115,25 @@ still needs independent review before the production compatibility gate is exten
 Sanitized results are in `docs/evidence/inline-review/host-privacy.json`. The images
 `simulated-host-compact.png` and `simulated-host-applied.png` show the real component
 inside the explicitly simulated browser test host. They are not screenshots of
-native Codex and do not close the native-interface acceptance item.
+native Codex and do not establish native rendering.
 
-## Native acceptance still required
+## Deferred native validation and demo
 
 This environment's Computer Use tool returns: `Computer Use is not allowed to use
 the app 'com.openai.codex' for safety reasons.` Consequently no native screen
 recording, actual host UI negotiation or human-controls proof is claimed. The same
 component passing a browser bridge harness is not a substitute.
 
-To finish this gate, a permitted operator should connect this candidate build in
+The user deferred demo work on 2026-11-08 so implementation delivery can proceed.
+Native rendering remains an explicit unverified limitation tracked in
+[issue #5](https://github.com/Will-Sanz/fuse/issues/5). For future validation,
+a permitted operator should connect this candidate build in
 their normal Codex client, ask Fuse to inspect a disposable checkout and present its
 saved review with `fuse_present_review`, then check compact/expanded rendering,
 behavior confirmation, agent continuation, executed results and final exact-code
 approval. Confirm that no external app opens by default. Record the actual Codex
-interface and its host/version. Keep this candidate in a draft PR until that native
-check is accepted; no additional backend bypass or global setting change is needed.
+interface and its host/version. No native acceptance is claimed by the automated
+tests; no additional backend bypass or global setting change is needed.
 
 ## Candidate verification
 
@@ -138,5 +141,7 @@ The local release checks passed: production build, 61 tests with a real prepared
 Docker image, 16 browser tests, 2 showcase tests, CLI acceptance, production-only
 package installation and formatting. Both installed-client privacy probes passed.
 An independent code review found no remaining material defects after lifecycle and
-rotated-capability notification fixes. GitHub CI is tracked on the candidate PR.
-These results do not close the native acceptance gate above.
+rotated-capability notification fixes. [GitHub CI passed for implementation commit
+ad54fb7](https://github.com/Will-Sanz/fuse/actions/runs/42532085393); current checks
+are tracked on the candidate PR.
+These results do not establish native rendering or replace the deferred demo.

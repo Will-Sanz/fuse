@@ -9,13 +9,12 @@ Branch: feat/inline-mcp-review. Parent: main (dd10049). Initial tree clean.
 - [x] Requested liquidglass package pinned, actual visual effect + accessible fallback
 - [x] Compact inline card; expand visual/choice; agent verification updates; exact code approval (simulated host)
 - [x] No model-callable confirmation/application bypass
-- [x] Inline default has no external-browser launch; native behavior still requires acceptance
+- [x] Inline default has no external-browser launch; native rendering remains unverified
 - [x] Real transport/browser negative and compatibility tests
 - [x] Independent review and corrections
-- [ ] Actual Codex interface proof / recording
 - [x] Build, 61 tests with real Docker, 16 browser tests, 2 showcase tests, package/CLI, format
-- [ ] GitHub CI
-- [ ] Pushed PR with concrete evidence and honest limitations
+- [x] GitHub CI for implementation commit ad54fb7: run 42532085393
+- [x] Pushed PR with concrete evidence and honest limitations: PR #4
 
 Two implementers own host/backend integration and liquidglass frontend. Lead owns scope,
 GitHub tracking, frequent milestone reviews, integration and acceptance. Synced references
@@ -33,6 +32,8 @@ cleanup races and duplicate tool-result notifications overwriting a rotated capa
 Both portable installed-client privacy probes pass their assertions. Published
 screenshots are explicitly simulated hosts, not native Codex captures.
 
-Native acceptance is blocked by the Computer Use denial for `com.openai.codex`.
-Keep the candidate draft and issue open until a permitted operator completes the
-native flow and recording described in `docs/inline-review.md`.
+Native rendering remains unverified because Computer Use denies access to
+`com.openai.codex`. The user deferred the demo on 2026-11-08; native recording is
+follow-up work, not a requirement for this implementation delivery. No native
+acceptance is claimed. Follow-up: [issue #5](https://github.com/Will-Sanz/fuse/issues/5).
+See `docs/inline-review.md` for future validation steps.
