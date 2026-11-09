@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-09",
+  "observedEngineClient": {
+    "name": "codex-mcp-client",
+    "title": "Codex",
+    "version": "0.167.0-alpha.3.2"
+  },
+  "nativeRendering": "UNVERIFIED: native Computer Use remains denied; these are protocol privacy probes only",
+  "provider": "Deterministic local fake Responses provider; actual installed Codex engine and MCP transport",
+  "projection": {
+    "publicContentPresent": true,
+    "publicStructuredPresent": true,
+    "exactPrivateMarkerAbsent": true,
+    "privateMarkerKeyAbsent": true,
+    "nativeResultMarkerMatched": true,
+    "rawRequestSha256": "fec3f285051e1dc0649bfa1b3e20ca2c4dc61904e249ac1f16493c78cecfe2cf"
+  },
+  "uiActionHistory": {
+    "successfulAndRejectedDirectActionAsserted": true,
+    "handlerWrittenArgumentMatchedNativeMarker": true,
+    "publicPriorOutputPresent": true,
+    "exactPrivateArgumentAbsent": true,
+    "uiActionNameAbsent": true,
+    "uiActionResultAbsent": true,
+    "rejectedActionErrorAbsent": true,
+    "nativeResultMarkerMatched": true,
+    "rawRequestSha256": "0fa2b8230427a84efadcefc6769ef0f6faa70e1c0923b439c5245cb1885e708c"
+  },
+  "independentReview": "Release reviewer independently matched native result markers, handler-written arguments, and subsequent raw model requests after both existing portable scripts passed.",
+  "rawArtifacts": "Retained outside the repository in persistent benchmark-work; no authentication files copied. Raw request bodies are not for publication."
+}

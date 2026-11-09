@@ -108,7 +108,10 @@ export function registerInlineReview(
   // Privacy compatibility, not authentication: typed model calls cannot alter the handshake.
   const supportsPrivateMetadata = () => {
     const client = server.server.getClientVersion();
-    return client?.name === 'codex-mcp-client' && client.version === '0.166.0-alpha.5.1';
+    return (
+      client?.name === 'codex-mcp-client' &&
+      ['0.166.0-alpha.5.1', '0.167.0-alpha.3.2'].includes(client.version)
+    );
   };
   const previousClose = server.server.onclose;
   server.server.onclose = () => {
