@@ -1,0 +1,1114 @@
+{
+  "schemaVersion": 1,
+  "cohort": "after-2-r2",
+  "auditedAt": "2026-11-09T18:44:02.252376+00:00",
+  "completeCohort": true,
+  "manifestSha256": "97d5f44ca5e4d41a708e4a3c4ddb1a1e3fda45542452d9494a41308914a12358",
+  "metrics": {
+    "attemptedRows": 106,
+    "expectedCases": 53,
+    "sameCompletedPairs": 53,
+    "pairIds": [
+      "rw-001",
+      "rw-002",
+      "rw-003",
+      "rw-004",
+      "rw-005",
+      "rw-006",
+      "rw-007",
+      "rw-008",
+      "rw-009",
+      "rw-010",
+      "rw-011",
+      "rw-012",
+      "rw-013",
+      "rw-014",
+      "rw-015",
+      "rw-016",
+      "rw-017",
+      "rw-018",
+      "rw-019",
+      "rw-020",
+      "rw-021",
+      "rw-022",
+      "rw-023",
+      "rw-024",
+      "rw-025",
+      "rw-026",
+      "rw-027",
+      "rw-028",
+      "rw-029",
+      "rw-030",
+      "rw-031",
+      "rw-032",
+      "rw-033",
+      "rw-034",
+      "rw-035",
+      "rw-036",
+      "rw-037",
+      "rw-038",
+      "rw-039",
+      "rw-040",
+      "rw-041",
+      "rw-042",
+      "rw-043",
+      "rw-044",
+      "rw-045",
+      "rw-046",
+      "rw-047",
+      "rw-048",
+      "rw-049",
+      "rw-050",
+      "rw-051",
+      "rw-052",
+      "rw-053"
+    ],
+    "arms": {
+      "agent": {
+        "states": {
+          "complete": 53
+        },
+        "determinate": 53,
+        "abstentions": 0,
+        "allTokens": {
+          "reasoning_output_tokens": 2269,
+          "cached_input_tokens": 3455616,
+          "output_tokens": 28880,
+          "input_tokens": 4286346
+        },
+        "unknownUsage": 0,
+        "matchedCorrect": 48,
+        "matchedTP": 30,
+        "matchedPositiveDenominator": 35,
+        "matchedFP": 0,
+        "matchedNegativeDenominator": 18,
+        "matchedDurationMs": {
+          "median": 23163,
+          "sum": 1279360,
+          "n": 53
+        },
+        "matchedTokens": {
+          "reasoning_output_tokens": 2269,
+          "cached_input_tokens": 3455616,
+          "output_tokens": 28880,
+          "input_tokens": 4286346
+        },
+        "matchedUnknownUsage": 0,
+        "inspectAttempts": 0,
+        "inspectSuccesses": 0,
+        "unsupportedCases": []
+      },
+      "fuse": {
+        "states": {
+          "complete": 53
+        },
+        "determinate": 53,
+        "abstentions": 0,
+        "allTokens": {
+          "reasoning_output_tokens": 2589,
+          "cached_input_tokens": 4213760,
+          "output_tokens": 42544,
+          "input_tokens": 5348906
+        },
+        "unknownUsage": 0,
+        "matchedCorrect": 47,
+        "matchedTP": 29,
+        "matchedPositiveDenominator": 35,
+        "matchedFP": 0,
+        "matchedNegativeDenominator": 18,
+        "matchedDurationMs": {
+          "median": 31319,
+          "sum": 2213326,
+          "n": 53
+        },
+        "matchedTokens": {
+          "reasoning_output_tokens": 2589,
+          "cached_input_tokens": 4213760,
+          "output_tokens": 42544,
+          "input_tokens": 5348906
+        },
+        "matchedUnknownUsage": 0,
+        "inspectAttempts": 63,
+        "inspectSuccesses": 63,
+        "unsupportedCases": [
+          "rw-001",
+          "rw-002",
+          "rw-013",
+          "rw-018",
+          "rw-021",
+          "rw-027",
+          "rw-029",
+          "rw-050",
+          "rw-051",
+          "rw-052",
+          "rw-053"
+        ]
+      }
+    },
+    "wins": [],
+    "losses": ["rw-015"]
+  },
+  "rowAudits": [
+    {
+      "key": "rw-001-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-FVzClJ",
+        "[STUDY]/runs/after-2-r2/work/source-NK7MSP"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-001-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-FVzClJ",
+        "[STUDY]/runs/after-2-r2/work/source-NK7MSP"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-002-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-cU9pS5",
+        "[STUDY]/runs/after-2-r2/work/source-tPQksJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-002-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-cU9pS5",
+        "[STUDY]/runs/after-2-r2/work/source-tPQksJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-003-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-vGK3Ta",
+        "[STUDY]/runs/after-2-r2/work/source-x8E041"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-003-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-vGK3Ta",
+        "[STUDY]/runs/after-2-r2/work/source-x8E041"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-004-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3DQN5Z",
+        "[STUDY]/runs/after-2-r2/work/source-YDRe1J"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-004-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3DQN5Z",
+        "[STUDY]/runs/after-2-r2/work/source-YDRe1J"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-005-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-I94D9h",
+        "[STUDY]/runs/after-2-r2/work/source-r1sjO4"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-005-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-I94D9h",
+        "[STUDY]/runs/after-2-r2/work/source-r1sjO4"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-006-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-bEyHir",
+        "[STUDY]/runs/after-2-r2/work/source-pj87yD"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-006-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-bEyHir",
+        "[STUDY]/runs/after-2-r2/work/source-pj87yD"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-007-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-9pcmGW",
+        "[STUDY]/runs/after-2-r2/work/source-g2oiyL"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-007-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-9pcmGW",
+        "[STUDY]/runs/after-2-r2/work/source-g2oiyL"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-008-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-CkapGj",
+        "[STUDY]/runs/after-2-r2/work/source-wFihVg"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-008-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-CkapGj",
+        "[STUDY]/runs/after-2-r2/work/source-wFihVg"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-009-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-giIwQs",
+        "[STUDY]/runs/after-2-r2/work/source-pkSqcU"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-009-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-giIwQs",
+        "[STUDY]/runs/after-2-r2/work/source-pkSqcU"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-010-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-8BIsQs",
+        "[STUDY]/runs/after-2-r2/work/source-9oE6dy"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-010-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-8BIsQs",
+        "[STUDY]/runs/after-2-r2/work/source-9oE6dy"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-011-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-A5PXiC",
+        "[STUDY]/runs/after-2-r2/work/source-xbMnzP"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-011-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-A5PXiC",
+        "[STUDY]/runs/after-2-r2/work/source-xbMnzP"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-012-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-GVD1Oy",
+        "[STUDY]/runs/after-2-r2/work/source-Vp1Bav"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-012-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-GVD1Oy",
+        "[STUDY]/runs/after-2-r2/work/source-Vp1Bav"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-013-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-L0st0t",
+        "[STUDY]/runs/after-2-r2/work/source-olQMPu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-013-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-L0st0t",
+        "[STUDY]/runs/after-2-r2/work/source-olQMPu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-014-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-RbVpW6",
+        "[STUDY]/runs/after-2-r2/work/source-aAytZg"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-014-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-RbVpW6",
+        "[STUDY]/runs/after-2-r2/work/source-aAytZg"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-015-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-iO6ILU",
+        "[STUDY]/runs/after-2-r2/work/source-u3vbVy"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-015-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-iO6ILU",
+        "[STUDY]/runs/after-2-r2/work/source-u3vbVy"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-016-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-48x7le",
+        "[STUDY]/runs/after-2-r2/work/source-X0Dkun"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-016-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-48x7le",
+        "[STUDY]/runs/after-2-r2/work/source-X0Dkun"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-017-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-XcnPwt",
+        "[STUDY]/runs/after-2-r2/work/source-w4cLJG"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-017-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-XcnPwt",
+        "[STUDY]/runs/after-2-r2/work/source-w4cLJG"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-018-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-Homizp",
+        "[STUDY]/runs/after-2-r2/work/source-y2sQDt"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-018-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-Homizp",
+        "[STUDY]/runs/after-2-r2/work/source-y2sQDt"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-019-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3bDBbL",
+        "[STUDY]/runs/after-2-r2/work/source-NoYLwC"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-019-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3bDBbL",
+        "[STUDY]/runs/after-2-r2/work/source-NoYLwC"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-020-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-V1bhcY",
+        "[STUDY]/runs/after-2-r2/work/source-xDjyEJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-020-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-V1bhcY",
+        "[STUDY]/runs/after-2-r2/work/source-xDjyEJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-021-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-M23Pii",
+        "[STUDY]/runs/after-2-r2/work/source-ygCux0"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-021-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-M23Pii",
+        "[STUDY]/runs/after-2-r2/work/source-ygCux0"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-022-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-gFraU0",
+        "[STUDY]/runs/after-2-r2/work/source-oet6c0"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-022-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-gFraU0",
+        "[STUDY]/runs/after-2-r2/work/source-oet6c0"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-023-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-BnCN6W",
+        "[STUDY]/runs/after-2-r2/work/source-j0GrUb"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-023-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-BnCN6W",
+        "[STUDY]/runs/after-2-r2/work/source-j0GrUb"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-024-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-CA6Dch",
+        "[STUDY]/runs/after-2-r2/work/source-HPUep4"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-024-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-CA6Dch",
+        "[STUDY]/runs/after-2-r2/work/source-HPUep4"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-025-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-5yJrqG",
+        "[STUDY]/runs/after-2-r2/work/source-xDexgX"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-025-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-5yJrqG",
+        "[STUDY]/runs/after-2-r2/work/source-xDexgX"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-026-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-QPLVf7",
+        "[STUDY]/runs/after-2-r2/work/source-ZNCOjx"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-026-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-QPLVf7",
+        "[STUDY]/runs/after-2-r2/work/source-ZNCOjx"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-027-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-PLeMpF",
+        "[STUDY]/runs/after-2-r2/work/source-TzuRLm"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-027-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-PLeMpF",
+        "[STUDY]/runs/after-2-r2/work/source-TzuRLm"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-028-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-6lDqy1",
+        "[STUDY]/runs/after-2-r2/work/source-su2OfJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-028-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-6lDqy1",
+        "[STUDY]/runs/after-2-r2/work/source-su2OfJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-029-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-8LFwti",
+        "[STUDY]/runs/after-2-r2/work/source-gLwOXu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-029-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-8LFwti",
+        "[STUDY]/runs/after-2-r2/work/source-gLwOXu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-030-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-eLZ47x",
+        "[STUDY]/runs/after-2-r2/work/source-tyMuYs"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-030-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-eLZ47x",
+        "[STUDY]/runs/after-2-r2/work/source-tyMuYs"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-031-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-lcA2Mw",
+        "[STUDY]/runs/after-2-r2/work/source-tQr6bH"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-031-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-lcA2Mw",
+        "[STUDY]/runs/after-2-r2/work/source-tQr6bH"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-032-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-XV51zF",
+        "[STUDY]/runs/after-2-r2/work/source-b1Etag"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-032-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-XV51zF",
+        "[STUDY]/runs/after-2-r2/work/source-b1Etag"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-033-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-9OWyyT",
+        "[STUDY]/runs/after-2-r2/work/source-LGhu7X"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-033-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-9OWyyT",
+        "[STUDY]/runs/after-2-r2/work/source-LGhu7X"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-034-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-vYZxJ2",
+        "[STUDY]/runs/after-2-r2/work/source-wZwy3W"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-034-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-vYZxJ2",
+        "[STUDY]/runs/after-2-r2/work/source-wZwy3W"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-035-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-Q6X2CF",
+        "[STUDY]/runs/after-2-r2/work/source-y3YHWz"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-035-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-Q6X2CF",
+        "[STUDY]/runs/after-2-r2/work/source-y3YHWz"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-036-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-LDQkNu",
+        "[STUDY]/runs/after-2-r2/work/source-m3bd4d"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-036-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-LDQkNu",
+        "[STUDY]/runs/after-2-r2/work/source-m3bd4d"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-037-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-GdPSW8",
+        "[STUDY]/runs/after-2-r2/work/source-d9esa7"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-037-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-GdPSW8",
+        "[STUDY]/runs/after-2-r2/work/source-d9esa7"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-038-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-sanLhI",
+        "[STUDY]/runs/after-2-r2/work/source-v5AEoQ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-038-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-sanLhI",
+        "[STUDY]/runs/after-2-r2/work/source-v5AEoQ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-039-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3xrZXN",
+        "[STUDY]/runs/after-2-r2/work/source-JMFn14"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-039-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3xrZXN",
+        "[STUDY]/runs/after-2-r2/work/source-JMFn14"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-040-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-Pc5eMW",
+        "[STUDY]/runs/after-2-r2/work/source-ZcKJxu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-040-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-Pc5eMW",
+        "[STUDY]/runs/after-2-r2/work/source-ZcKJxu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-041-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-65to8c",
+        "[STUDY]/runs/after-2-r2/work/source-UXyoEe"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-041-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-65to8c",
+        "[STUDY]/runs/after-2-r2/work/source-UXyoEe"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-042-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-TSQGOM",
+        "[STUDY]/runs/after-2-r2/work/source-ueRZCs"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-042-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-TSQGOM",
+        "[STUDY]/runs/after-2-r2/work/source-ueRZCs"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-043-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-4daN9I",
+        "[STUDY]/runs/after-2-r2/work/source-ttX1Zu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-043-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-4daN9I",
+        "[STUDY]/runs/after-2-r2/work/source-ttX1Zu"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-044-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3t9BcK",
+        "[STUDY]/runs/after-2-r2/work/source-oUEGPC"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-044-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-3t9BcK",
+        "[STUDY]/runs/after-2-r2/work/source-oUEGPC"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-045-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-JQiaBS",
+        "[STUDY]/runs/after-2-r2/work/source-dl8W9h"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-045-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-JQiaBS",
+        "[STUDY]/runs/after-2-r2/work/source-dl8W9h"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-046-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-1lymz9",
+        "[STUDY]/runs/after-2-r2/work/source-CqL3Nk"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-046-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-1lymz9",
+        "[STUDY]/runs/after-2-r2/work/source-CqL3Nk"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-047-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-eNKTCV",
+        "[STUDY]/runs/after-2-r2/work/source-opncQO"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-047-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-eNKTCV",
+        "[STUDY]/runs/after-2-r2/work/source-opncQO"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-048-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-83sdBH",
+        "[STUDY]/runs/after-2-r2/work/source-z0VNfD"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-048-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-83sdBH",
+        "[STUDY]/runs/after-2-r2/work/source-z0VNfD"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-049-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-1dZxSh",
+        "[STUDY]/runs/after-2-r2/work/source-Drrm2d"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-049-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-1dZxSh",
+        "[STUDY]/runs/after-2-r2/work/source-Drrm2d"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-050-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-eR1GWW",
+        "[STUDY]/runs/after-2-r2/work/source-yvhHRs"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-050-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-eR1GWW",
+        "[STUDY]/runs/after-2-r2/work/source-yvhHRs"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-051-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-JHZnFL",
+        "[STUDY]/runs/after-2-r2/work/source-enZAqJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-051-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-JHZnFL",
+        "[STUDY]/runs/after-2-r2/work/source-enZAqJ"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-052-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-TVBxUf",
+        "[STUDY]/runs/after-2-r2/work/source-pLVD3a"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-052-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-TVBxUf",
+        "[STUDY]/runs/after-2-r2/work/source-pLVD3a"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-053-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-cNEL5u",
+        "[STUDY]/runs/after-2-r2/work/source-i6b6L2"
+      ],
+      "issues": []
+    },
+    {
+      "key": "rw-053-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/after-2-r2/work/source-cNEL5u",
+        "[STUDY]/runs/after-2-r2/work/source-i6b6L2"
+      ],
+      "issues": []
+    }
+  ],
+  "currentSourceStores": 106,
+  "nativeInspectCalls": 63,
+  "clientVersions": {
+    "codex-cli 0.167.0-alpha.3.2": 106
+  },
+  "uniqueAgentThreads": 106,
+  "issues": []
+}

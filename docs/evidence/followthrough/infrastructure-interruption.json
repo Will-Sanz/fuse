@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-09",
+  "status": "interrupted-infrastructure-loss",
+  "scored": false,
+  "description": "The execution environment restarted around 17:53 UTC, removing temporary jobs, worktrees and artifacts. The repository and already pushed commits survived. This attempt is not a completed or scored epoch.",
+  "lostBeforeAttempt": {
+    "productCommit": "7ad3058f931a0b284c4968ed0770f7a651fbf871",
+    "seed": "fuse-followthrough-before-20261109",
+    "plannedArmRuns": 106,
+    "independentlyVerifiedCompletedRecordLowerBound": 38,
+    "finalAttemptedRecords": null,
+    "finalCompletedRecords": null,
+    "usage": null,
+    "rawArtifactsAvailable": false
+  },
+  "lostPayloadMeasurements": {
+    "completeAllCaseReportAvailable": false,
+    "scoredModelCalls": false,
+    "partialConsoleAssertionsDoNotReplaceFullEvidence": true
+  },
+  "installedClientBefore": "0.166.0-alpha.5.1",
+  "installedClientAfter": "0.167.0-alpha.3.2",
+  "recovery": "Restore exact locked sources and immutable checkouts in persistent project storage; rerun client control/privacy probes and preregister fresh r2 cohorts. Never infer zero usage or overwrite this incident with replacement scores.",
+  "historicalPublishedBaselineChanged": false
+}

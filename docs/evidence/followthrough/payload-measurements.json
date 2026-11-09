@@ -1,0 +1,3971 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-09T18:06:32.782Z",
+  "method": "Actual production MCP stdio, full inspect then compact and default/full reads of the same saved review. UTF-8 JSON text response bytes, not model tokens, efficacy, transport overhead or billing. All preservation assertions must pass.",
+  "fuseCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+  "fuseSourceSha256": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+  "harnessSha256": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+  "scriptSha256": "aed1e523e355b394f52fdedee57e2640eaee9fe07835190cd3b9d6c702b92682",
+  "nodeVersion": "v24.3.0",
+  "dataset": {
+    "schemaVersion": 1,
+    "upstreamUrl": "https://github.com/elizedrac/realworld-express-prisma",
+    "upstreamCommit": "8e8aa21b1c9968c291a981d7d97f30049a4525a8",
+    "casesSha256": "fee5eeaae0d9fd0bf953f20d20c30dd1530548d2c29ee4377e4b35f02dc60cf7",
+    "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+    "sourceReportedValidation": {
+      "valid": 53,
+      "total": 53,
+      "writtenAt": "2026-11-04T01:28:55.597Z",
+      "versions": "v22.23.4\nVersion 4.9.4",
+      "independentlyRerun": false,
+      "branchHeadsBound": false
+    },
+    "cases": [
+      {
+        "id": "rw-001",
+        "type": "test",
+        "label": "conflict",
+        "category": "config_env_rename",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-001-a",
+        "branch_b": "rw-001-b",
+        "intent_a": "Rename the JWT_SECRET env var to AUTH_JWT_SECRET.",
+        "intent_b": "Add password reset token helpers.",
+        "involved_symbols": [
+          "process.env.JWT_SECRET",
+          "process.env.AUTH_JWT_SECRET",
+          "createPasswordResetToken",
+          ".env.test"
+        ],
+        "explanation": "B's new helpers read JWT_SECRET, which A renamed everywhere including .env.test; B's tests throw at runtime. process.env reads are untyped, so tsc passes.",
+        "aCommit": "c4381b64e90eb50d9d88740a71172eb04c54fc24",
+        "aTree": "4238d934adf2d694ed98ff0527d4c40995f5e794",
+        "bCommit": "4430ab4edb2a87f2c4d8faf6618f6b8f111c6ef0",
+        "bTree": "eaa289fa3ea0d887705b5061f12ffd54486540ec",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-002",
+        "type": "build",
+        "label": "conflict",
+        "category": "prisma_schema_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-002-a",
+        "branch_b": "rw-002-b",
+        "intent_a": "Rename the Article.body column to content, keeping 'body' in the API.",
+        "intent_b": "Add a ?search= filter on title or body.",
+        "involved_symbols": ["Article.body", "Article.content", "articlesListPrisma"],
+        "explanation": "A renames the Prisma field; B's new where clause filters on body, which no longer exists in the generated client.",
+        "aCommit": "fc40502069b2e74d4f1473c1f679cb9c7f7d55fc",
+        "aTree": "3a1fa361a0d0402db301567204e8f8564e394dc3",
+        "bCommit": "b31294e4332c49fdfcbf975e6e925d666376f2a2",
+        "bTree": "59aba2b4502c3a6cc6b7d1aee2fa78560001f78e",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-003",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "tag_casing",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-003-a",
+        "branch_b": "rw-003-b",
+        "intent_a": "Normalize tag names (trim, lowercase, dedupe) on create.",
+        "intent_b": "Make the ?tag= filter case-insensitive.",
+        "involved_symbols": ["tagsCreatePrisma", "parseArticleListQuery"],
+        "explanation": "Both lowercase tags and agree on the convention; they compose cleanly.",
+        "aCommit": "5ec8183a11aea863d88415ceb320dc4bf7835ffd",
+        "aTree": "8728249ee03e88eab6d15c0f2555a3e89d73bc50",
+        "bCommit": "456679be34ae618a2fb0bf17b150ba1392ecfefe",
+        "bTree": "9ebeff1374e1e7ff685c33d08a4e68b9b91891cb",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-004",
+        "type": "textual",
+        "label": "conflict",
+        "category": "logging",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-004-a",
+        "branch_b": "rw-004-b",
+        "intent_a": "Stop logging passwords when comparing hashes.",
+        "intent_b": "Route password comparison logging through the logger.",
+        "involved_symbols": ["compareWithHash"],
+        "explanation": "Both sides rewrite the same console.log lines in compareWithHash.",
+        "aCommit": "4f9d4a0f5ec9f21beeebaa5173e1e4d5d17ce956",
+        "aTree": "3499f369e31f425a8cfed9d46d3f3547391c6385",
+        "bCommit": "bea75b1e1eaf3da4b88bbbaf0b81b5271c0b91a3",
+        "bTree": "47ec23a908e3b94cc28aad82e50ecafe37fc56bd",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-005",
+        "type": "textual",
+        "label": "conflict",
+        "category": "status_code",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-005-a",
+        "branch_b": "rw-005-b",
+        "intent_a": "Stop logging passwords on login.",
+        "intent_b": "Return 401 instead of 403 for a wrong login password.",
+        "involved_symbols": ["userLogin"],
+        "explanation": "A deletes the console.log line directly above the line B changes, so git sees one overlapping hunk.",
+        "aCommit": "7e8c6a1879a3b9a56cc6504eff64fabc1101b86c",
+        "aTree": "e7f27d99b7bcc7068aec965dd0c632c73527b20b",
+        "bCommit": "ed882d794d477f2aa727f71c4fe42250527d9f2b",
+        "bTree": "c256d495e457dcfbf65d344692241c8de3ce8ff9",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-006",
+        "type": "textual",
+        "label": "conflict",
+        "category": "query_options",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-006-a",
+        "branch_b": "rw-006-b",
+        "intent_a": "Order the feed by most recent update.",
+        "intent_b": "Limit the feed to followed authors.",
+        "involved_symbols": ["articleFeedPrisma"],
+        "explanation": "Both add a new findMany option at the same spot (after skip) in articleFeedPrisma.",
+        "aCommit": "6e20a114ff5b9d171cd04136a8748b7448e79cda",
+        "aTree": "e8a75707a5689c3e3e8c6df300785189a9c816bc",
+        "bCommit": "126eee55bbee2914ade6294c78198097754d09b0",
+        "bTree": "7cd32ff08f14d8f97a185fe31b82840406cd0102",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-007",
+        "type": "build",
+        "label": "conflict",
+        "category": "signature_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-007-a",
+        "branch_b": "rw-007-b",
+        "intent_a": "Make articlesListPrisma take an options object instead of positional args.",
+        "intent_b": "Add GET /api/profiles/:username/articles.",
+        "involved_symbols": ["articlesListPrisma", "getProfileArticles"],
+        "explanation": "B's new controller calls articlesListPrisma(undefined, username) with the old positional signature.",
+        "aCommit": "539b9ca59666758a79d2261b0eb27f1ba639fb7b",
+        "aTree": "0c2957f1f6c111956d4e5f9ca42d647bf187a55c",
+        "bCommit": "8025b833f5f24be84caa40829dd68f3e6ec78294",
+        "bTree": "b6a5ca3c814304f2d4b32f9afbc29afbc4ec7dc6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-008",
+        "type": "build",
+        "label": "conflict",
+        "category": "return_shape_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-008-a",
+        "branch_b": "rw-008-b",
+        "intent_a": "Load only follows and favorites in userGetPrisma; profiles use a new profileGetPrisma.",
+        "intent_b": "Add GET /api/profiles/:username/stats.",
+        "involved_symbols": [
+          "userGetPrisma",
+          "getProfileStats",
+          "User.authored",
+          "User.followedBy"
+        ],
+        "explanation": "B reads user.authored and user.followedBy from userGetPrisma, which A stopped including.",
+        "aCommit": "aeb3ab6108f86b722280ef4659fcacc6c5000db1",
+        "aTree": "6109ff5884b6287a1c46cf4b388068d3fbf1888a",
+        "bCommit": "a569b888e28e89ac72cfb53b7c3d9d84a49ffd98",
+        "bTree": "674e889d7f27956ca9d8402a4beaf60396baf0b6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-009",
+        "type": "test",
+        "label": "conflict",
+        "category": "default_value_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-009-a",
+        "branch_b": "rw-009-b",
+        "intent_a": "Lower the default article page size from 20 to 10.",
+        "intent_b": "Report the total match count in articlesCount.",
+        "involved_symbols": ["articlesListPrisma", "articleCountPrisma", "articlesList"],
+        "explanation": "B's test expects the first page to contain all 12 articles under the old default of 20.",
+        "aCommit": "6bcb3c49eb48bcac740ebfdf21716d3a26dc8b4b",
+        "aTree": "1a23a9e0f669aa4b59971388f33f6973b45996c3",
+        "bCommit": "145caffd21cd1fa6e31f4a5e61cc30fc85f155b9",
+        "bTree": "a0ade4dc06601a5aefcbca1006d13bfbdd9e7c77",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-010",
+        "type": "test",
+        "label": "conflict",
+        "category": "nullability_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-010-a",
+        "branch_b": "rw-010-b",
+        "intent_a": "Show a default avatar URL when a user has no image.",
+        "intent_b": "Let users clear their avatar by sending an empty image.",
+        "involved_symbols": ["userViewer", "userUpdate", "User.image"],
+        "explanation": "B expects image to come back null after clearing; A's viewer now replaces null with the default avatar.",
+        "aCommit": "8d8e58ed21bda433280e64f6002a31e88ec0a547",
+        "aTree": "e09a56e11c5b0c4340bf96d444722b7fab70eb64",
+        "bCommit": "428900168915bbc89ea8dd813a5fd6fd99461b90",
+        "bTree": "caef92bfceed1f421ac297360dd28a859336e269",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-011",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "cache_invalidation",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-011-a",
+        "branch_b": "rw-011-b",
+        "intent_a": "Delete orphan tags when an article is deleted.",
+        "intent_b": "Cache GET /api/tags for a minute, refreshing when tags are created.",
+        "involved_symbols": ["getTags", "invalidateTagsCache", "articleDeletePrisma"],
+        "explanation": "B only invalidates the cache on create because tags were never removed at base. With A, deletes remove tags but the cache keeps serving them.",
+        "oracle_applies_to": ["base", "a", "b"],
+        "aCommit": "c997942de239836a68fb0215b2c8b049e7a9367d",
+        "aTree": "0f1a4f0a09a67c320f84565536f3282453b77625",
+        "bCommit": "a8ee1989d9c9b2c21a08a8b9f5faeeaf7cff5e6e",
+        "bTree": "cc110cb1815db76cdb2e28630a27ac83b666307b",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-012",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "double_processing",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-012-a",
+        "branch_b": "rw-012-b",
+        "intent_a": "Hash passwords inside userUpdatePrisma.",
+        "intent_b": "Add POST /api/user/password, which hashes the new password before calling userUpdatePrisma.",
+        "involved_symbols": ["userUpdatePrisma", "userChangePassword", "hashPassword"],
+        "explanation": "After merging, the new password is hashed twice, so the user cannot log in with it. B's tests only check the stored value is not plain text.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "9a8187d68297c4d2003a233e192a2fe657e3572d",
+        "aTree": "a0a7cee70aa30f3898fd13492cf1f16248580669",
+        "bCommit": "7cd1b10c7aba67a330a59810d448ae0abcee44f7",
+        "bTree": "a27a8bfe07ba6c021bbada6cf2f641b6e2c226ca",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-013",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "implicit_side_effect",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-013-a",
+        "branch_b": "rw-013-b",
+        "intent_a": "Let Prisma maintain Article.updatedAt with @updatedAt.",
+        "intent_b": "Count article views by updating the article on every GET.",
+        "involved_symbols": ["Article.updatedAt", "articleViewPrisma", "articlesListPrisma"],
+        "explanation": "With @updatedAt, every view-count update bumps updatedAt, so merely reading an article moves it to the top of the list.",
+        "oracle_applies_to": ["base", "a", "b"],
+        "aCommit": "303f448701c9a156c50e17b5468b3f2adcbfb5ed",
+        "aTree": "85cfc6a0031452247cd12601383f7f6c4c4cd0b7",
+        "bCommit": "9682952f2d7a96683acce6fc90b12a69e4fc4fda",
+        "bTree": "0edec4a90fb31e984a40ff6df8c48f04fa3f5c25",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-014",
+        "type": "intent",
+        "label": "conflict",
+        "category": "duplicate_implementation",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-014-a",
+        "branch_b": "rw-014-b",
+        "intent_a": "Delete orphan tags when an article is deleted.",
+        "intent_b": "Filter GET /api/tags to tags used by an article.",
+        "involved_symbols": ["articleDeletePrisma", "getTags"],
+        "explanation": "Both make the tag list show only tags in use, by different mechanisms in different files.",
+        "aCommit": "d4f9e9fd63ddffd5553e719a4fb940c0a921f090",
+        "aTree": "3d5b0e6a4af718e70c2f87c9c922bcc79d86122a",
+        "bCommit": "7c3e6f047bfe0cadddb8022d55e2354da693d278",
+        "bTree": "6ef7a06062701b3b8199ada46aba87f54141e672",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-015",
+        "type": "intent",
+        "label": "conflict",
+        "category": "duplicate_implementation",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-015-a",
+        "branch_b": "rw-015-b",
+        "intent_a": "Filter the feed to followed authors in the database query.",
+        "intent_b": "Filter the feed to followed authors in the controller.",
+        "involved_symbols": ["articleFeedPrisma", "articlesFeed"],
+        "explanation": "Both fix the feed bug. B's in-memory filter runs after limit/offset, so pagination is wrong even though the merge passes.",
+        "aCommit": "8fbf560f1a922b7bf6279ededbd24e82e007141e",
+        "aTree": "2595482c497c28e6f75c55a3e500b2b9727438ef",
+        "bCommit": "ef31f03ff29a01b68f6a691cf325a9c5c20e44aa",
+        "bTree": "e33766f625441233d2eb278b7558f63b85c16476",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-016",
+        "type": "intent",
+        "label": "conflict",
+        "category": "duplicate_implementation",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-016-a",
+        "branch_b": "rw-016-b",
+        "intent_a": "Only let authors delete their articles (check in the controller).",
+        "intent_b": "Require article authorship to delete (route middleware).",
+        "involved_symbols": ["articlesDelete", "requireArticleAuthor"],
+        "explanation": "Both add the same ownership check; after merging the article is loaded and checked twice.",
+        "aCommit": "6a37f2c91dff6b2e93bd97b0dbe8fca3629a1dc4",
+        "aTree": "60b19ba63ba8353f0c02429ae33d7c100ea07a6a",
+        "bCommit": "74374bcd33cb95e80432a3883e6c2f57c5c90504",
+        "bTree": "c1f5dbdf3e447a48d47f2788757746190d9b8618",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-017",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "length_limits",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-017-a",
+        "branch_b": "rw-017-b",
+        "intent_a": "Cap slugs at 100 characters.",
+        "intent_b": "Reject article titles over 150 characters.",
+        "involved_symbols": ["slugfy", "articlesCreateValidator"],
+        "explanation": "Both limit title-derived lengths in different layers; the limits are compatible.",
+        "aCommit": "199033c136816851dc31b7e31f5416cd709748bd",
+        "aTree": "0aa2650c7a4e408a5f14f808af2ff705fccac3d4",
+        "bCommit": "b666624597263990f434ee220326406e065e6a58",
+        "bTree": "814994eff291cd1518e41a7fcae83d3577823b7a",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-018",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "schema_and_query",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-018-a",
+        "branch_b": "rw-018-b",
+        "intent_a": "Add indexes on Article.authorUsername and updatedAt.",
+        "intent_b": "Add ?sort=created|updated to the article list.",
+        "involved_symbols": ["Article", "articlesListPrisma"],
+        "explanation": "A schema change next to a query change on the same model, but indexes do not change query results.",
+        "aCommit": "c0cb56072a404071b66c77c331d8a00944677c2e",
+        "aTree": "5efaf7e02308b1d5bb0564c2a416fafcc51dd022",
+        "bCommit": "f4809846d9b48e14269a432efa5eb97b75552f1a",
+        "bTree": "79d9a08de231e6e63f84ed198f2fd907bc45e8db",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-019",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "cache_invalidated_by_middleware",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-019-a",
+        "branch_b": "rw-019-b",
+        "intent_a": "Cache the GET /api/tags list.",
+        "intent_b": "Delete tags no article uses when an article is deleted.",
+        "involved_symbols": [
+          "getTags",
+          "prisma.$use",
+          "articleDeletePrisma",
+          "prisma.tag.deleteMany"
+        ],
+        "explanation": "Looks like rw-011, but A's cache is cleared by a Prisma middleware on any Tag or Article write, so B's orphan-tag delete also clears it.",
+        "aCommit": "73e54c7cfbb0d11bdac83fa953cbea6ac5bf7ebb",
+        "aTree": "69ca544850bb1baddf936f8f8bb68d10c32a3068",
+        "bCommit": "020498e5c52d2a9b78be5fbc70f7a2d0229e6624",
+        "bTree": "a72199cca268e8e416d991d30ebe08f11db9c22d",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-020",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "password_hashed_once",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-020-a",
+        "branch_b": "rw-020-b",
+        "intent_a": "Hash passwords inside userUpdatePrisma.",
+        "intent_b": "Add POST /api/user/password to change the password.",
+        "involved_symbols": [
+          "userUpdatePrisma",
+          "userChangePassword",
+          "userSetPasswordPrisma",
+          "hashPassword"
+        ],
+        "explanation": "Looks like rw-012, but B stores the hash through its own userSetPasswordPrisma, not userUpdatePrisma, so it is hashed once.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "0c760ad425198423f8f064d6a956da0ce6ad4139",
+        "aTree": "a0a7cee70aa30f3898fd13492cf1f16248580669",
+        "bCommit": "db6e4f81de82d9162b70787877be51bebee06967",
+        "bTree": "2a2a950302685f2ec2e560a0a07e3cbf987b06a4",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-021",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "separate_env_secret",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-021-a",
+        "branch_b": "rw-021-b",
+        "intent_a": "Rename the JWT_SECRET env var to AUTH_JWT_SECRET.",
+        "intent_b": "Add password reset token helpers.",
+        "involved_symbols": [
+          "process.env.JWT_SECRET",
+          "process.env.AUTH_JWT_SECRET",
+          "process.env.RESET_TOKEN_SECRET",
+          "createPasswordResetToken"
+        ],
+        "explanation": "Looks like rw-001, but B's reset tokens use their own RESET_TOKEN_SECRET, which A does not touch.",
+        "aCommit": "e023ce3ed7d81d09bb573578ec25351374abba02",
+        "aTree": "4238d934adf2d694ed98ff0527d4c40995f5e794",
+        "bCommit": "fc08d49b3adbaabb9e8fa8e4af71594633e6fe3e",
+        "bTree": "65f89dd8cd4f13a7bb78b6588aacd2bc96006a02",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-022",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "page_size_mismatch",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-022-a",
+        "branch_b": "rw-022-b",
+        "intent_a": "Lower the default article page size from 20 to 10.",
+        "intent_b": "Add ?page= to the article list.",
+        "involved_symbols": ["articlesListPrisma", "parseArticleListQuery", "PAGE_SIZE"],
+        "explanation": "A lowers the default page size to 10; B's ?page= uses its own PAGE_SIZE of 20, so paging on from the default list skips articles 11 to 20.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "f887d2e08f1831b8f5f3d24e1d1bb3da0797ad21",
+        "aTree": "1a23a9e0f669aa4b59971388f33f6973b45996c3",
+        "bCommit": "4b651f85794eb5f178f574f3eab2dc69013d265b",
+        "bTree": "d2dc4098c8585f8aedc9ebb9b61b2a205056fc85",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-023",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "same_function_independent_edits",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-023-a",
+        "branch_b": "rw-023-b",
+        "intent_a": "Log each created article.",
+        "intent_b": "Limit articles to 10 tags.",
+        "involved_symbols": ["articlesCreate", "logger.info", "MAX_TAGS"],
+        "explanation": "Both edit articlesCreate, in different places and for unrelated reasons.",
+        "aCommit": "8924176737b0f4cdfdcc1e488732836e5bde5bd0",
+        "aTree": "cc9340bc2f8de95562f39df5e74c9d87c61697fe",
+        "bCommit": "609440f6e6d9b4b8f437ce3f65753839c2f21163",
+        "bTree": "9959fcbeab00e36b076d2fbf6ed39a4736c7900b",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-024",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "refactor_keeps_signature",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-024-a",
+        "branch_b": "rw-024-b",
+        "intent_a": "Build the article list filter one field at a time.",
+        "intent_b": "Add GET /api/profiles/:username/articles.",
+        "involved_symbols": ["articlesListPrisma", "getProfileArticles"],
+        "explanation": "Looks like rw-007, but A only rewrites the body of articlesListPrisma; its signature and behavior stay the same for B's new positional caller.",
+        "aCommit": "10915e3fcd1c0dc92927187f90c87a62347df1d6",
+        "aTree": "361c1a4a81391d4cc9f8105b0f4abef15e4cdb22",
+        "bCommit": "9d647fdb7ae9fb938423af8ba32e63a6819672dc",
+        "bTree": "85e421bcca38fb208eed8c56e26313bc46db7dd0",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-025",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "similar_features_different_data",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-025-a",
+        "branch_b": "rw-025-b",
+        "intent_a": "Add GET /api/articles/:slug/comments/count.",
+        "intent_b": "Add GET /api/tags/:tag/count.",
+        "involved_symbols": ["countComments", "countTagArticles"],
+        "explanation": "Both add a count endpoint, but they count different things on different routes.",
+        "aCommit": "b5c07b0295872b1b35e424dd7dfe80b98b42e51d",
+        "aTree": "3732040638bff81cb28b6751ad18a5c51643c12a",
+        "bCommit": "f2480fc1f83f117793c8fc889a7505f8ec2aa2ce",
+        "bTree": "d1e3cfd7c1d50bab8e83c75e33d1d8769f855208",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-026",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "docs_only_overlap",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-026-a",
+        "branch_b": "rw-026-b",
+        "intent_a": "Document userUpdatePrisma.",
+        "intent_b": "Trim bio and image on user update.",
+        "involved_symbols": ["userUpdatePrisma", "UpdateFields"],
+        "explanation": "A only adds doc comments to the function B changes; the docs stay accurate after B's change.",
+        "aCommit": "9f6cfd93c8b70be1c81fa91a7f860ed4a3cd4476",
+        "aTree": "2bb16dbebb22acca5777a155a1286828f2a6c45c",
+        "bCommit": "758fead87aa8c09837e735bee7515ff983c5de3b",
+        "bTree": "96f39ffc9297154fd00a37bd9728109a12994de0",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-027",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "soft_delete_missed_query",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-027-a",
+        "branch_b": "rw-027-b",
+        "intent_a": "Soft-delete articles; also drop the password debug logging.",
+        "intent_b": "Add GET /api/tags/counts; also tidy the tags controller docs.",
+        "involved_symbols": ["articleDeletePrisma", "deletedAt", "getTagCounts"],
+        "explanation": "A keeps deleted articles as rows with deletedAt and filters them out of its queries; B's new tag count query does not know about deletedAt, so deleted articles are still counted. Each side carries an unrelated change.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "94a0623db0e80fe1e97e617b69966fb2875f162e",
+        "aTree": "7ad8ee756966cc52d7d9360c8f9f909d1c8d83d9",
+        "bCommit": "9884617bedb12b66cc1ab48efa9905d951b5cd60",
+        "bTree": "5516b65214dff44272c3b239a028754c721e6e2d",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-028",
+        "type": "intent",
+        "label": "conflict",
+        "category": "email_normalized_twice",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-028-a",
+        "branch_b": "rw-028-b",
+        "intent_a": "Normalize emails on register and login; also fix the register docs.",
+        "intent_b": "Store and look up emails in lower case; also document the user helpers.",
+        "involved_symbols": [
+          "normalizeEmail",
+          "usersRegister",
+          "usersLogin",
+          "userCreatePrisma",
+          "userGetEmailPrisma"
+        ],
+        "explanation": "Both normalize emails, A in the controllers and B in the db helpers, so the merge does it twice in two places. Each side carries an unrelated change.",
+        "aCommit": "6b1b1109be66c7bd533821ec85ebccd9190a6f03",
+        "aTree": "b99cdafedb5a8cbdbeaba80e248425e361c6ea64",
+        "bCommit": "1d9c2b4b3f71512f82557bc5514fc29da63feb59",
+        "bTree": "ad1aa38e023d5f97f46f9f1d0b93a127bc0be2fa",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-029",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "slug_change_breaks_stored_refs",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-029-a",
+        "branch_b": "rw-029-b",
+        "intent_a": "Change the slug when an article's title changes.",
+        "intent_b": "Add GET /api/user/recent for recently viewed articles.",
+        "involved_symbols": ["articleUpdatePrisma", "slugfy", "RecentView", "recentArticlesPrisma"],
+        "explanation": "A makes a title change rename the slug; B stores viewed slugs in a plain column with no foreign key, so a renamed article drops out of the recent list. Each side carries an unrelated doc fix.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "71ddb7d4137bde36cec261c7c43d322442309e86",
+        "aTree": "35c10cc5e7ea6d9a91d5adeae7037b98601359bb",
+        "bCommit": "4e7d6e0b373c2235884d3d7239e2110f3a570a4d",
+        "bTree": "d629d2c4887925e51f31a24018004919bab51fec",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-030",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "order_and_cursor_mismatch",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-030-a",
+        "branch_b": "rw-030-b",
+        "intent_a": "List articles newest first by creation time.",
+        "intent_b": "Add an ?after= cursor to the article list.",
+        "involved_symbols": [
+          "articlesListPrisma",
+          "orderBy",
+          "updatedAt",
+          "createdAt",
+          "articlesList"
+        ],
+        "explanation": "A orders the list by createdAt; B's cursor filters on updatedAt, which only matches the old order, so paging skips articles once one is edited.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "383141509fc40ba745562087b885222cd1cb8ee3",
+        "aTree": "d3051ac4310b98b6558868fa432a465401b0b9cb",
+        "bCommit": "b9059edae33d5271c70c00128a6881ade7512ba3",
+        "bTree": "d5afa3d37b8954a841ae1aa6cfbe125e64b6db00",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-031",
+        "type": "build",
+        "label": "conflict",
+        "category": "deleted_helper_used",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-031-a",
+        "branch_b": "rw-031-b",
+        "intent_a": "Replace userGetEmailPrisma with a generic userFindPrisma.",
+        "intent_b": "Add GET /api/users/email-taken.",
+        "involved_symbols": ["userGetEmailPrisma", "userFindPrisma", "usersEmailTaken"],
+        "explanation": "A deletes userGetEmailPrisma after moving its only caller; B's new controller imports it.",
+        "aCommit": "98a10b2fc94c5190f1f0c2863ae5404e25f734d3",
+        "aTree": "313a9b59155718b420eb0ff193ca18aa3ba786a6",
+        "bCommit": "09eb96ec13578fb18e2785ee1178dcce740dd189",
+        "bTree": "e4907956e94bead2fffb914142215c811cf6de24",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-032",
+        "type": "test",
+        "label": "conflict",
+        "category": "new_rule_breaks_new_tests",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-032-a",
+        "branch_b": "rw-032-b",
+        "intent_a": "Require passwords of 8+ characters with a number.",
+        "intent_b": "Trim usernames on register.",
+        "involved_symbols": ["userRegisterValidator", "registerUser", "usersRegister"],
+        "explanation": "A adds a password rule and updates the tests that register users; B's new tests register users inline with the password 'pw', which the rule rejects.",
+        "aCommit": "8cba2db6782aa369d510c36c1b899664e53fd0ae",
+        "aTree": "b7ff970ccc219761809a32fac6d54fac40bb1aef",
+        "bCommit": "77ade6a798140bb2d5012e51e9c6a34b1285f53a",
+        "bTree": "0e7634fd92c7302cc24c4be65f3ebe6d527ce07f",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-033",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "validation_bypassed_by_new_route",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-033-a",
+        "branch_b": "rw-033-b",
+        "intent_a": "Require https images on user update.",
+        "intent_b": "Add PUT /api/user/image.",
+        "involved_symbols": ["userUpdateValidator", "userSetImage", "userUpdatePrisma"],
+        "explanation": "A validates images in the PUT /api/user validator; B's new endpoint writes the image through userUpdatePrisma without that validator, so http images can still be stored.",
+        "oracle_applies_to": ["a"],
+        "aCommit": "b0c942bc97ffe1447fb5dd45ed10c19616a90eff",
+        "aTree": "0b1bc9e650414bf5fced7c0dfb1ce2abe91fb307",
+        "bCommit": "590252ceb641e4165c22965b16072eaa3e6d8e77",
+        "bTree": "71434628accf4a995594f647177402fdc863d4b2",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-034",
+        "type": "intent",
+        "label": "conflict",
+        "category": "same_feature_two_apis",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-034-a",
+        "branch_b": "rw-034-b",
+        "intent_a": "Add GET /api/user/favorites; also fix the user get docs.",
+        "intent_b": "Support ?favorited=me in the article list; also document the list controller.",
+        "involved_symbols": ["userFavorites", "articlesList", "favorited"],
+        "explanation": "Both let a user list their own favorites, one as a new endpoint and one as a list filter. Each side carries an unrelated doc change.",
+        "aCommit": "dfa1cec8eb2a0b63df4a7cb180f1e2c4cb1e83b1",
+        "aTree": "ee14a086d7577e7e1f1ed159324ef2f48a5a0bcd",
+        "bCommit": "af6a2e2ff2b2349b22b2c4042a34accb9e2e995c",
+        "bTree": "25bf5f79f6f067a9c302c96f0d15747c4c6c859e",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-035",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "cut_off_format_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-035-a",
+        "branch_b": "rw-035-b",
+        "intent_a": "Add debug logging to every handler, and store tag names lowercase.",
+        "intent_b": "Add GET /api/tags/:tag with its article count.",
+        "involved_symbols": ["tagsCreatePrisma", "getTag", "tagName"],
+        "explanation": "Same conflict as rw-040, but A's diff is mostly logging and runs past the 40,000 character cap, so the tag change is cut from it.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "5eadeb3127b7ae14007c9c05ed3b29ddbd13be2c",
+        "aTree": "7f44fe385a30b9ca2425eba9dbbfcabc9cd4573b",
+        "bCommit": "a963438371175328da7ec41166c7f15670876170",
+        "bTree": "6031d79d50413ad325330b9ade3dd21f5ec4c731",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-036",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "cut_off_unrelated",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-036-a",
+        "branch_b": "rw-036-b",
+        "intent_a": "Add debug logging to every handler, and store tag names lowercase.",
+        "intent_b": "Trim comment bodies.",
+        "involved_symbols": ["commentCreatePrisma", "logger"],
+        "explanation": "A's diff is cut off as in rw-035, but B trims comment bodies, which nothing in A touches.",
+        "aCommit": "9ae8f896680015a1fa2144653a6e0d7a0b8f524f",
+        "aTree": "7f44fe385a30b9ca2425eba9dbbfcabc9cd4573b",
+        "bCommit": "d014521a8fdf4028908e81b5735c35b71ca4c46f",
+        "bTree": "5bab9b649c7368f048007db204cea39dd9f0e1d6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-037",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "slug_format_no_static_link",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-037-a",
+        "branch_b": "rw-037-b",
+        "intent_a": "Keep accented and non-Latin letters in slugs.",
+        "intent_b": "Only route well-formed slugs to GET /api/articles/:slug.",
+        "involved_symbols": ["slugfy", "articlesGet", "router.get"],
+        "explanation": "A's slugs keep letters like è and п; B's route only accepts [a-z0-9-], so those articles 404. No code on one side calls the other; they meet only in the slug format.",
+        "aCommit": "0435cbf1f6b9cc78bd3b4956c9c66e0937b1fe75",
+        "aTree": "c6da83c5016270d8f5dc5ce8fffa2051b3053230",
+        "bCommit": "2490d0d8fedf6c9b5d6e7f4171f27a6b972c151b",
+        "bTree": "be4903cc8882f9e9eb24a5fd22bd5365d0e78663",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-038",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "same_kind_different_resource",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-038-a",
+        "branch_b": "rw-038-b",
+        "intent_a": "Limit comment bodies to 1,000 characters.",
+        "intent_b": "Limit article bodies to 20,000 characters.",
+        "involved_symbols": ["commentCreateValidator", "articlesCreateValidator"],
+        "explanation": "Looks like the same fix twice, but one limits comments and the other articles.",
+        "aCommit": "b70792c7765fea55618beea957ac16f645af4452",
+        "aTree": "9b5579212333b31d5d348389448cecc25415b39b",
+        "bCommit": "41f1e28d9603a62ab33994a1feb835d564610658",
+        "bTree": "72cfa9bc40605d525ac86c7adbd42713dcd5b75c",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-039",
+        "type": "intent",
+        "label": "conflict",
+        "category": "contradicting_limits",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-039-a",
+        "branch_b": "rw-039-b",
+        "intent_a": "Reject article titles over 100 characters.",
+        "intent_b": "Cut article titles to 120 characters when saving.",
+        "involved_symbols": ["articlesCreateValidator", "articleCreatePrisma", "MAX_TITLE_CHARS"],
+        "explanation": "Both limit title length, with different limits and opposite behavior: A rejects over 100, B silently cuts over 120, which can no longer happen through the API.",
+        "aCommit": "b51c8c768d6417efe33df3a2bc28d6bcafd3d355",
+        "aTree": "7b3f05b3c0a021dccb2bf45af00fb5369ff77087",
+        "bCommit": "6b02f707095ee9fe1847b9aea255291b82660343",
+        "bTree": "175cff0fa3219e8fcfb9e38adee532100a73b2e9",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-040",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "stored_format_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-040-a",
+        "branch_b": "rw-040-b",
+        "intent_a": "Store tag names lowercase and trimmed.",
+        "intent_b": "Add GET /api/tags/:tag with its article count.",
+        "involved_symbols": ["tagsCreatePrisma", "getTag", "tagName"],
+        "explanation": "A stores tags lowercase; B looks a tag up by the exact name in the URL, so /api/tags/React is a 404 for a tag created as React.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "3484b9c1fb89aff9cef93573e79b4506f05fdf28",
+        "aTree": "01eb8a1426b38d6ea316235241ee21e1e150112a",
+        "bCommit": "856bce045bc73068149158a81b97d00df1c0a59f",
+        "bTree": "6031d79d50413ad325330b9ade3dd21f5ec4c731",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-041",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "linked_but_independent",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-041-a",
+        "branch_b": "rw-041-b",
+        "intent_a": "Sort article tags ignoring case.",
+        "intent_b": "Cap slugs at 60 characters.",
+        "involved_symbols": ["articleViewer", "slugfy", "articlesCreate"],
+        "explanation": "articlesCreate uses both changes, two steps apart, but tag order and slug length do not affect each other.",
+        "aCommit": "f57262eb87f92bbe09e031bf4998342d97882a99",
+        "aTree": "e8b8fcad30edea4d250053bd2b31ecbeb4bd2dfd",
+        "bCommit": "42bd1893be9a04ca1070af53cea6e36620675070",
+        "bTree": "cdfc7cefe75508cc2d59ce8b38da8b9002f923d1",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-042",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "token_payload_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-042-a",
+        "branch_b": "rw-042-b",
+        "intent_a": "Add debug logging to every handler and stop putting the email in login tokens.",
+        "intent_b": "Let moderators, listed by email, delete any comment.",
+        "involved_symbols": ["createUserToken", "isModerator", "deleteComment"],
+        "explanation": "A's token carries only the username; B reads req.auth.user.email to find moderators, so after the merge nobody is a moderator. The token change is past the diff cap, among 30 files of logging.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "b0cb3be86bd803b4f85e13ba5f78abded2a0e32a",
+        "aTree": "736060fc02331587a450b254e87d78653e615883",
+        "bCommit": "44f91f796b24ce5f17d350a1a6276635a10af95f",
+        "bTree": "3c5e379b93acc648937bff98262ddfb6b249bac6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-043",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "looks_like_conflict",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-043-a",
+        "branch_b": "rw-043-b",
+        "intent_a": "Add debug logging to every handler and stop putting the email in login tokens.",
+        "intent_b": "Let moderators, listed by username, delete any comment.",
+        "involved_symbols": ["createUserToken", "isModerator", "deleteComment"],
+        "explanation": "Twin of rw-042, but B reads the username from the token, which A keeps.",
+        "aCommit": "622f4370da4c806cf7489191719e23ebdb65d67c",
+        "aTree": "736060fc02331587a450b254e87d78653e615883",
+        "bCommit": "6a0eb943c3bf98bf7afffde8acd20aa0f7651d0c",
+        "bTree": "ce0d85eef3b311536114c6e805096cf64fc567d6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-044",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "normalization_mismatch",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-044-a",
+        "branch_b": "rw-044-b",
+        "intent_a": "Add debug logging to every handler and ignore whitespace around passwords.",
+        "intent_b": "Add POST /api/user/confirm-password.",
+        "involved_symbols": ["hashPassword", "compareWithHash", "userConfirmPassword"],
+        "explanation": "A trims passwords before hashing; B compares with bcrypt directly, untrimmed, so a password with surrounding spaces no longer confirms. The trim is past the diff cap.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "cef978cba138ad4e34bf71d113734289f611b222",
+        "aTree": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "bCommit": "ef590d1dfbaf4ad29ef8ead6f9886bcecb66e1f8",
+        "bTree": "dd8a1b35d0ee20e485811a4440eefa745a4f1883",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-045",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "looks_like_conflict",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-045-a",
+        "branch_b": "rw-045-b",
+        "intent_a": "Add debug logging to every handler and ignore whitespace around passwords.",
+        "intent_b": "Add POST /api/user/confirm-password.",
+        "involved_symbols": ["hashPassword", "compareWithHash", "userConfirmPassword"],
+        "explanation": "Twin of rw-044, but B uses compareWithHash, which A trims as well.",
+        "aCommit": "cef978cba138ad4e34bf71d113734289f611b222",
+        "aTree": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "bCommit": "2a8544c757808d28b72f86e94bfca5a80b38a060",
+        "bTree": "65f23954aa1c547d0c39547353c5e902f804b8ca",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-046",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "silent_side_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-046-a",
+        "branch_b": "rw-046-b",
+        "intent_a": "Add debug logging to every handler.",
+        "intent_b": "Let moderators, listed by email, delete any comment.",
+        "involved_symbols": ["createUserToken", "isModerator", "deleteComment"],
+        "explanation": "Same code as rw-042, but A's task and commit message only mention the logging; the token change is unannounced and past the diff cap.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "8231f42920a8dcce23ef91ab15bfa3102e41870c",
+        "aTree": "736060fc02331587a450b254e87d78653e615883",
+        "bCommit": "ef8ee56425f6564dcfabdfb109da1713afe42115",
+        "bTree": "3c5e379b93acc648937bff98262ddfb6b249bac6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-047",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "silent_side_change",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-047-a",
+        "branch_b": "rw-047-b",
+        "intent_a": "Add debug logging to every handler.",
+        "intent_b": "Add POST /api/user/confirm-password.",
+        "involved_symbols": ["hashPassword", "compareWithHash", "userConfirmPassword"],
+        "explanation": "Same code as rw-044, but A's task and commit message only mention the logging; the password trim is unannounced and past the diff cap.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "8f305a8cba52a14cc6d3a6dde6cdf8a0d0db9526",
+        "aTree": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "bCommit": "b78a3919c81bd07995579d8072c0ecf2605f4fb3",
+        "bTree": "dd8a1b35d0ee20e485811a4440eefa745a4f1883",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-048",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "misleading_message",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-048-a",
+        "branch_b": "rw-048-b",
+        "intent_a": "Add debug logging to every handler and ignore whitespace around passwords.",
+        "intent_b": "Add POST /api/user/confirm-password, checked with the shared compareWithHash.",
+        "involved_symbols": ["hashPassword", "compareWithHash", "userConfirmPassword"],
+        "explanation": "Same code as rw-044, but B's commit message says it uses compareWithHash; the code calls bcrypt directly, untrimmed.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "aTree": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "bCommit": "9cb54d388e5df4eafeb4d12c12eb00d072cd5899",
+        "bTree": "dd8a1b35d0ee20e485811a4440eefa745a4f1883",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-049",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "misleading_message",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-049-a",
+        "branch_b": "rw-049-b",
+        "intent_a": "Add debug logging to every handler and ignore whitespace around passwords.",
+        "intent_b": "Add POST /api/user/confirm-password, checked with bcrypt directly.",
+        "involved_symbols": ["hashPassword", "compareWithHash", "userConfirmPassword"],
+        "explanation": "Same code as rw-045, but B's commit message says it calls bcrypt directly; the code uses compareWithHash, which A trims too.",
+        "aCommit": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "aTree": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "bCommit": "92a8a3a8db8c4077ce7cebba1c5a44f1b48f244c",
+        "bTree": "65f23954aa1c547d0c39547353c5e902f804b8ca",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-050",
+        "type": "runtime",
+        "label": "conflict",
+        "category": "past_diff_cap",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-050-a",
+        "branch_b": "rw-050-b",
+        "intent_a": "Add debug logging to every handler and a demo seed script.",
+        "intent_b": "Let moderators, listed by email, delete any comment.",
+        "involved_symbols": ["createUserToken", "isModerator", "deleteComment"],
+        "explanation": "Like rw-046, but A also adds a 160k-character seed script first in the diff, so the unannounced token change is past the 150k diff cap.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+        "aTree": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "bCommit": "590430c3cf8a65e603e7443ce7fa8057c6c1baf0",
+        "bTree": "3c5e379b93acc648937bff98262ddfb6b249bac6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "id": "rw-051",
+        "type": "negative",
+        "label": "no_conflict",
+        "category": "looks_like_conflict",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "branch_a": "rw-051-a",
+        "branch_b": "rw-051-b",
+        "intent_a": "Add debug logging to every handler and a demo seed script.",
+        "intent_b": "Let moderators, listed by username, delete any comment.",
+        "involved_symbols": ["createUserToken", "isModerator", "deleteComment"],
+        "explanation": "Twin of rw-050, but B reads the username from the token, which A keeps.",
+        "aCommit": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+        "aTree": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "bCommit": "2a5e5daf9173ccbb278b64cfd6aab37335a6ca08",
+        "bTree": "ce0d85eef3b311536114c6e805096cf64fc567d6",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "type": "runtime",
+        "label": "conflict",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "intent_a": "Add debug logging to every handler and table tests for the article validator.",
+        "intent_b": "Add GET /api/articles/:slug/comments/latest.",
+        "id": "rw-052",
+        "branch_a": "rw-052-a",
+        "branch_b": "rw-052-b",
+        "category": "past_diff_cap_import_linked",
+        "involved_symbols": ["commentsGetPrisma", "latestComment"],
+        "explanation": "A (unannounced) lists comments newest first; B takes the last comment as the latest, so after the merge it returns the oldest. The order change is past the 150k cap in path order, but B's controller imports commentsGetPrisma.",
+        "oracle_applies_to": ["b"],
+        "aCommit": "4a1e6b527b83c0b3015789b7bdc8baaae9756f7c",
+        "aTree": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "bCommit": "f0a84bac3c7479cf2fca0fc63d2a1ec1bdf1a714",
+        "bTree": "085bf7e8908779a6e3c4e16b80beb2c2f0f703db",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      },
+      {
+        "type": "negative",
+        "label": "no_conflict",
+        "target": "realworld-express-prisma",
+        "base": "eval-base-v2",
+        "intent_a": "Add debug logging to every handler and table tests for the article validator.",
+        "intent_b": "Add GET /api/articles/:slug/comments/latest.",
+        "id": "rw-053",
+        "branch_a": "rw-053-a",
+        "branch_b": "rw-053-b",
+        "category": "looks_like_conflict",
+        "involved_symbols": ["commentsGetPrisma", "latestComment"],
+        "explanation": "Twin of rw-052, but B picks the highest id, which does not depend on the order.",
+        "aCommit": "3a1374ab66885e3e28d4ba5515a0a5daa58cadd1",
+        "aTree": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "bCommit": "e75933296827a4567c1bf4595f7f0246edb62c87",
+        "bTree": "b900bc63748c7f4d575bc507178d10907d6d00a0",
+        "baseCommit": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "baseTree": "c15a161bb1aec25c3a26bda161277694af53cf8a"
+      }
+    ]
+  },
+  "totals": {
+    "cases": 53,
+    "fullBytes": 6554688,
+    "compactBytes": 4293027,
+    "fullMedianBytes": 52887,
+    "compactMedianBytes": 39872
+  },
+  "reduction": 0.3450447984709569,
+  "rows": [
+    {
+      "caseId": "rw-001",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "cbb74cce9ae4c1310130775e4d1fcfc396d67120",
+        "b": "8435559951ab702dcc5d34875ba606f3d51fb111",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "c4381b64e90eb50d9d88740a71172eb04c54fc24",
+          "b": "4430ab4edb2a87f2c4d8faf6618f6b8f111c6ef0"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "4238d934adf2d694ed98ff0527d4c40995f5e794",
+          "b": "eaa289fa3ea0d887705b5061f12ffd54486540ec"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "cbb74cce9ae4c1310130775e4d1fcfc396d67120",
+          "b": "8435559951ab702dcc5d34875ba606f3d51fb111"
+        },
+        "commitMessagesSha256": {
+          "a": "d8b37a826818360d18dbd7fda63be9e7b5707305309b786d1a221b5d3cb03a2e",
+          "b": "af415ec21d74e8522e9b6ac20fe50c4d0aad484190350601b2946255eb5e33a2"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "6fecc0615e59ed00de0ac46e687e117e7ca627a2b412aa1f4c54be13a199788f"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "4238d934adf2d694ed98ff0527d4c40995f5e794",
+        "b": "eaa289fa3ea0d887705b5061f12ffd54486540ec"
+      },
+      "sourceBefore": "524658d9d79b616f35a485964bd34ad53b09c95e6ada7c3cdbb89efd5886290e",
+      "sourceAfter": "524658d9d79b616f35a485964bd34ad53b09c95e6ada7c3cdbb89efd5886290e",
+      "full": {
+        "bytes": 52439,
+        "responseSha256": "55325fbbdb614c6ee8fa85a4fdd58ca4376cfe90580aa245d9416bc005f249dd"
+      },
+      "compact": {
+        "bytes": 39535,
+        "responseSha256": "f78317e493956fb0be952d55f37778f37b8f1fb8ddca4e3e7169198f0ee0fc48"
+      },
+      "fullAgainSha256": "55325fbbdb614c6ee8fa85a4fdd58ca4376cfe90580aa245d9416bc005f249dd",
+      "savedReviewSha256": "789255f2451460fe43b8de3b80d290807c7690154c89a26b563fdc8c08767a28",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": ".env.test",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "README.md",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-002",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "b76d7531981749a259b780fef1dc70a393967c50",
+        "b": "6826a4273c3dc89bfe9bf22c291c225139708678",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "fc40502069b2e74d4f1473c1f679cb9c7f7d55fc",
+          "b": "b31294e4332c49fdfcbf975e6e925d666376f2a2"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "3a1fa361a0d0402db301567204e8f8564e394dc3",
+          "b": "59aba2b4502c3a6cc6b7d1aee2fa78560001f78e"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "b76d7531981749a259b780fef1dc70a393967c50",
+          "b": "6826a4273c3dc89bfe9bf22c291c225139708678"
+        },
+        "commitMessagesSha256": {
+          "a": "91236ebf14a2feea64516e9d1e650731765e4c68877c52211a5099f778593b1f",
+          "b": "027854edf48e33e6f15c1284ad1f2fe4701237b82680a4d085732da33a30eb73"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "903b52018a40c1ea1cf8a35ecb7ceb816360153583cbc90691d8e33650d73e89"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "3a1fa361a0d0402db301567204e8f8564e394dc3",
+        "b": "59aba2b4502c3a6cc6b7d1aee2fa78560001f78e"
+      },
+      "sourceBefore": "6454ec27ac648f9fc2aab413876d7eb06b073c3cb8c13332e55ca732b95bfffa",
+      "sourceAfter": "6454ec27ac648f9fc2aab413876d7eb06b073c3cb8c13332e55ca732b95bfffa",
+      "full": {
+        "bytes": 93332,
+        "responseSha256": "2ae80bb01244a2e311630e869537b2dce548c569b8a3b22b013d881d8f1998da"
+      },
+      "compact": {
+        "bytes": 65350,
+        "responseSha256": "4be1616e76b3f50ad9abd4413dbc20f11b72538cd9d3e546eff3b8bcb4566fcc"
+      },
+      "fullAgainSha256": "2ae80bb01244a2e311630e869537b2dce548c569b8a3b22b013d881d8f1998da",
+      "savedReviewSha256": "58ed6a747c26b467de114b43ed1c751a08db29f34a0d230f3e38f4736274f106",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/schema.prisma",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-003",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "450868c0f63efddcbf6c222cafde6bc0eab87c8f",
+        "b": "a6cacbff82163b3e1414cf2040da53afe493aa8e",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "5ec8183a11aea863d88415ceb320dc4bf7835ffd",
+          "b": "456679be34ae618a2fb0bf17b150ba1392ecfefe"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "8728249ee03e88eab6d15c0f2555a3e89d73bc50",
+          "b": "9ebeff1374e1e7ff685c33d08a4e68b9b91891cb"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "450868c0f63efddcbf6c222cafde6bc0eab87c8f",
+          "b": "a6cacbff82163b3e1414cf2040da53afe493aa8e"
+        },
+        "commitMessagesSha256": {
+          "a": "3d67f57b9e38540d4422f392f3ab0b277ca0ee06371dbbfe7879e2ba40e564e3",
+          "b": "f0b196e60a857e9e1133ea1ef9cfb5648de7eb803f073262d2ef1e94f585f2eb"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "32b4550a6e10f59abccba43ab7e7968e2c224cd1ade40fd15f2fccaaea3714dd"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "8728249ee03e88eab6d15c0f2555a3e89d73bc50",
+        "b": "9ebeff1374e1e7ff685c33d08a4e68b9b91891cb"
+      },
+      "sourceBefore": "ce926c311098deb01a1954a6704e20bb1e602a9549d2f2f8c45a328b82df5107",
+      "sourceAfter": "ce926c311098deb01a1954a6704e20bb1e602a9549d2f2f8c45a328b82df5107",
+      "full": {
+        "bytes": 24585,
+        "responseSha256": "e06b5e920b3b83cc71b70882bf436e68cf809503ac55aa2b3742ae4d303befce"
+      },
+      "compact": {
+        "bytes": 17341,
+        "responseSha256": "4ad2b48a3e7e839fb10df666b7d01acb9e4d4be90733de5e596275b0293dcb6d"
+      },
+      "fullAgainSha256": "e06b5e920b3b83cc71b70882bf436e68cf809503ac55aa2b3742ae4d303befce",
+      "savedReviewSha256": "efbe910a16236cd6e7334ab9988e3d100cf872cb6bfeeea640809b41ae3c06c8",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-004",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "2b7258edd9f02bdcf35cd7ce6712424b8d18d47a",
+        "b": "9630894bac4201da0d2641ef5fc958b25c0dedbc",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "4f9d4a0f5ec9f21beeebaa5173e1e4d5d17ce956",
+          "b": "bea75b1e1eaf3da4b88bbbaf0b81b5271c0b91a3"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "3499f369e31f425a8cfed9d46d3f3547391c6385",
+          "b": "47ec23a908e3b94cc28aad82e50ecafe37fc56bd"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "2b7258edd9f02bdcf35cd7ce6712424b8d18d47a",
+          "b": "9630894bac4201da0d2641ef5fc958b25c0dedbc"
+        },
+        "commitMessagesSha256": {
+          "a": "f7c62cbb658a2ff1077ef5a316ba7d55f089139e30a62a108189b25bcf840d6d",
+          "b": "60fb30499e30d20b46f2bb95c33feff1e5a8167eb675d58a189396d5bd9f6132"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "2ee90f7a9b1162fd0d1610472c850bce94636b6e00ad36ac84434f71d7199962"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "3499f369e31f425a8cfed9d46d3f3547391c6385",
+        "b": "47ec23a908e3b94cc28aad82e50ecafe37fc56bd"
+      },
+      "sourceBefore": "e0f3af96835b8ef5333953e8436ef57ed57dff3c1e3445fbfc16a5c2f9c69564",
+      "sourceAfter": "e0f3af96835b8ef5333953e8436ef57ed57dff3c1e3445fbfc16a5c2f9c69564",
+      "full": {
+        "bytes": 8417,
+        "responseSha256": "ee0b6c8db6cac1a330c0ff71487876b44a777f1a92c59bcfb254fb004bddfa0a"
+      },
+      "compact": {
+        "bytes": 6091,
+        "responseSha256": "416381c07ae1ba7de595b5ffdf51ea9e6cc4359b936b54075861d20bd3cce22d"
+      },
+      "fullAgainSha256": "ee0b6c8db6cac1a330c0ff71487876b44a777f1a92c59bcfb254fb004bddfa0a",
+      "savedReviewSha256": "771c6eb189669ddc77a5b5e4b56a6e08bd574e230bd7163e92380388abe37e56",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-005",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "17e713ed0c7d64c5e47b9e8a9b385c2057a9d0ac",
+        "b": "5fcdda856a9712918ed9c02d9e89b58c69eafd19",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "7e8c6a1879a3b9a56cc6504eff64fabc1101b86c",
+          "b": "ed882d794d477f2aa727f71c4fe42250527d9f2b"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "e7f27d99b7bcc7068aec965dd0c632c73527b20b",
+          "b": "c256d495e457dcfbf65d344692241c8de3ce8ff9"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "17e713ed0c7d64c5e47b9e8a9b385c2057a9d0ac",
+          "b": "5fcdda856a9712918ed9c02d9e89b58c69eafd19"
+        },
+        "commitMessagesSha256": {
+          "a": "503587bc1c4e50a28f1280fe43dd5325b9aa56caf6237ed51c6b5210a87bab3f",
+          "b": "1e6f74a2cc9939f2301c163de2f33b31ad028ff99ebf71536938dcedf437b0dd"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "ed9a0812691876996254ceeedf0183baa3bd12b5b8bcbee1583e6358d9a678a3"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "e7f27d99b7bcc7068aec965dd0c632c73527b20b",
+        "b": "c256d495e457dcfbf65d344692241c8de3ce8ff9"
+      },
+      "sourceBefore": "088e3ab671622258cdd9dbc48943a106c9846ee5bc5ea52eaffd60edfb2ec4ca",
+      "sourceAfter": "088e3ab671622258cdd9dbc48943a106c9846ee5bc5ea52eaffd60edfb2ec4ca",
+      "full": {
+        "bytes": 66576,
+        "responseSha256": "8c60982caf342255a8ee8e7045aaf3c56f9e142b5654e3e89f8bc0fec24c0ef9"
+      },
+      "compact": {
+        "bytes": 45980,
+        "responseSha256": "efb0bc0c6848d3adf717f769fc73a55dba4285c495e50cb98e7dced29f979d8b"
+      },
+      "fullAgainSha256": "8c60982caf342255a8ee8e7045aaf3c56f9e142b5654e3e89f8bc0fec24c0ef9",
+      "savedReviewSha256": "b2f68786aacd322a19d138c70908396b36d36a179e74ce7ff0e5040f68c68812",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-006",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "e86322ad30b06f7d090b11a1ca6af7b6d2acd470",
+        "b": "8965d8c947a15b4efb88bbc70950386b1b0de33d",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "6e20a114ff5b9d171cd04136a8748b7448e79cda",
+          "b": "126eee55bbee2914ade6294c78198097754d09b0"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "e8a75707a5689c3e3e8c6df300785189a9c816bc",
+          "b": "7cd32ff08f14d8f97a185fe31b82840406cd0102"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "e86322ad30b06f7d090b11a1ca6af7b6d2acd470",
+          "b": "8965d8c947a15b4efb88bbc70950386b1b0de33d"
+        },
+        "commitMessagesSha256": {
+          "a": "4556df1909bcda80f7ec8ab53e317880c37b1e5267e127f6980f45a8cbf3541d",
+          "b": "68d82b6351fb531bb0f012a8e5f187ac2ee337de934df8bab1dd8ee03234249c"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "b833304c9a8a445fbefc937479f2894ce29ba722ebdb2aa6256a267fbd4b9e5a"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "e8a75707a5689c3e3e8c6df300785189a9c816bc",
+        "b": "7cd32ff08f14d8f97a185fe31b82840406cd0102"
+      },
+      "sourceBefore": "30c3e52ba4a5c48010ffd72f051db347ec999a1e176fce80ef906e4581b682d1",
+      "sourceAfter": "30c3e52ba4a5c48010ffd72f051db347ec999a1e176fce80ef906e4581b682d1",
+      "full": {
+        "bytes": 90381,
+        "responseSha256": "bc4079f5dff2b6bd2d4d2a186a489969f9927d38977c433941f13d4294e4776d"
+      },
+      "compact": {
+        "bytes": 66662,
+        "responseSha256": "0f0a583deff3e47a643a055ec4aa2c4479987832b990b9ef86915388250e5743"
+      },
+      "fullAgainSha256": "bc4079f5dff2b6bd2d4d2a186a489969f9927d38977c433941f13d4294e4776d",
+      "savedReviewSha256": "2ba734bb6a6e0434cc02eb12d472d3672f8b3df72c59cabb1b10f3c946deacf5",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-007",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "074e2e6ff285681815272d0221c81f536ba16a26",
+        "b": "8f66ee890d225fca793de3843b8c9f8cf9c65fce",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "539b9ca59666758a79d2261b0eb27f1ba639fb7b",
+          "b": "8025b833f5f24be84caa40829dd68f3e6ec78294"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "0c2957f1f6c111956d4e5f9ca42d647bf187a55c",
+          "b": "b6a5ca3c814304f2d4b32f9afbc29afbc4ec7dc6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "074e2e6ff285681815272d0221c81f536ba16a26",
+          "b": "8f66ee890d225fca793de3843b8c9f8cf9c65fce"
+        },
+        "commitMessagesSha256": {
+          "a": "4eed21b1100effeb4522ec651e4d02d50de11aff69c261521c42770ad3e133d5",
+          "b": "48d57ced3ee3c2fa23839ccc6e4810c01e4bc7f9f5ff8bd01f2761a05569252a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "39b5522216ffbcb86777470e09eacc5e510e6bd1d71eabbf4c45dd0281433806"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "0c2957f1f6c111956d4e5f9ca42d647bf187a55c",
+        "b": "b6a5ca3c814304f2d4b32f9afbc29afbc4ec7dc6"
+      },
+      "sourceBefore": "83d6c20519b38e1567d9137188eb7b3ad599c9f079d9130fea9e904c25e5c9f0",
+      "sourceAfter": "83d6c20519b38e1567d9137188eb7b3ad599c9f079d9130fea9e904c25e5c9f0",
+      "full": {
+        "bytes": 34365,
+        "responseSha256": "ebe57e1ac9f4f0e3c0f0e7b3a42458ddb98cb670476ca429a6b3ac6be359960a"
+      },
+      "compact": {
+        "bytes": 23800,
+        "responseSha256": "50576225de4d202cee2be149a9502b990b4ec3522dea1bc5f09c8f31cd9064c0"
+      },
+      "fullAgainSha256": "ebe57e1ac9f4f0e3c0f0e7b3a42458ddb98cb670476ca429a6b3ac6be359960a",
+      "savedReviewSha256": "9a585299cffda1f36f369ee4f05d315f61a689a007e96248cff4dd7de5f4dedc",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-008",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "b60dcdf4b38fc915f6b841226486ca7190f5203a",
+        "b": "2abdcf63fd3e1cfa962736cc618d39e0ac8f213f",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "aeb3ab6108f86b722280ef4659fcacc6c5000db1",
+          "b": "a569b888e28e89ac72cfb53b7c3d9d84a49ffd98"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "6109ff5884b6287a1c46cf4b388068d3fbf1888a",
+          "b": "674e889d7f27956ca9d8402a4beaf60396baf0b6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "b60dcdf4b38fc915f6b841226486ca7190f5203a",
+          "b": "2abdcf63fd3e1cfa962736cc618d39e0ac8f213f"
+        },
+        "commitMessagesSha256": {
+          "a": "4350d3dd26a1b8ee478ad5aec51791b9d05e38d14a02859dccce3a5466897432",
+          "b": "d0f8eb82d0116996dce25252d0e3097217327d1fd31a9b9213c978a22c941b3b"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "2aeeab0c422c192e164791fc23ae298b7b72298ce57eb0f0f223982d2da333c5"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "6109ff5884b6287a1c46cf4b388068d3fbf1888a",
+        "b": "674e889d7f27956ca9d8402a4beaf60396baf0b6"
+      },
+      "sourceBefore": "7e64b88f18dfba9a375fa6c9821edd1ceef34e25e7906d8b2d840ff6f9f58230",
+      "sourceAfter": "7e64b88f18dfba9a375fa6c9821edd1ceef34e25e7906d8b2d840ff6f9f58230",
+      "full": {
+        "bytes": 29152,
+        "responseSha256": "85a3788517c61570e963450d6b35f88df4b4347c78655cdf056f54114a5e16f1"
+      },
+      "compact": {
+        "bytes": 21220,
+        "responseSha256": "19bdc19d3fd6c5d0fd6a4f179a58b485990d130b12cb2d9b193f5b133248dd44"
+      },
+      "fullAgainSha256": "85a3788517c61570e963450d6b35f88df4b4347c78655cdf056f54114a5e16f1",
+      "savedReviewSha256": "84f0fef13d7a1f4efd7441cc033c06ea8e64c7e5725d0d78afd0c4d0072bd646",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-009",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "4a2ac9a35c24fccd0c533d44e44f70bdbfb4e369",
+        "b": "a9951173246e605613988077a28d6f8777a29f47",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "6bcb3c49eb48bcac740ebfdf21716d3a26dc8b4b",
+          "b": "145caffd21cd1fa6e31f4a5e61cc30fc85f155b9"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "1a23a9e0f669aa4b59971388f33f6973b45996c3",
+          "b": "a0ade4dc06601a5aefcbca1006d13bfbdd9e7c77"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "4a2ac9a35c24fccd0c533d44e44f70bdbfb4e369",
+          "b": "a9951173246e605613988077a28d6f8777a29f47"
+        },
+        "commitMessagesSha256": {
+          "a": "311b8e0411d15ef0c78e2c2d7b2e7f5bf1f5a71df520fe5d368bd7f1e2369f3c",
+          "b": "288c6be6e7b2bf036181e0344705804ff40374d222bf52f265d173eb6c91f37f"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "10558edcc9436fc176918ac3ccb3a3eb09a5f8d69a9f968230d5e91a7960ed04"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1a23a9e0f669aa4b59971388f33f6973b45996c3",
+        "b": "a0ade4dc06601a5aefcbca1006d13bfbdd9e7c77"
+      },
+      "sourceBefore": "7d7dafc95237e72cb868bd3a70a2eb2b187ee854626275c748c6f9840c86a8a1",
+      "sourceAfter": "7d7dafc95237e72cb868bd3a70a2eb2b187ee854626275c748c6f9840c86a8a1",
+      "full": {
+        "bytes": 102591,
+        "responseSha256": "3d7667c7e240bbc1dfc44267d9fb74a8031ca55281b5883900897669f763349a"
+      },
+      "compact": {
+        "bytes": 75861,
+        "responseSha256": "53f58463ef2306c9792ccd5f0d86e03aebacaed10e56348da80b622615ec1c88"
+      },
+      "fullAgainSha256": "3d7667c7e240bbc1dfc44267d9fb74a8031ca55281b5883900897669f763349a",
+      "savedReviewSha256": "bf2e413b5e3f0cbdf7cdb0b25e9694692314c9d6f0e2373b99c7677bda93bdbc",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-010",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "855d233bb3c0920c1d82a9e93d8f36d981d961d5",
+        "b": "ed5e2b75bb08db680d913742a7995caf8b1c3932",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "8d8e58ed21bda433280e64f6002a31e88ec0a547",
+          "b": "428900168915bbc89ea8dd813a5fd6fd99461b90"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "e09a56e11c5b0c4340bf96d444722b7fab70eb64",
+          "b": "caef92bfceed1f421ac297360dd28a859336e269"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "855d233bb3c0920c1d82a9e93d8f36d981d961d5",
+          "b": "ed5e2b75bb08db680d913742a7995caf8b1c3932"
+        },
+        "commitMessagesSha256": {
+          "a": "7dbc1093159ad92fe0056d0bfdae2d3d0756a6266b89bafc6c9a5fe1ffd7dc4b",
+          "b": "f35dbfe166e4d4937fb756731aa90d5234e8a3753f3a6af13f90cb63462a191b"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "ef57be7f79ed5a3c3a30fb7feacba350725024e6fcef2701fa3b0d6f74be67bc"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "e09a56e11c5b0c4340bf96d444722b7fab70eb64",
+        "b": "caef92bfceed1f421ac297360dd28a859336e269"
+      },
+      "sourceBefore": "baa4f93eb358373be7f95453b73db7b43b3f703d31f10b95169b4f8a654ac93c",
+      "sourceAfter": "baa4f93eb358373be7f95453b73db7b43b3f703d31f10b95169b4f8a654ac93c",
+      "full": {
+        "bytes": 79010,
+        "responseSha256": "fb952660ab1991a7d943cbe06f17ddb551162c8ce925e8b7964306ec90eeecd7"
+      },
+      "compact": {
+        "bytes": 59699,
+        "responseSha256": "f99d85f2d7c8a291604ccccc421fbe801d51d5c16cd135fd4a675582ef782666"
+      },
+      "fullAgainSha256": "fb952660ab1991a7d943cbe06f17ddb551162c8ce925e8b7964306ec90eeecd7",
+      "savedReviewSha256": "c3e463cfc1962c104af1e3ccd0e97e871b7dad1b61171e79cd0cadf071dc0e59",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-011",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "81b76c655e90230da3af0a551306868cad7e4558",
+        "b": "63dc0ff85ba54670b804ba1927ecf22678a38fc0",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "c997942de239836a68fb0215b2c8b049e7a9367d",
+          "b": "a8ee1989d9c9b2c21a08a8b9f5faeeaf7cff5e6e"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "0f1a4f0a09a67c320f84565536f3282453b77625",
+          "b": "cc110cb1815db76cdb2e28630a27ac83b666307b"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "81b76c655e90230da3af0a551306868cad7e4558",
+          "b": "63dc0ff85ba54670b804ba1927ecf22678a38fc0"
+        },
+        "commitMessagesSha256": {
+          "a": "30020a38913020d02b3bcbe7133df6d56e65a4052402f80a846dd4f934eaeccf",
+          "b": "1291befb9b94f7a03903179d2bdb30d3f9a90a29e6f6ea6d3ed0b0f06547d84f"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "0e01c05f39bb990447e10df08cece101856d6e686f4f0204c65be88fa737cc37"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "0f1a4f0a09a67c320f84565536f3282453b77625",
+        "b": "cc110cb1815db76cdb2e28630a27ac83b666307b"
+      },
+      "sourceBefore": "4d6ab062a32ea4147849a4f8cce81151003313d2d5a22e6f7f73ac0d2cffd588",
+      "sourceAfter": "4d6ab062a32ea4147849a4f8cce81151003313d2d5a22e6f7f73ac0d2cffd588",
+      "full": {
+        "bytes": 29184,
+        "responseSha256": "c32eb3f41442ad4023f8681adfd1f731a711d34e60ff758f8b0d71dd87e80c33"
+      },
+      "compact": {
+        "bytes": 20346,
+        "responseSha256": "2612aac25e10deaacb0881e7c6aecfde711e1b969d16310cd24ee12b1b5a037a"
+      },
+      "fullAgainSha256": "c32eb3f41442ad4023f8681adfd1f731a711d34e60ff758f8b0d71dd87e80c33",
+      "savedReviewSha256": "84bbd0015ab981906940c8e68d0230933e4bb3323626955123c0dc3da030318d",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-012",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "43dca9e18d4b8346fc59bc4145f8dbe108ccce3a",
+        "b": "bd9dde6bfe3bd228028c6f46f566d2c7eff5591b",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "9a8187d68297c4d2003a233e192a2fe657e3572d",
+          "b": "7cd1b10c7aba67a330a59810d448ae0abcee44f7"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "a0a7cee70aa30f3898fd13492cf1f16248580669",
+          "b": "a27a8bfe07ba6c021bbada6cf2f641b6e2c226ca"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "43dca9e18d4b8346fc59bc4145f8dbe108ccce3a",
+          "b": "bd9dde6bfe3bd228028c6f46f566d2c7eff5591b"
+        },
+        "commitMessagesSha256": {
+          "a": "77fa83f9e84a51ffdbce418587eca7093a2bddf35979d5f911161766059717ac",
+          "b": "626c05ff7995d66f55edc5ab0833ab6bba4a88a569aad587959e399fade1fa10"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "ed905e5390fc6f3ee92fd16bdbfefa44aea462d8523da5d9d424af0553b5e28d"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "a0a7cee70aa30f3898fd13492cf1f16248580669",
+        "b": "a27a8bfe07ba6c021bbada6cf2f641b6e2c226ca"
+      },
+      "sourceBefore": "3731fd0e07a922c913d01b1086540d932a8c1fd42e1d7dd24b045a7e4bd48f33",
+      "sourceAfter": "3731fd0e07a922c913d01b1086540d932a8c1fd42e1d7dd24b045a7e4bd48f33",
+      "full": {
+        "bytes": 48992,
+        "responseSha256": "8160de7c0fbbd253dfed68049e0b14003ee2d39f19b9aba229d2f1b4cac7fda5"
+      },
+      "compact": {
+        "bytes": 36756,
+        "responseSha256": "ed9e0ff48447631223e69fb484be86c72458eddf2b299431cedc624974785d93"
+      },
+      "fullAgainSha256": "8160de7c0fbbd253dfed68049e0b14003ee2d39f19b9aba229d2f1b4cac7fda5",
+      "savedReviewSha256": "efd6330061cd4b91dc39298ff75f2d53c30f7690e986f74e04ccbf505fcb36fd",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-013",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "8f0cdd483c14a48283fc02c626b1d5ca35d60336",
+        "b": "20f2ee2313b69d95774351468426a127bb3470e3",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "303f448701c9a156c50e17b5468b3f2adcbfb5ed",
+          "b": "9682952f2d7a96683acce6fc90b12a69e4fc4fda"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "85cfc6a0031452247cd12601383f7f6c4c4cd0b7",
+          "b": "0edec4a90fb31e984a40ff6df8c48f04fa3f5c25"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "8f0cdd483c14a48283fc02c626b1d5ca35d60336",
+          "b": "20f2ee2313b69d95774351468426a127bb3470e3"
+        },
+        "commitMessagesSha256": {
+          "a": "f057020adcebde0e9b22096b53a3e8b666c3334f37a2178fc9423a3cd7870dae",
+          "b": "20e1ac9d8e4418ae7bc22d92252e8d84d1f4c13c3e3e389814162f6efbc6427a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "600a7a8d7cce23d28685a0fe0cbd65279c821b3c7f24d094048e78f6603a2837"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "85cfc6a0031452247cd12601383f7f6c4c4cd0b7",
+        "b": "0edec4a90fb31e984a40ff6df8c48f04fa3f5c25"
+      },
+      "sourceBefore": "3d0bb3adcdd2851775fd5b57970e32871044ce52bc4f80950b5a390d3e9567ca",
+      "sourceAfter": "3d0bb3adcdd2851775fd5b57970e32871044ce52bc4f80950b5a390d3e9567ca",
+      "full": {
+        "bytes": 41443,
+        "responseSha256": "3fe8fa4103e8e2bc90382c474490e42dd5ac8c2a04d8efb5fef110822b167147"
+      },
+      "compact": {
+        "bytes": 32161,
+        "responseSha256": "56f2eb9c146603bbeab0e8fe2af917a835814341da15747f2dad7adac638c25a"
+      },
+      "fullAgainSha256": "3fe8fa4103e8e2bc90382c474490e42dd5ac8c2a04d8efb5fef110822b167147",
+      "savedReviewSha256": "868e8312629ca8187320c1e3f99df5c714f03496fff40d7664aa8612de16d99a",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/schema.prisma",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-014",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "17161de0cfb8e9a529cedae040eaa435af1acd6c",
+        "b": "829ca4b1edc77c14110cb5acd8b2a916c0645506",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "d4f9e9fd63ddffd5553e719a4fb940c0a921f090",
+          "b": "7c3e6f047bfe0cadddb8022d55e2354da693d278"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "3d5b0e6a4af718e70c2f87c9c922bcc79d86122a",
+          "b": "6ef7a06062701b3b8199ada46aba87f54141e672"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "17161de0cfb8e9a529cedae040eaa435af1acd6c",
+          "b": "829ca4b1edc77c14110cb5acd8b2a916c0645506"
+        },
+        "commitMessagesSha256": {
+          "a": "30020a38913020d02b3bcbe7133df6d56e65a4052402f80a846dd4f934eaeccf",
+          "b": "dc2ff5ee52135b3573612a1796c485254352ccfd9bc61625cddb57fde8f26a45"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "0e01c05f39bb990447e10df08cece101856d6e686f4f0204c65be88fa737cc37"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "3d5b0e6a4af718e70c2f87c9c922bcc79d86122a",
+        "b": "6ef7a06062701b3b8199ada46aba87f54141e672"
+      },
+      "sourceBefore": "c2410fc2bb53de87a83e04f8dd2c9fd86211d44957d66301d842fd7e753c3618",
+      "sourceAfter": "c2410fc2bb53de87a83e04f8dd2c9fd86211d44957d66301d842fd7e753c3618",
+      "full": {
+        "bytes": 15871,
+        "responseSha256": "05c44d04943ed5aa2f82baa488cfa97b8b0a43f0aac3a3f71a7dff9500942b6f"
+      },
+      "compact": {
+        "bytes": 11941,
+        "responseSha256": "28a61107d8894b7142d07d6498811cafc2aea825d8c7c66ec63809e862c883af"
+      },
+      "fullAgainSha256": "05c44d04943ed5aa2f82baa488cfa97b8b0a43f0aac3a3f71a7dff9500942b6f",
+      "savedReviewSha256": "06359d4f3c3c39f49e75fe13e39988ee6b420d4827e2399171f166a8c3187d52",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-015",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "8db011a6859151f38b3ee49cd42a37b74daf9ec6",
+        "b": "07e94b22c6dfc2590f6ddcfe66dd52c33a05e5eb",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "8fbf560f1a922b7bf6279ededbd24e82e007141e",
+          "b": "ef31f03ff29a01b68f6a691cf325a9c5c20e44aa"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "2595482c497c28e6f75c55a3e500b2b9727438ef",
+          "b": "e33766f625441233d2eb278b7558f63b85c16476"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "8db011a6859151f38b3ee49cd42a37b74daf9ec6",
+          "b": "07e94b22c6dfc2590f6ddcfe66dd52c33a05e5eb"
+        },
+        "commitMessagesSha256": {
+          "a": "68d82b6351fb531bb0f012a8e5f187ac2ee337de934df8bab1dd8ee03234249c",
+          "b": "6e1d2855ed1271ce48a37ef35845a0c774e3e0e641935667d98b1a50e50f62fb"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "395868f833f653b620115ceb6a1e6262d2f7cb0328661c78320fc8f322777f04"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "2595482c497c28e6f75c55a3e500b2b9727438ef",
+        "b": "e33766f625441233d2eb278b7558f63b85c16476"
+      },
+      "sourceBefore": "af2ae7e144aa0c0058f86cf3d991a745c0d81ef9f6ee52610d2c55db33228d2a",
+      "sourceAfter": "af2ae7e144aa0c0058f86cf3d991a745c0d81ef9f6ee52610d2c55db33228d2a",
+      "full": {
+        "bytes": 114719,
+        "responseSha256": "7a94d33371c307d835b946bd0106712e48e49b6ebecd3fad45a503b898e9592e"
+      },
+      "compact": {
+        "bytes": 71879,
+        "responseSha256": "8f0db0e96bc6a35f227882c130cf3aee4e88b882cdc3fdbe65a4ac39de813b67"
+      },
+      "fullAgainSha256": "7a94d33371c307d835b946bd0106712e48e49b6ebecd3fad45a503b898e9592e",
+      "savedReviewSha256": "c675932ee53db1aba2ad6b08343c672db98cf33ff9ff06cdb955253c8c052620",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-016",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "55c1e738db014400990be643377f6ed94c882874",
+        "b": "7479e1207ff0f811953a51227449b0a2ba224d62",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "6a37f2c91dff6b2e93bd97b0dbe8fca3629a1dc4",
+          "b": "74374bcd33cb95e80432a3883e6c2f57c5c90504"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "60b19ba63ba8353f0c02429ae33d7c100ea07a6a",
+          "b": "c1f5dbdf3e447a48d47f2788757746190d9b8618"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "55c1e738db014400990be643377f6ed94c882874",
+          "b": "7479e1207ff0f811953a51227449b0a2ba224d62"
+        },
+        "commitMessagesSha256": {
+          "a": "ecf4617cc8b1c6a7bdddb10df9254102692ad0fec84efb99791ff93689e694d1",
+          "b": "6f1f9116eda24184d1f56272378a74455267ad0efc71b32bad29dedd6e5eebcc"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "b9a44c3b5533d32381859ff875402a4270e14d0409882e0da69d9979622894e7"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "60b19ba63ba8353f0c02429ae33d7c100ea07a6a",
+        "b": "c1f5dbdf3e447a48d47f2788757746190d9b8618"
+      },
+      "sourceBefore": "772e1c3b1a9e1948ec9e5adc2622a8fc3460cec48626dc7e8c3ad61746687c39",
+      "sourceAfter": "772e1c3b1a9e1948ec9e5adc2622a8fc3460cec48626dc7e8c3ad61746687c39",
+      "full": {
+        "bytes": 120132,
+        "responseSha256": "4130b0cd9f3508c707668d1005995bb495f4d6037d417f9bf56be105f5dacf35"
+      },
+      "compact": {
+        "bytes": 75905,
+        "responseSha256": "ef0818ffc3632447702ac26eecdc19e96feb0b04dfb735d00e4020aa28a5539f"
+      },
+      "fullAgainSha256": "4130b0cd9f3508c707668d1005995bb495f4d6037d417f9bf56be105f5dacf35",
+      "savedReviewSha256": "64abdeae60f30b283b6a2be56ba2c578385189557bae7c8fd5c67a01a950d7b3",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-017",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "00d6e985b380dcf9adc74f39770753f7d8939d8a",
+        "b": "e197f3923a69e64fdfb1563b9e96f177d28bbe65",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "199033c136816851dc31b7e31f5416cd709748bd",
+          "b": "b666624597263990f434ee220326406e065e6a58"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "0aa2650c7a4e408a5f14f808af2ff705fccac3d4",
+          "b": "814994eff291cd1518e41a7fcae83d3577823b7a"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "00d6e985b380dcf9adc74f39770753f7d8939d8a",
+          "b": "e197f3923a69e64fdfb1563b9e96f177d28bbe65"
+        },
+        "commitMessagesSha256": {
+          "a": "ec5e93be9310169730f16c2d19cc0088fdd9723fa04cf4b2850d24aea867df35",
+          "b": "3bb2e9ab12a6526028712678b2633353c0dc9f523b4c7610789a3448439e0243"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "603f1a24c1c940832823316a9dcfeca5ccbcfa549e96bba229d19c044bb5506c"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "0aa2650c7a4e408a5f14f808af2ff705fccac3d4",
+        "b": "814994eff291cd1518e41a7fcae83d3577823b7a"
+      },
+      "sourceBefore": "e4784df49309cf8f143d6cdcc9b7b97dbd685707a5ce9da471ae366b4d6891b6",
+      "sourceAfter": "e4784df49309cf8f143d6cdcc9b7b97dbd685707a5ce9da471ae366b4d6891b6",
+      "full": {
+        "bytes": 23333,
+        "responseSha256": "ee745e1bac91497d75f18e16f7058e275ab3e55803f654990767fffaf9ebb8ee"
+      },
+      "compact": {
+        "bytes": 15598,
+        "responseSha256": "89d208ac8ec36c2d9a33edd3800229c58cd90fb140b52cc1b56634e9810e642d"
+      },
+      "fullAgainSha256": "ee745e1bac91497d75f18e16f7058e275ab3e55803f654990767fffaf9ebb8ee",
+      "savedReviewSha256": "54a26aae3f10a8d2e14adb67f09ca72ab5a434cee46cdb1904bdd71adfb0abc0",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-018",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "78148b7bf19e0b48f9a1c466a7dc6fe4c6412a85",
+        "b": "f42cc43acacdcd7b7668ff3bf6dd62ef7f88fc6a",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "c0cb56072a404071b66c77c331d8a00944677c2e",
+          "b": "f4809846d9b48e14269a432efa5eb97b75552f1a"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "5efaf7e02308b1d5bb0564c2a416fafcc51dd022",
+          "b": "79d9a08de231e6e63f84ed198f2fd907bc45e8db"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "78148b7bf19e0b48f9a1c466a7dc6fe4c6412a85",
+          "b": "f42cc43acacdcd7b7668ff3bf6dd62ef7f88fc6a"
+        },
+        "commitMessagesSha256": {
+          "a": "60831a13a669aa2f9529b2c0739883dda9338efb7e90035c6911a28adfc140d3",
+          "b": "d2d937f7ea8ffe93e42f838acec2960dc54c17a9a263f16b719e829fe5073706"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "8d03cf967455bdcbde32d1be0d59fde170b61512a3c08993fbbca73f935d6a45"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "5efaf7e02308b1d5bb0564c2a416fafcc51dd022",
+        "b": "79d9a08de231e6e63f84ed198f2fd907bc45e8db"
+      },
+      "sourceBefore": "77adbe94b3cbf3785b5013d2a562c8acefd1cb58f959fe6744476d0e87f2d4a1",
+      "sourceAfter": "77adbe94b3cbf3785b5013d2a562c8acefd1cb58f959fe6744476d0e87f2d4a1",
+      "full": {
+        "bytes": 40659,
+        "responseSha256": "60dbe76128bea6c8d49ca1a631e284df14e847cc3e02b1ff9c626d73ef4497c2"
+      },
+      "compact": {
+        "bytes": 27000,
+        "responseSha256": "9693076059aa1c564641ae3a579a823df1743aa782bca1268d99392ad6940101"
+      },
+      "fullAgainSha256": "60dbe76128bea6c8d49ca1a631e284df14e847cc3e02b1ff9c626d73ef4497c2",
+      "savedReviewSha256": "af3c4016cbf5c321edaa36fbe2750c00992e8012d9e9ca95c8558541f9c9035a",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/schema.prisma",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-019",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "31797ca23c71293ae8baa5425c8d050be634c9e9",
+        "b": "1b32147791cb96d2524456aa9c732f00413b558e",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "73e54c7cfbb0d11bdac83fa953cbea6ac5bf7ebb",
+          "b": "020498e5c52d2a9b78be5fbc70f7a2d0229e6624"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "69ca544850bb1baddf936f8f8bb68d10c32a3068",
+          "b": "a72199cca268e8e416d991d30ebe08f11db9c22d"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "31797ca23c71293ae8baa5425c8d050be634c9e9",
+          "b": "1b32147791cb96d2524456aa9c732f00413b558e"
+        },
+        "commitMessagesSha256": {
+          "a": "ed6a18190891075565d8a0aa829d82ccb24ca0e1f7a7f44fc8e96aa331d692a7",
+          "b": "9f015979814723e7fecbece214f2f06a8af8a20d1ed1f6434863211060e0dd8b"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "5e5921894f920e8bae1f697843c1b561b23d4fb8b658615b9241caf11d982338"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "69ca544850bb1baddf936f8f8bb68d10c32a3068",
+        "b": "a72199cca268e8e416d991d30ebe08f11db9c22d"
+      },
+      "sourceBefore": "c14fe7194a1b76394ee544d3b7d0cc1fee8a3ba00a7ad99ed61d6029b0de0dc5",
+      "sourceAfter": "c14fe7194a1b76394ee544d3b7d0cc1fee8a3ba00a7ad99ed61d6029b0de0dc5",
+      "full": {
+        "bytes": 18638,
+        "responseSha256": "bfe21fdec7544b6cf81e09c5e83964a9969455eebf741810bab302acd25126bc"
+      },
+      "compact": {
+        "bytes": 13366,
+        "responseSha256": "e9fbb3bb9cfdc95148b0cd26d0f280990aba43c97dbcd743c3cddac9f80dbdfd"
+      },
+      "fullAgainSha256": "bfe21fdec7544b6cf81e09c5e83964a9969455eebf741810bab302acd25126bc",
+      "savedReviewSha256": "acd36ac8787f67ac3613e2e29a85725cfe6e551cd2db438701e9a2f626b2d621",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-020",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "0db0228a0fb600a426cd74a5d62e5d4c2eb9582c",
+        "b": "0e4e6e5ab0ebc3fc4123321a454a275aba3df805",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "0c760ad425198423f8f064d6a956da0ce6ad4139",
+          "b": "db6e4f81de82d9162b70787877be51bebee06967"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "a0a7cee70aa30f3898fd13492cf1f16248580669",
+          "b": "2a2a950302685f2ec2e560a0a07e3cbf987b06a4"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "0db0228a0fb600a426cd74a5d62e5d4c2eb9582c",
+          "b": "0e4e6e5ab0ebc3fc4123321a454a275aba3df805"
+        },
+        "commitMessagesSha256": {
+          "a": "6432894d8a627544e6aa25b1b60f411bde797112e0365070f84c1a650e1b7212",
+          "b": "be6f1d97cf45a62d2811e3ac993a7e90b780c0dc9d7b65d3bb58ac7cb7fd0150"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "ed905e5390fc6f3ee92fd16bdbfefa44aea462d8523da5d9d424af0553b5e28d"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "a0a7cee70aa30f3898fd13492cf1f16248580669",
+        "b": "2a2a950302685f2ec2e560a0a07e3cbf987b06a4"
+      },
+      "sourceBefore": "80c8150a15df470bef9bbdf846b8cb12b4718dc5a8cdf728bb871b3f736defd4",
+      "sourceAfter": "80c8150a15df470bef9bbdf846b8cb12b4718dc5a8cdf728bb871b3f736defd4",
+      "full": {
+        "bytes": 51760,
+        "responseSha256": "2a522ae6eb930b187c11c27b90a9cf44210e6230109badb174b39f30ae3b88d6"
+      },
+      "compact": {
+        "bytes": 38785,
+        "responseSha256": "9655c954ca45ad57e5d10872621584ccc230225961fefed20676e9ab3eb88d02"
+      },
+      "fullAgainSha256": "2a522ae6eb930b187c11c27b90a9cf44210e6230109badb174b39f30ae3b88d6",
+      "savedReviewSha256": "7aa4fa96d7e72c6e6ff2263596b3ea287c6a990aa9acda79ca61755cf8a22632",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-021",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "66daeeda0a8613ce69f136c532be2d0e1e789f5b",
+        "b": "bd455b8ddae819e0628f8e8077b22fe914339a1a",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "e023ce3ed7d81d09bb573578ec25351374abba02",
+          "b": "fc08d49b3adbaabb9e8fa8e4af71594633e6fe3e"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "4238d934adf2d694ed98ff0527d4c40995f5e794",
+          "b": "65f89dd8cd4f13a7bb78b6588aacd2bc96006a02"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "66daeeda0a8613ce69f136c532be2d0e1e789f5b",
+          "b": "bd455b8ddae819e0628f8e8077b22fe914339a1a"
+        },
+        "commitMessagesSha256": {
+          "a": "2677c991f716e14ba7630ce13da2b663b2a031a23d6f0c2c7ab64c7d31815bca",
+          "b": "ca46af1614c9de167cbedb35a6b9482ba317f44098f67af5c736c36d9f289f21"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "6fecc0615e59ed00de0ac46e687e117e7ca627a2b412aa1f4c54be13a199788f"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "4238d934adf2d694ed98ff0527d4c40995f5e794",
+        "b": "65f89dd8cd4f13a7bb78b6588aacd2bc96006a02"
+      },
+      "sourceBefore": "96e2f1f8b8d49a5fc702531ec3841070ae4fbf4fe26903402f371f878d89cec9",
+      "sourceAfter": "96e2f1f8b8d49a5fc702531ec3841070ae4fbf4fe26903402f371f878d89cec9",
+      "full": {
+        "bytes": 52887,
+        "responseSha256": "fb69fbdbc977b9ea4fa1628acb706be789db09bf09523fa9c58b5776d2c82f39"
+      },
+      "compact": {
+        "bytes": 39872,
+        "responseSha256": "92838f56b16aa550d11fb854891a833a50d2d7b5c7ad69165bc77c4dd18c0e9d"
+      },
+      "fullAgainSha256": "fb69fbdbc977b9ea4fa1628acb706be789db09bf09523fa9c58b5776d2c82f39",
+      "savedReviewSha256": "41dfb3dcbc2952efa6c1f92c2d4b6366d621a3608f8f43b2bf1b3f85d02cf6ca",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": ".env.test",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "README.md",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-022",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "6fb9a7b881e394067184e3f9cec682aa7836986c",
+        "b": "5013377091ee48ba2b15030fc52ced3b257cb247",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "f887d2e08f1831b8f5f3d24e1d1bb3da0797ad21",
+          "b": "4b651f85794eb5f178f574f3eab2dc69013d265b"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "1a23a9e0f669aa4b59971388f33f6973b45996c3",
+          "b": "d2dc4098c8585f8aedc9ebb9b61b2a205056fc85"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "6fb9a7b881e394067184e3f9cec682aa7836986c",
+          "b": "5013377091ee48ba2b15030fc52ced3b257cb247"
+        },
+        "commitMessagesSha256": {
+          "a": "2b37c140d3f701326064c885d689a807d30bb1cf9528d8772717c526ec85b1ba",
+          "b": "9f85c1d6761a2d77ac295e61038f3c22baf66bbd67476a066ed978019099dac0"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "10558edcc9436fc176918ac3ccb3a3eb09a5f8d69a9f968230d5e91a7960ed04"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1a23a9e0f669aa4b59971388f33f6973b45996c3",
+        "b": "d2dc4098c8585f8aedc9ebb9b61b2a205056fc85"
+      },
+      "sourceBefore": "8b3390091daa46fee09cf6a1c5f60f98644fd86e9320d4f9574f26d2ffcb3aeb",
+      "sourceAfter": "8b3390091daa46fee09cf6a1c5f60f98644fd86e9320d4f9574f26d2ffcb3aeb",
+      "full": {
+        "bytes": 37216,
+        "responseSha256": "afc6aa173734039b08de3ce6207879807ba779046fe90a265ae502987d3ac56c"
+      },
+      "compact": {
+        "bytes": 24757,
+        "responseSha256": "6284c353830c21dcfa3b23e41119600a84bf8e1c98fd25b07336346116b23881"
+      },
+      "fullAgainSha256": "afc6aa173734039b08de3ce6207879807ba779046fe90a265ae502987d3ac56c",
+      "savedReviewSha256": "d388e9aeb4483c7f50e3cfd1f4f1c266b319ae1b80ca7810932e7fc397159932",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-023",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "34bf6c1cae9f615a9ecd3d848f252ffb2a400224",
+        "b": "b7bbbbe07fa36e3847f09b208a620099120c3bc0",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "8924176737b0f4cdfdcc1e488732836e5bde5bd0",
+          "b": "609440f6e6d9b4b8f437ce3f65753839c2f21163"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "cc9340bc2f8de95562f39df5e74c9d87c61697fe",
+          "b": "9959fcbeab00e36b076d2fbf6ed39a4736c7900b"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "34bf6c1cae9f615a9ecd3d848f252ffb2a400224",
+          "b": "b7bbbbe07fa36e3847f09b208a620099120c3bc0"
+        },
+        "commitMessagesSha256": {
+          "a": "e750248de7246de5651e3d05799c4d8c0f06d7f46fb66620fd52c3764e458c8e",
+          "b": "05940164b69011987eb6a5cfc87df7b8cc124565761d13cf2debeccced1a22b4"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "71e4de696df17bd14f31df587a220f8ab30f0b13c837e0e1dc5fcc363de6d6af"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "cc9340bc2f8de95562f39df5e74c9d87c61697fe",
+        "b": "9959fcbeab00e36b076d2fbf6ed39a4736c7900b"
+      },
+      "sourceBefore": "ced345bb6a97571f8346f3a5eeb0b52d1de514b215cee6f02ef5adc39a37fdd5",
+      "sourceAfter": "ced345bb6a97571f8346f3a5eeb0b52d1de514b215cee6f02ef5adc39a37fdd5",
+      "full": {
+        "bytes": 28753,
+        "responseSha256": "f9feb76da692ea9b1f632e2a87a16b102fb1bf130f27196f458ad2775f1167da"
+      },
+      "compact": {
+        "bytes": 14257,
+        "responseSha256": "2d51854d9d125efa536437f65e67f066e09c3dd933393ffcf7fb0c7d941a1eb7"
+      },
+      "fullAgainSha256": "f9feb76da692ea9b1f632e2a87a16b102fb1bf130f27196f458ad2775f1167da",
+      "savedReviewSha256": "9e83bedf91e8629611a5aec1b8e86d103d8b8c14d0a3a3267553aae0704e92b1",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-024",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "9312ad7eec0e7a1933759b0b1efd72ac3c7fc485",
+        "b": "64522a0d9deb5636fda76f6c55f9e0ef2d8fca9c",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "10915e3fcd1c0dc92927187f90c87a62347df1d6",
+          "b": "9d647fdb7ae9fb938423af8ba32e63a6819672dc"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "361c1a4a81391d4cc9f8105b0f4abef15e4cdb22",
+          "b": "85e421bcca38fb208eed8c56e26313bc46db7dd0"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "9312ad7eec0e7a1933759b0b1efd72ac3c7fc485",
+          "b": "64522a0d9deb5636fda76f6c55f9e0ef2d8fca9c"
+        },
+        "commitMessagesSha256": {
+          "a": "83ba0d9453fb29f79fad1285d5a3f19e87cbda0f86027f66972cc6de1e4f9f34",
+          "b": "70b356b2c57883c8460e2959b420bba3ebb8e4f5378277d873d88f8cb0575999"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "abba4786812a37be785a80a4f9a3c3b7ae805c093475e4f84418eda0f8a96f62"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "361c1a4a81391d4cc9f8105b0f4abef15e4cdb22",
+        "b": "85e421bcca38fb208eed8c56e26313bc46db7dd0"
+      },
+      "sourceBefore": "3f9259da7ee4aaafef9b19e7169477334d3602a3bd818b1013c38417d07b40be",
+      "sourceAfter": "3f9259da7ee4aaafef9b19e7169477334d3602a3bd818b1013c38417d07b40be",
+      "full": {
+        "bytes": 22891,
+        "responseSha256": "722fb4b579d00494dc2dcb5b5cb08e03ef133321758fcdb7972294c6eb7568de"
+      },
+      "compact": {
+        "bytes": 16060,
+        "responseSha256": "0af9201b30cabb0a98376145368b1a022ee42fd3ab21ae5fc8543564d817dfe9"
+      },
+      "fullAgainSha256": "722fb4b579d00494dc2dcb5b5cb08e03ef133321758fcdb7972294c6eb7568de",
+      "savedReviewSha256": "327a9937c0c9701d4c12dbfb4da84d8eb56dbeb76c9726cb8c0f7df0b404b56a",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-025",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "df0e71496fdac92e261ef164fc1e7db3e7161735",
+        "b": "1262470d92d6410ba799d7bd5ed6ab70b0a96ff0",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "b5c07b0295872b1b35e424dd7dfe80b98b42e51d",
+          "b": "f2480fc1f83f117793c8fc889a7505f8ec2aa2ce"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "3732040638bff81cb28b6751ad18a5c51643c12a",
+          "b": "d1e3cfd7c1d50bab8e83c75e33d1d8769f855208"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "df0e71496fdac92e261ef164fc1e7db3e7161735",
+          "b": "1262470d92d6410ba799d7bd5ed6ab70b0a96ff0"
+        },
+        "commitMessagesSha256": {
+          "a": "27afb3822721f3052dc63a867d1ee29aee7d0ce3d6ff1d7decf039a5c77acff3",
+          "b": "5f6cf94c5c6beab3f22f6eb7ce4967a17a81fc413fc8936b7fe3b9957f72a0bc"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "64840d970819efeb6c015b84b70e8cb71ae676b7eae6fb9351b7cc35ff62a63b"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "3732040638bff81cb28b6751ad18a5c51643c12a",
+        "b": "d1e3cfd7c1d50bab8e83c75e33d1d8769f855208"
+      },
+      "sourceBefore": "e04624b817292b6663c997c9c0e335d09d1d959ba63a36f97bf8e6364d84dde7",
+      "sourceAfter": "e04624b817292b6663c997c9c0e335d09d1d959ba63a36f97bf8e6364d84dde7",
+      "full": {
+        "bytes": 28160,
+        "responseSha256": "0e5853a38ae466c17f721adf97398a2df02e03739f952f4aa849207d1a412497"
+      },
+      "compact": {
+        "bytes": 21636,
+        "responseSha256": "fed9e8a39b7ccdd7b19f918a7fb06041311dc84c65735e3d7d45f309829f3ad0"
+      },
+      "fullAgainSha256": "0e5853a38ae466c17f721adf97398a2df02e03739f952f4aa849207d1a412497",
+      "savedReviewSha256": "56fbb6d40b0ae466ddb337448daf4767fe777ce38b55125660fbd5c10f48bef9",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-026",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "2b7172ddc9dc9cf0d3b939c15b3516ba08572ffd",
+        "b": "32601ed9414dd86432881f1481c5011525fab1be",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "9f6cfd93c8b70be1c81fa91a7f860ed4a3cd4476",
+          "b": "758fead87aa8c09837e735bee7515ff983c5de3b"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "2bb16dbebb22acca5777a155a1286828f2a6c45c",
+          "b": "96f39ffc9297154fd00a37bd9728109a12994de0"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "2b7172ddc9dc9cf0d3b939c15b3516ba08572ffd",
+          "b": "32601ed9414dd86432881f1481c5011525fab1be"
+        },
+        "commitMessagesSha256": {
+          "a": "33850b71ffd7f822239af7b9e371b5fc5c4f167438ebcda38f8b103bf20f1fa5",
+          "b": "082a039853d9336673b6b15f408615ccf3dadc63d5c42747286d4018aadfeb91"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "07228be39fb86bd5131b7e81c2dd77a90daeba51eff8491054c297937caf3e57"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "2bb16dbebb22acca5777a155a1286828f2a6c45c",
+        "b": "96f39ffc9297154fd00a37bd9728109a12994de0"
+      },
+      "sourceBefore": "11339a4a2defa549a16859414357b51f890ac2c3da90ffb07ca3f677e854b090",
+      "sourceAfter": "11339a4a2defa549a16859414357b51f890ac2c3da90ffb07ca3f677e854b090",
+      "full": {
+        "bytes": 12459,
+        "responseSha256": "2e5ccbcbe701eb8fbe2510370276e1daf8eded800a47a20263c7b277664c073e"
+      },
+      "compact": {
+        "bytes": 8080,
+        "responseSha256": "2e1f377b7922f5bc1401f5a143a1028ee112b015c0a9ee3759a36310600c9a6c"
+      },
+      "fullAgainSha256": "2e5ccbcbe701eb8fbe2510370276e1daf8eded800a47a20263c7b277664c073e",
+      "savedReviewSha256": "97b3ea0a7b42531d461fbd99ed89be457615bfa91701f51d2ee5ade4f5feefcf",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-027",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f29ac0fd160640b087f1a081a3244a72a2dfc3a2",
+        "b": "03ccbb473d2d368042cf97980ff5bbc65db7b8bd",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "94a0623db0e80fe1e97e617b69966fb2875f162e",
+          "b": "9884617bedb12b66cc1ab48efa9905d951b5cd60"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "7ad8ee756966cc52d7d9360c8f9f909d1c8d83d9",
+          "b": "5516b65214dff44272c3b239a028754c721e6e2d"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f29ac0fd160640b087f1a081a3244a72a2dfc3a2",
+          "b": "03ccbb473d2d368042cf97980ff5bbc65db7b8bd"
+        },
+        "commitMessagesSha256": {
+          "a": "d597278bc6fd5e88ad50f80d1f98b52208175e6d07136506ab4918e32d85018e",
+          "b": "361229dbe879c19244bda99046dd17de66f0bbc782293710e264e28c4469e15f"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "78fe82cf630324fdddfd623ac3c952a54526bb61b9029ba5d9a15d2c0a98c660"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "7ad8ee756966cc52d7d9360c8f9f909d1c8d83d9",
+        "b": "5516b65214dff44272c3b239a028754c721e6e2d"
+      },
+      "sourceBefore": "8f37036adc7d51bfbc47cc3094d20aa364e0399f0f724bf5115213b6b2fdffd0",
+      "sourceAfter": "8f37036adc7d51bfbc47cc3094d20aa364e0399f0f724bf5115213b6b2fdffd0",
+      "full": {
+        "bytes": 54358,
+        "responseSha256": "0a1a7557b08e0c1259aa2902e437930b1506680765eb51dde041d0a3b29b0764"
+      },
+      "compact": {
+        "bytes": 40094,
+        "responseSha256": "2b1acdbc73e8a759da7f5f30f028f60ad62c28f3883b2ff0c5b56d3e3c543d39"
+      },
+      "fullAgainSha256": "0a1a7557b08e0c1259aa2902e437930b1506680765eb51dde041d0a3b29b0764",
+      "savedReviewSha256": "3be65146846390c875c4922eef2d3ad841353d6c0504085c965ef3a056001b8d",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/schema.prisma",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-028",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "4204f901754128d46477fbbd9139ec1dc4e724e9",
+        "b": "9183844b6a5ea95903c2d45047b7371473e34531",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "6b1b1109be66c7bd533821ec85ebccd9190a6f03",
+          "b": "1d9c2b4b3f71512f82557bc5514fc29da63feb59"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "b99cdafedb5a8cbdbeaba80e248425e361c6ea64",
+          "b": "ad1aa38e023d5f97f46f9f1d0b93a127bc0be2fa"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "4204f901754128d46477fbbd9139ec1dc4e724e9",
+          "b": "9183844b6a5ea95903c2d45047b7371473e34531"
+        },
+        "commitMessagesSha256": {
+          "a": "f4bb1759923907c83272b0017b93c06bc920a16cff8149c6205b75ca2d2df601",
+          "b": "cc19c222ec80ae9d6bb36d3ccde0f66cde53e295a5347df41275d292d6bf5318"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "d806d97dcc0d1be4ff629516b3e34c802ecc5001d617110ad36e34a62223e45c"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "b99cdafedb5a8cbdbeaba80e248425e361c6ea64",
+        "b": "ad1aa38e023d5f97f46f9f1d0b93a127bc0be2fa"
+      },
+      "sourceBefore": "2e0ec3a6153b15deb7290acff95f82405060340f40482854927fbe023a8bd1c3",
+      "sourceAfter": "2e0ec3a6153b15deb7290acff95f82405060340f40482854927fbe023a8bd1c3",
+      "full": {
+        "bytes": 36256,
+        "responseSha256": "dc00bc98fc401957941325c76108079d4babf06f00367c8dadc17391cdd5e405"
+      },
+      "compact": {
+        "bytes": 24973,
+        "responseSha256": "97e55f69d8b5daec480f0d45c95f9b640fc0b36b837e29117e367052d64d5037"
+      },
+      "fullAgainSha256": "dc00bc98fc401957941325c76108079d4babf06f00367c8dadc17391cdd5e405",
+      "savedReviewSha256": "13614e7dee56724cd8bf416a7f2b12297aedc96e27b1ebee7b621d6d183c20a2",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-029",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "20666c095fcea213aed9dd8ae9b02b1c32fb41eb",
+        "b": "eddd99234615633895cbe7c00a356ba06fa3f1a1",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "71ddb7d4137bde36cec261c7c43d322442309e86",
+          "b": "4e7d6e0b373c2235884d3d7239e2110f3a570a4d"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "35c10cc5e7ea6d9a91d5adeae7037b98601359bb",
+          "b": "d629d2c4887925e51f31a24018004919bab51fec"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "20666c095fcea213aed9dd8ae9b02b1c32fb41eb",
+          "b": "eddd99234615633895cbe7c00a356ba06fa3f1a1"
+        },
+        "commitMessagesSha256": {
+          "a": "dddb9030bbfc32d0fbf93d11b921bb3aa410d61359de5f9198f734ed72034d30",
+          "b": "c5b48dca0a28f1884a4dabf8336d532ffa77b6aea8b4dd3d7f60c51b4abaa7df"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "f036f7eb7c43f1af579a0b5c5463c0d69bf42ceac085506a40bb58810712ba1c"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "35c10cc5e7ea6d9a91d5adeae7037b98601359bb",
+        "b": "d629d2c4887925e51f31a24018004919bab51fec"
+      },
+      "sourceBefore": "830b0bb4e76450a08873674a14fa90f072efc01d62e978c17d11f2f340ad97d1",
+      "sourceAfter": "830b0bb4e76450a08873674a14fa90f072efc01d62e978c17d11f2f340ad97d1",
+      "full": {
+        "bytes": 125448,
+        "responseSha256": "5a12eee945835e2602eda2d7c304b0069de30dd926f1b44bf605ec0f510b841d"
+      },
+      "compact": {
+        "bytes": 92111,
+        "responseSha256": "84cdf67dfb11816712f6e08629e03d7ea371088225ad059966478bcc61bf2b08"
+      },
+      "fullAgainSha256": "5a12eee945835e2602eda2d7c304b0069de30dd926f1b44bf605ec0f510b841d",
+      "savedReviewSha256": "3ccd4ebc2b9351e6ff6ef5e9402204f95250598f3024b42b7b7ee1ae660c6b77",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/schema.prisma",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-030",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "540c307c9612bbeb7ba8e18080e8654fa6c65c83",
+        "b": "f2a4a4f99096b6ab0f7a99c2b9eb650b64d646b7",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "383141509fc40ba745562087b885222cd1cb8ee3",
+          "b": "b9059edae33d5271c70c00128a6881ade7512ba3"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "d3051ac4310b98b6558868fa432a465401b0b9cb",
+          "b": "d5afa3d37b8954a841ae1aa6cfbe125e64b6db00"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "540c307c9612bbeb7ba8e18080e8654fa6c65c83",
+          "b": "f2a4a4f99096b6ab0f7a99c2b9eb650b64d646b7"
+        },
+        "commitMessagesSha256": {
+          "a": "cb5038d3ca345ef06ce4d7551820393b9fe803a42ddc78d5f11a00ebfb8d9244",
+          "b": "b49c1d71ccdb1638bba97a704cfe7a8413eb5099acb55a848d43d0d59775ef25"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "6d43b5221c5f2617b25b9b9c5d4fa1d1041c00fea6844b6e4d9f5d86d8921e2e"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "d3051ac4310b98b6558868fa432a465401b0b9cb",
+        "b": "d5afa3d37b8954a841ae1aa6cfbe125e64b6db00"
+      },
+      "sourceBefore": "e2a76ab364ddaf2f42421d3ba9e51eedea1ee16c1e8e29f5d0026d8ed8e68e14",
+      "sourceAfter": "e2a76ab364ddaf2f42421d3ba9e51eedea1ee16c1e8e29f5d0026d8ed8e68e14",
+      "full": {
+        "bytes": 109483,
+        "responseSha256": "db8a600024c233391c91e2cbdac589e3d7614bad459f899532184007bd867ee3"
+      },
+      "compact": {
+        "bytes": 77581,
+        "responseSha256": "67d319a425c2692c2fea4ad9ef7d6407368339d42f9e388221598b9c6945894d"
+      },
+      "fullAgainSha256": "db8a600024c233391c91e2cbdac589e3d7614bad459f899532184007bd867ee3",
+      "savedReviewSha256": "d51d4457b23c6f12fc49255f2734125d69ef357ca9026b9bae6883f1e9a847cb",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-031",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "0826e7c4a3b33dc0d468a56784a4654e08d18d80",
+        "b": "1f0ba680cc5ce1874e9e6eb255f234a21f577f65",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "98a10b2fc94c5190f1f0c2863ae5404e25f734d3",
+          "b": "09eb96ec13578fb18e2785ee1178dcce740dd189"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "313a9b59155718b420eb0ff193ca18aa3ba786a6",
+          "b": "e4907956e94bead2fffb914142215c811cf6de24"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "0826e7c4a3b33dc0d468a56784a4654e08d18d80",
+          "b": "1f0ba680cc5ce1874e9e6eb255f234a21f577f65"
+        },
+        "commitMessagesSha256": {
+          "a": "d8f0c1b52a03c6548409beaeebb34de95a3967b00b567ae6ce4b022cae7e6730",
+          "b": "97c0fa7edc6f8e37d16659b732749954d9375de4eadaccf916bd975e42d7ba04"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "cc8bd29bb1bd9aa07cd4a75b5945988a33006e18021f20de1e5723e2e83f618b"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "313a9b59155718b420eb0ff193ca18aa3ba786a6",
+        "b": "e4907956e94bead2fffb914142215c811cf6de24"
+      },
+      "sourceBefore": "e7cca46c274516b982a0ec77b208f3dd91a6fb23df711b5c3236c842e5b7667f",
+      "sourceAfter": "e7cca46c274516b982a0ec77b208f3dd91a6fb23df711b5c3236c842e5b7667f",
+      "full": {
+        "bytes": 28508,
+        "responseSha256": "ecc17d425f1dff7a504b632492d2e7fe2b523ff5f8cfbdb733fac8cc9d93ac8d"
+      },
+      "compact": {
+        "bytes": 20876,
+        "responseSha256": "68670224774d32767e72b5a8775e3729ea7296e6d09e05573eeab30187f8edca"
+      },
+      "fullAgainSha256": "ecc17d425f1dff7a504b632492d2e7fe2b523ff5f8cfbdb733fac8cc9d93ac8d",
+      "savedReviewSha256": "d3022366dcde1bad6da06de844273075caeda9be8b574f3da3d3b76ebba4065e",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-032",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "7a9b1547e909662db58b1cf8c3ca1771c419ec3e",
+        "b": "0d3c2cb1cde447eeb88a2e74da866e81d1e0df10",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "8cba2db6782aa369d510c36c1b899664e53fd0ae",
+          "b": "77ade6a798140bb2d5012e51e9c6a34b1285f53a"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "b7ff970ccc219761809a32fac6d54fac40bb1aef",
+          "b": "0e7634fd92c7302cc24c4be65f3ebe6d527ce07f"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "7a9b1547e909662db58b1cf8c3ca1771c419ec3e",
+          "b": "0d3c2cb1cde447eeb88a2e74da866e81d1e0df10"
+        },
+        "commitMessagesSha256": {
+          "a": "688c3d610711fb688bd651a28212cb57ccc54cfabfcf025b20068ac15b7fd4b6",
+          "b": "04be4bbb3d59a610ef4e58d1c4e366e005e711261a02d7d63c57dddffcd9865c"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "02164c9015f97b5f9b81c5e4436dc7193f896c1a2e1a65de553a4d935e3d8a3d"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "b7ff970ccc219761809a32fac6d54fac40bb1aef",
+        "b": "0e7634fd92c7302cc24c4be65f3ebe6d527ce07f"
+      },
+      "sourceBefore": "03f05902105aa3febea58ed92671e21c0551a4c5c5c574c461fc00b523725649",
+      "sourceAfter": "03f05902105aa3febea58ed92671e21c0551a4c5c5c574c461fc00b523725649",
+      "full": {
+        "bytes": 66915,
+        "responseSha256": "472a1ca3c3b62f435d206076159e8eea740b4d11552dacf73e031bb29de07ec6"
+      },
+      "compact": {
+        "bytes": 46507,
+        "responseSha256": "44c770373dc42dc21b2f950486589a5902c28f15a18ef46eb378bfe14230f30a"
+      },
+      "fullAgainSha256": "472a1ca3c3b62f435d206076159e8eea740b4d11552dacf73e031bb29de07ec6",
+      "savedReviewSha256": "8b97fe406247234875972730584bf7b907d235a0aa5eb7df034b49ac652f4dba",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-033",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "97484b218067b86cbebfa79ba990bf1ee3933bb2",
+        "b": "5c69c9652d66fcadabfac8845498461efef4cd8a",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "b0c942bc97ffe1447fb5dd45ed10c19616a90eff",
+          "b": "590252ceb641e4165c22965b16072eaa3e6d8e77"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "0b1bc9e650414bf5fced7c0dfb1ce2abe91fb307",
+          "b": "71434628accf4a995594f647177402fdc863d4b2"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "97484b218067b86cbebfa79ba990bf1ee3933bb2",
+          "b": "5c69c9652d66fcadabfac8845498461efef4cd8a"
+        },
+        "commitMessagesSha256": {
+          "a": "7888cf7814ff661c61247d40f683ecea5b09d3d30983855588226be467d28013",
+          "b": "a4f34f6a6191afe270936edf43b71df146530e0c88c4e83f20d9903f94475154"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "09f50a19253da748a72088b2f24cd0175a23e237833bfc5ae8bde8e23d59ece1"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "0b1bc9e650414bf5fced7c0dfb1ce2abe91fb307",
+        "b": "71434628accf4a995594f647177402fdc863d4b2"
+      },
+      "sourceBefore": "5ab6eedfd58c7aaf1c5f52e878e14450e43d7d921faed3b558076f595eb5b601",
+      "sourceAfter": "5ab6eedfd58c7aaf1c5f52e878e14450e43d7d921faed3b558076f595eb5b601",
+      "full": {
+        "bytes": 51638,
+        "responseSha256": "acc5fa85beb3cec87d64c04b49f68e6c3ea6f412d0f8ca6aeec0e65fbcf75cf2"
+      },
+      "compact": {
+        "bytes": 37198,
+        "responseSha256": "11d8c9382b15d25d2eace0ca8b8e2a0235b5f76688fc472ad7c4088f92e7d9fc"
+      },
+      "fullAgainSha256": "acc5fa85beb3cec87d64c04b49f68e6c3ea6f412d0f8ca6aeec0e65fbcf75cf2",
+      "savedReviewSha256": "6fe9de0b36bacfbf3b0f2230064e0777af4932c4ac13785f7c7af6c7560436cc",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-034",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f12e2f5432be49d5f6f75f5cdee7b24160c659f0",
+        "b": "e85fe72d7b6910ddc839b852b528ee95677050c9",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "dfa1cec8eb2a0b63df4a7cb180f1e2c4cb1e83b1",
+          "b": "af6a2e2ff2b2349b22b2c4042a34accb9e2e995c"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "ee14a086d7577e7e1f1ed159324ef2f48a5a0bcd",
+          "b": "25bf5f79f6f067a9c302c96f0d15747c4c6c859e"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f12e2f5432be49d5f6f75f5cdee7b24160c659f0",
+          "b": "e85fe72d7b6910ddc839b852b528ee95677050c9"
+        },
+        "commitMessagesSha256": {
+          "a": "d05162bb32512cd90702da73cd6d59168bcb20ecad7d31b62eddf6d3e443a4f1",
+          "b": "02de984dad7edd8ad2fea3c3d7e109272a9f0f5b04d14e6fd87cd8f4bbb7c75e"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "aba451360d3d35be3f92d7195c2c229e41f0edd8a3b51dac2993d401ff2d533c"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "ee14a086d7577e7e1f1ed159324ef2f48a5a0bcd",
+        "b": "25bf5f79f6f067a9c302c96f0d15747c4c6c859e"
+      },
+      "sourceBefore": "21cec498ea92716ee5d6606c718660da4eb5fab89634795b639248542ca2efc2",
+      "sourceAfter": "21cec498ea92716ee5d6606c718660da4eb5fab89634795b639248542ca2efc2",
+      "full": {
+        "bytes": 38285,
+        "responseSha256": "1a5d4cad5841176b889e130185e75a774cd8df728b03d15b8eaf0f94ea2d960a"
+      },
+      "compact": {
+        "bytes": 26264,
+        "responseSha256": "e54b5f24812fc1561b9984036c195a40bcef6406790f8721246adc17f13b6618"
+      },
+      "fullAgainSha256": "1a5d4cad5841176b889e130185e75a774cd8df728b03d15b8eaf0f94ea2d960a",
+      "savedReviewSha256": "1f73e5ae49f3135d8bbfa9e12d5e2b41d921209f3ea4edeea5c512c7966db29f",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-035",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "81949c9de4b45b83aa43c0085ee9d5cfd2073dbe",
+        "b": "4620df14c6047fd07fd1aac116bbd9f0c58674ef",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "5eadeb3127b7ae14007c9c05ed3b29ddbd13be2c",
+          "b": "a963438371175328da7ec41166c7f15670876170"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "7f44fe385a30b9ca2425eba9dbbfcabc9cd4573b",
+          "b": "6031d79d50413ad325330b9ade3dd21f5ec4c731"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "81949c9de4b45b83aa43c0085ee9d5cfd2073dbe",
+          "b": "4620df14c6047fd07fd1aac116bbd9f0c58674ef"
+        },
+        "commitMessagesSha256": {
+          "a": "7df71bc871bfca43c77d1d08a4623b4578b11d7c4f998b2d99625f8fcdaf59cb",
+          "b": "862a88837c1f7a0f2db336e7c6b68fd5012b4d737d552f599a1dd6b7f82a7c6e"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "e362a9cd4b5209b9e8ac33ed2933d12a894216d2295274ccd33514ee9e8fb1cf"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "7f44fe385a30b9ca2425eba9dbbfcabc9cd4573b",
+        "b": "6031d79d50413ad325330b9ade3dd21f5ec4c731"
+      },
+      "sourceBefore": "2ca2e984e76a06df2c5e0e411462bde4cd65db9990a75893f10cb5aedc255fea",
+      "sourceAfter": "2ca2e984e76a06df2c5e0e411462bde4cd65db9990a75893f10cb5aedc255fea",
+      "full": {
+        "bytes": 319367,
+        "responseSha256": "a28c99dfa314f1c20c951a0c4fccf64715513e417770c54bb90ed63fd4942291"
+      },
+      "compact": {
+        "bytes": 202947,
+        "responseSha256": "6e4e5358e8765ec15254e835426b26e5ab8166757a93beb6c3fc5a22e709b11f"
+      },
+      "fullAgainSha256": "a28c99dfa314f1c20c951a0c4fccf64715513e417770c54bb90ed63fd4942291",
+      "savedReviewSha256": "823de162cbce723afa7b775c236150dbe91fc84c409c2d3c24540d8cad4c54e4",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-036",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "81949c9de4b45b83aa43c0085ee9d5cfd2073dbe",
+        "b": "72ce0c3e33ec07ad297f5c6f35179b7d2eb1c9a6",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "9ae8f896680015a1fa2144653a6e0d7a0b8f524f",
+          "b": "d014521a8fdf4028908e81b5735c35b71ca4c46f"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "7f44fe385a30b9ca2425eba9dbbfcabc9cd4573b",
+          "b": "5bab9b649c7368f048007db204cea39dd9f0e1d6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "81949c9de4b45b83aa43c0085ee9d5cfd2073dbe",
+          "b": "72ce0c3e33ec07ad297f5c6f35179b7d2eb1c9a6"
+        },
+        "commitMessagesSha256": {
+          "a": "7df71bc871bfca43c77d1d08a4623b4578b11d7c4f998b2d99625f8fcdaf59cb",
+          "b": "3e5730b38a8877cac95351d75d65e2a1e17085eb83a6485fda4f84bff74f1a12"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "e362a9cd4b5209b9e8ac33ed2933d12a894216d2295274ccd33514ee9e8fb1cf"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "7f44fe385a30b9ca2425eba9dbbfcabc9cd4573b",
+        "b": "5bab9b649c7368f048007db204cea39dd9f0e1d6"
+      },
+      "sourceBefore": "c542a0c86c3ef78f609255a30304dc53ba0e8de9af0919df523936871af94109",
+      "sourceAfter": "c542a0c86c3ef78f609255a30304dc53ba0e8de9af0919df523936871af94109",
+      "full": {
+        "bytes": 316354,
+        "responseSha256": "bea42475ed9d58469b5fdb9b1baec2029114e2053ec1d901012b70a59198a3b0"
+      },
+      "compact": {
+        "bytes": 200519,
+        "responseSha256": "87a4fdff01df886e577c3f242eb1865a1bcf8f9eb8dd3308c7522ba043873367"
+      },
+      "fullAgainSha256": "bea42475ed9d58469b5fdb9b1baec2029114e2053ec1d901012b70a59198a3b0",
+      "savedReviewSha256": "8e86f51b0d9ff9d342a671fd849a711b9573153be6cae1c398ab3ee94596a84f",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-037",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "dfd6ead82136738b1d0d9a4dcdb0cb6223f59c16",
+        "b": "2064779f5c54bb6cf5d3717845a74ec03b0030e4",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "0435cbf1f6b9cc78bd3b4956c9c66e0937b1fe75",
+          "b": "2490d0d8fedf6c9b5d6e7f4171f27a6b972c151b"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "c6da83c5016270d8f5dc5ce8fffa2051b3053230",
+          "b": "be4903cc8882f9e9eb24a5fd22bd5365d0e78663"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "dfd6ead82136738b1d0d9a4dcdb0cb6223f59c16",
+          "b": "2064779f5c54bb6cf5d3717845a74ec03b0030e4"
+        },
+        "commitMessagesSha256": {
+          "a": "fbb39224ff46f4e14e601208f5f5a951cff60e01abed9e37b43b655bd5a35b01",
+          "b": "e6d399ef3a071995dfdbce1728446578fa5537c3e7db35c16a244acd93f2df19"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "c7b25a2b6a46eaf6bb200fff0206f50e9679b40afba558b11385bf37c6b19e45"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "c6da83c5016270d8f5dc5ce8fffa2051b3053230",
+        "b": "be4903cc8882f9e9eb24a5fd22bd5365d0e78663"
+      },
+      "sourceBefore": "d726598426cc4465e5f90883739e74e4bce55d1cfe993ef344c9bba77e5b47bf",
+      "sourceAfter": "d726598426cc4465e5f90883739e74e4bce55d1cfe993ef344c9bba77e5b47bf",
+      "full": {
+        "bytes": 93557,
+        "responseSha256": "8a81182c3d7ac2df5e61f3ee4c61be817a2a1f9a93b2bc5099b8c60e5dd3545f"
+      },
+      "compact": {
+        "bytes": 70842,
+        "responseSha256": "e237cdfefd5ccb12fa69946d48d227921052d9b15bdde7b0442848f269d7fc1a"
+      },
+      "fullAgainSha256": "8a81182c3d7ac2df5e61f3ee4c61be817a2a1f9a93b2bc5099b8c60e5dd3545f",
+      "savedReviewSha256": "4e40ab22b4f6e37f4788c642bb6b13d6118fd05ff61870cbb76edc8ffa0ee6b9",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-038",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "173115eb530726b5223cf1d29b9975db7e7ca631",
+        "b": "a02394c87d41d9c39b81d758f6425b54fa5a8eb7",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "b70792c7765fea55618beea957ac16f645af4452",
+          "b": "41f1e28d9603a62ab33994a1feb835d564610658"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "9b5579212333b31d5d348389448cecc25415b39b",
+          "b": "72cfa9bc40605d525ac86c7adbd42713dcd5b75c"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "173115eb530726b5223cf1d29b9975db7e7ca631",
+          "b": "a02394c87d41d9c39b81d758f6425b54fa5a8eb7"
+        },
+        "commitMessagesSha256": {
+          "a": "c213a82893c9a32fc918de6707cd022173cdea4c5f408e2fed0efa0be7792f25",
+          "b": "6c31b8d09ff034534e586b153471640bc297cffa64157b5431df49d0b58bce60"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "15ae850c219d7d8584ff29569abf85e118f74a82cca43ddeb8bf9a4eca6394dc"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "9b5579212333b31d5d348389448cecc25415b39b",
+        "b": "72cfa9bc40605d525ac86c7adbd42713dcd5b75c"
+      },
+      "sourceBefore": "9452143f523db04adce527dc11a5437966178e7c30ced10f0a00f36b54641065",
+      "sourceAfter": "9452143f523db04adce527dc11a5437966178e7c30ced10f0a00f36b54641065",
+      "full": {
+        "bytes": 27220,
+        "responseSha256": "f66931cb3758d729cf872b9c35fc1ce70d5845ed0e18ce39dd16926c8a761de3"
+      },
+      "compact": {
+        "bytes": 17835,
+        "responseSha256": "04f2bcd3f5d3d0193aa2b55104e965709f4bebc7c8b55f317f487201cb1cf240"
+      },
+      "fullAgainSha256": "f66931cb3758d729cf872b9c35fc1ce70d5845ed0e18ce39dd16926c8a761de3",
+      "savedReviewSha256": "cd3e23734e616084e51e20ae80e55dd45882df43f535ec17b74f866cf83a5d98",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-039",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f52c2decf4d519fb311da23a1be6508abda093a1",
+        "b": "54bd8e7f7a844b737a86b2288d045891dd46a7ed",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "b51c8c768d6417efe33df3a2bc28d6bcafd3d355",
+          "b": "6b02f707095ee9fe1847b9aea255291b82660343"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "7b3f05b3c0a021dccb2bf45af00fb5369ff77087",
+          "b": "175cff0fa3219e8fcfb9e38adee532100a73b2e9"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f52c2decf4d519fb311da23a1be6508abda093a1",
+          "b": "54bd8e7f7a844b737a86b2288d045891dd46a7ed"
+        },
+        "commitMessagesSha256": {
+          "a": "dcefc6c51b3f624be68bcb583dcf1fd64a05b83a287db0ebfa23f7463f242fdf",
+          "b": "aa70d0a8a0a946a181a7c94e6abbadfe34e8adb278419bdaf704003fc1287c81"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "bd8a2e15813940af7265bc514062adc86b05e0d9c9cd963c4d2609c499d6cef9"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "7b3f05b3c0a021dccb2bf45af00fb5369ff77087",
+        "b": "175cff0fa3219e8fcfb9e38adee532100a73b2e9"
+      },
+      "sourceBefore": "e5c39f2c5d4ef5bcfae4f17df6d2b7f4017940e08d4ab0dc83525fdedc0ed47a",
+      "sourceAfter": "e5c39f2c5d4ef5bcfae4f17df6d2b7f4017940e08d4ab0dc83525fdedc0ed47a",
+      "full": {
+        "bytes": 25418,
+        "responseSha256": "4a954105906190467b5741dbd333a774eb9e377e20bfa951e7897fa0e0e26448"
+      },
+      "compact": {
+        "bytes": 17028,
+        "responseSha256": "a9cc2bd02c818819d7679d5a3754965b191d517439c6a7264d8756108f07e9bd"
+      },
+      "fullAgainSha256": "4a954105906190467b5741dbd333a774eb9e377e20bfa951e7897fa0e0e26448",
+      "savedReviewSha256": "dceedc7d7ac39debcf68bf913048560ab7b35ad7ae18e3b1460339847510679c",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-040",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "833e0d3a7ce526fa5bc6af2e2ef3a11b41ebaef2",
+        "b": "4620df14c6047fd07fd1aac116bbd9f0c58674ef",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "3484b9c1fb89aff9cef93573e79b4506f05fdf28",
+          "b": "856bce045bc73068149158a81b97d00df1c0a59f"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "01eb8a1426b38d6ea316235241ee21e1e150112a",
+          "b": "6031d79d50413ad325330b9ade3dd21f5ec4c731"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "833e0d3a7ce526fa5bc6af2e2ef3a11b41ebaef2",
+          "b": "4620df14c6047fd07fd1aac116bbd9f0c58674ef"
+        },
+        "commitMessagesSha256": {
+          "a": "02990c91aac0cec256f02839615b4748355db23583e91fcd9461e4f61994e34b",
+          "b": "862a88837c1f7a0f2db336e7c6b68fd5012b4d737d552f599a1dd6b7f82a7c6e"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "ed8536864699de4e2c1b056a7e1a37fd56f84161a6a4af5429137f1718dbd308"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "01eb8a1426b38d6ea316235241ee21e1e150112a",
+        "b": "6031d79d50413ad325330b9ade3dd21f5ec4c731"
+      },
+      "sourceBefore": "36614a4424ac80c007d4d46e621b3b8a53d78b2bdbd73a7c6b7aee16f89584c8",
+      "sourceAfter": "36614a4424ac80c007d4d46e621b3b8a53d78b2bdbd73a7c6b7aee16f89584c8",
+      "full": {
+        "bytes": 24377,
+        "responseSha256": "0595dea8061d298fed36baace1656b8ca0bc6d9354e85c8fd65ae986479a40da"
+      },
+      "compact": {
+        "bytes": 18040,
+        "responseSha256": "f7a3abc28b41aaa57cb681c00ab79a7bdab75f651f6b8d3dde4b62f8cd116757"
+      },
+      "fullAgainSha256": "0595dea8061d298fed36baace1656b8ca0bc6d9354e85c8fd65ae986479a40da",
+      "savedReviewSha256": "2ad7a7445d0e549164afbbddcfd355641a4188b94aefcd81d53d9e03bf55ed86",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-041",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "8ff9117296ed7cd81d210a55d32c7dbcbdb349d6",
+        "b": "e654a7b96e564eed6a29c05a43c0143cdaedbef6",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "f57262eb87f92bbe09e031bf4998342d97882a99",
+          "b": "42bd1893be9a04ca1070af53cea6e36620675070"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "e8b8fcad30edea4d250053bd2b31ecbeb4bd2dfd",
+          "b": "cdfc7cefe75508cc2d59ce8b38da8b9002f923d1"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "8ff9117296ed7cd81d210a55d32c7dbcbdb349d6",
+          "b": "e654a7b96e564eed6a29c05a43c0143cdaedbef6"
+        },
+        "commitMessagesSha256": {
+          "a": "185f50cdc512b572d76ab1b82174240e931ee3243d15f371191ae571011fbcb5",
+          "b": "ea0ac26bbed5b2f99fc928fcf94efd0514d8816d1e64cde51afd03bac97dcfa7"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "11417918d2f68b08b36ce163badd3028b5181cd7d124d17f9cc76c2e5f8e2a02"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "e8b8fcad30edea4d250053bd2b31ecbeb4bd2dfd",
+        "b": "cdfc7cefe75508cc2d59ce8b38da8b9002f923d1"
+      },
+      "sourceBefore": "429c1b297f622a19e5bb60fb29296e4e0928708612d9eeb8f5a3390e3b85436f",
+      "sourceAfter": "429c1b297f622a19e5bb60fb29296e4e0928708612d9eeb8f5a3390e3b85436f",
+      "full": {
+        "bytes": 18093,
+        "responseSha256": "a14b2c368faa76cb252b79b379890a1c0fc31db3b4c050ebde0450625e053b24"
+      },
+      "compact": {
+        "bytes": 12869,
+        "responseSha256": "dcd792ef298c5dcf7f3e23f7dc004a78b09fca803073066b74d32b1fd25ffa41"
+      },
+      "fullAgainSha256": "a14b2c368faa76cb252b79b379890a1c0fc31db3b4c050ebde0450625e053b24",
+      "savedReviewSha256": "5173ff9cf6d821bf5b3dc49afb2fd03b09fb5d7f335a113917c438ee4243a64f",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-042",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "6df19cd6b9d5d8ed45c313649d7a3260a11937de",
+        "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "b0cb3be86bd803b4f85e13ba5f78abded2a0e32a",
+          "b": "44f91f796b24ce5f17d350a1a6276635a10af95f"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "736060fc02331587a450b254e87d78653e615883",
+          "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "6df19cd6b9d5d8ed45c313649d7a3260a11937de",
+          "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973"
+        },
+        "commitMessagesSha256": {
+          "a": "4666b48b2ffb5694f7d5d40110a679073e8a45fed1d586f14608a4d11eb164a6",
+          "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "e0bdc94e27639a3e5114476f4ce612fa6b231b8851631c407bac2c9511e72507"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "736060fc02331587a450b254e87d78653e615883",
+        "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+      },
+      "sourceBefore": "e460a55903afa718a30a9a818fec77d93551f980602560c66a0d51cf9bfe83d1",
+      "sourceAfter": "e460a55903afa718a30a9a818fec77d93551f980602560c66a0d51cf9bfe83d1",
+      "full": {
+        "bytes": 345801,
+        "responseSha256": "654603af20e528202599e0ca6141574a2ef6561607647a128fb524d0e07af869"
+      },
+      "compact": {
+        "bytes": 217021,
+        "responseSha256": "387519c8856783b458f81dc2f0872bf8ccc8743d39284e83509722b41af197e8"
+      },
+      "fullAgainSha256": "654603af20e528202599e0ca6141574a2ef6561607647a128fb524d0e07af869",
+      "savedReviewSha256": "9d1b6f8153b8aaebc1001137bc8699d8eb8f0bbc1de8370667a8f76bdb5dd9ca",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-043",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "6df19cd6b9d5d8ed45c313649d7a3260a11937de",
+        "b": "44eb7a50a060b48b0aafeb598e1def9f6c3ba323",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "622f4370da4c806cf7489191719e23ebdb65d67c",
+          "b": "6a0eb943c3bf98bf7afffde8acd20aa0f7651d0c"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "736060fc02331587a450b254e87d78653e615883",
+          "b": "ce0d85eef3b311536114c6e805096cf64fc567d6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "6df19cd6b9d5d8ed45c313649d7a3260a11937de",
+          "b": "44eb7a50a060b48b0aafeb598e1def9f6c3ba323"
+        },
+        "commitMessagesSha256": {
+          "a": "4666b48b2ffb5694f7d5d40110a679073e8a45fed1d586f14608a4d11eb164a6",
+          "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "e0bdc94e27639a3e5114476f4ce612fa6b231b8851631c407bac2c9511e72507"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "736060fc02331587a450b254e87d78653e615883",
+        "b": "ce0d85eef3b311536114c6e805096cf64fc567d6"
+      },
+      "sourceBefore": "eed57c29914c796b1be4d749a527dccc280b726e2ce771dc30939100fb663eb2",
+      "sourceAfter": "eed57c29914c796b1be4d749a527dccc280b726e2ce771dc30939100fb663eb2",
+      "full": {
+        "bytes": 345867,
+        "responseSha256": "3a8b100566aaee41816aa951a1659abdbde6bd961182f87620dd7b23a8bcbaab"
+      },
+      "compact": {
+        "bytes": 217042,
+        "responseSha256": "8f24d5a5c2ed44ef749f1f1ad1a376f78e09c3d41f5bf20f42e20784ea5966e3"
+      },
+      "fullAgainSha256": "3a8b100566aaee41816aa951a1659abdbde6bd961182f87620dd7b23a8bcbaab",
+      "savedReviewSha256": "9148afbcb28911203ae2947f1bce9b165b1be23f5e15886028f209c10b8d0799",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-044",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "c9c56b7478a820900537dc64931f67d60a19e797",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "cef978cba138ad4e34bf71d113734289f611b222",
+          "b": "ef590d1dfbaf4ad29ef8ead6f9886bcecb66e1f8"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+          "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+          "b": "c9c56b7478a820900537dc64931f67d60a19e797"
+        },
+        "commitMessagesSha256": {
+          "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+          "b": "438c430375df6eb17cec438308830ee87f281cf44f8d4bb6c5b4347b2ab75017"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "sourceBefore": "dbe14b00dfa3f045b4c205f2717142aa3f5716a56279e7f181570d34f511e896",
+      "sourceAfter": "dbe14b00dfa3f045b4c205f2717142aa3f5716a56279e7f181570d34f511e896",
+      "full": {
+        "bytes": 316802,
+        "responseSha256": "4449c358268b5b34b858e54aeb4d4884cce4abbe7b0d22804f27c0122c776805"
+      },
+      "compact": {
+        "bytes": 201215,
+        "responseSha256": "d6778cdca9d933ed1d7a6d5b36b8559e3ac43cb87847b71f5620a6bec52a164e"
+      },
+      "fullAgainSha256": "4449c358268b5b34b858e54aeb4d4884cce4abbe7b0d22804f27c0122c776805",
+      "savedReviewSha256": "b412950b51106f8d2188fce0bb90e716b810259eb42e3c3a2cc39e6d45ad6c04",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-045",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "e3bc1448f7f2db54113641327c3f3906e084ab24",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "cef978cba138ad4e34bf71d113734289f611b222",
+          "b": "2a8544c757808d28b72f86e94bfca5a80b38a060"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+          "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+          "b": "e3bc1448f7f2db54113641327c3f3906e084ab24"
+        },
+        "commitMessagesSha256": {
+          "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+          "b": "438c430375df6eb17cec438308830ee87f281cf44f8d4bb6c5b4347b2ab75017"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+      },
+      "sourceBefore": "84976dc64d334b128c21053e05b8bcc1dd33501fe19f1253dc7d7204ca956182",
+      "sourceAfter": "84976dc64d334b128c21053e05b8bcc1dd33501fe19f1253dc7d7204ca956182",
+      "full": {
+        "bytes": 316620,
+        "responseSha256": "47e60cf4532895c8007219e4ed9d67e556237d611a44ad01841b00faa2d47162"
+      },
+      "compact": {
+        "bytes": 201165,
+        "responseSha256": "1baf17f106a723e9ea180b8050c1f07fae985ff59dcdc3f2097d22e23ff37dfc"
+      },
+      "fullAgainSha256": "47e60cf4532895c8007219e4ed9d67e556237d611a44ad01841b00faa2d47162",
+      "savedReviewSha256": "7711a92d1d08c5dc7463e09083be61aaf9f736add219919b6e3c7e25d82399a4",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-046",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "2b37075f8365642e4d898ebe4e8f67a88cdd3504",
+        "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "8231f42920a8dcce23ef91ab15bfa3102e41870c",
+          "b": "ef8ee56425f6564dcfabdfb109da1713afe42115"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "736060fc02331587a450b254e87d78653e615883",
+          "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "2b37075f8365642e4d898ebe4e8f67a88cdd3504",
+          "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973"
+        },
+        "commitMessagesSha256": {
+          "a": "96f3b4072c392b7556f8dc98d573112c54469917c49ac6e1e2d41c4797b21be0",
+          "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "df32747eca0d7c88f4a673cca05fe07df169518c52aef7c773c1ebde120c1901"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "736060fc02331587a450b254e87d78653e615883",
+        "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+      },
+      "sourceBefore": "5d28f5a0cafca89289b08642679d63b2814137c61623f95d4743df506156a29c",
+      "sourceAfter": "5d28f5a0cafca89289b08642679d63b2814137c61623f95d4743df506156a29c",
+      "full": {
+        "bytes": 345801,
+        "responseSha256": "4ce216f6a981f338dc6be2b57c1f5610ac771862c5c225b06c1eb547ba691d13"
+      },
+      "compact": {
+        "bytes": 217021,
+        "responseSha256": "be5c72193978a6c12cf570844ee1f3306d67f363e4e60a852ccba709f5159a82"
+      },
+      "fullAgainSha256": "4ce216f6a981f338dc6be2b57c1f5610ac771862c5c225b06c1eb547ba691d13",
+      "savedReviewSha256": "2da83ff66197490553f94f6a6be456e2fd6964d23b846d838629b1305484c1af",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-047",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "d1458e4fc01d4ca498f0047653752e5a908de391",
+        "b": "c9c56b7478a820900537dc64931f67d60a19e797",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "8f305a8cba52a14cc6d3a6dde6cdf8a0d0db9526",
+          "b": "b78a3919c81bd07995579d8072c0ecf2605f4fb3"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+          "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "d1458e4fc01d4ca498f0047653752e5a908de391",
+          "b": "c9c56b7478a820900537dc64931f67d60a19e797"
+        },
+        "commitMessagesSha256": {
+          "a": "96f3b4072c392b7556f8dc98d573112c54469917c49ac6e1e2d41c4797b21be0",
+          "b": "438c430375df6eb17cec438308830ee87f281cf44f8d4bb6c5b4347b2ab75017"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "df32747eca0d7c88f4a673cca05fe07df169518c52aef7c773c1ebde120c1901"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "sourceBefore": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+      "sourceAfter": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+      "full": {
+        "bytes": 316802,
+        "responseSha256": "cf8c5dd5e8e606d45fb2fa862793a1e0ff5c8a580f045ed367d44efc72a7da54"
+      },
+      "compact": {
+        "bytes": 201215,
+        "responseSha256": "e1d7a413737e6cb4f699184edaca68098e2cdcce5ae7fd0954de7df2ee077059"
+      },
+      "fullAgainSha256": "cf8c5dd5e8e606d45fb2fa862793a1e0ff5c8a580f045ed367d44efc72a7da54",
+      "savedReviewSha256": "f150ca66fd1aeb9f5ae0a8e59e66e846919d19117055d48e7be7359f677f3fd1",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-048",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "5cf45b36cc27e3c3991c03664fc928115afb86d7",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+          "b": "9cb54d388e5df4eafeb4d12c12eb00d072cd5899"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+          "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+          "b": "5cf45b36cc27e3c3991c03664fc928115afb86d7"
+        },
+        "commitMessagesSha256": {
+          "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+          "b": "b624e68730565cc1dcc952df1df20959eab5e7ecebb2199c260f8a4a7c7ff68c"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "sourceBefore": "b551fa00d20cb5d0c61fcdcdf65171d95ff292f83ddc9cc73bb713373338cee8",
+      "sourceAfter": "b551fa00d20cb5d0c61fcdcdf65171d95ff292f83ddc9cc73bb713373338cee8",
+      "full": {
+        "bytes": 316802,
+        "responseSha256": "c54b06ec996403a72861c832a7b052a09bd3c43b7ecc1063f152034afd83939c"
+      },
+      "compact": {
+        "bytes": 201215,
+        "responseSha256": "e8cecdb63222dca1a4872676b85d640e119bfdd871ad4e77f805643520f5c71e"
+      },
+      "fullAgainSha256": "c54b06ec996403a72861c832a7b052a09bd3c43b7ecc1063f152034afd83939c",
+      "savedReviewSha256": "911ad6867aa0c805ad1f1e3cdb69cfd8ad0341d26cdf58e73a7773264da7f788",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-049",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "069fb63e9533b509bfc6e99124fcaca282a3bbd6",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+          "b": "92a8a3a8db8c4077ce7cebba1c5a44f1b48f244c"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+          "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+          "b": "069fb63e9533b509bfc6e99124fcaca282a3bbd6"
+        },
+        "commitMessagesSha256": {
+          "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+          "b": "7978bbe91b6d3ec6695a42931ab147b09318c945636ec0ab94127dcff450a241"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+      },
+      "sourceBefore": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+      "sourceAfter": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+      "full": {
+        "bytes": 316620,
+        "responseSha256": "e058f041cc6ca827dcad3b80da7009a8bbe07e28c0059e833220376c1b7cdf7d"
+      },
+      "compact": {
+        "bytes": 201165,
+        "responseSha256": "b29a24ce1191456be0974e1800fd26b9a063e0ceef11b355ed7ef69b1f11d161"
+      },
+      "fullAgainSha256": "e058f041cc6ca827dcad3b80da7009a8bbe07e28c0059e833220376c1b7cdf7d",
+      "savedReviewSha256": "b88664e060d05cc6e8d86dd6dfd752392f8c2e7a6a8183fddc364bd8f5b9f9d1",
+      "preserved": true,
+      "unsupported": []
+    },
+    {
+      "caseId": "rw-050",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+        "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+          "b": "590430c3cf8a65e603e7443ce7fa8057c6c1baf0"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+          "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+          "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973"
+        },
+        "commitMessagesSha256": {
+          "a": "4ab64c74251a0d067044b7440d8362e9dbadad18af49f5bfe42fe60fc6407352",
+          "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "762c70ae347214caffcb3330bef3034141d33dcab4802bc6dd979b7dd04801a2"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+      },
+      "sourceBefore": "b9fda72f08c9419e14af56d3c49adc01dee42ad4c320fae64563ba323b749314",
+      "sourceAfter": "b9fda72f08c9419e14af56d3c49adc01dee42ad4c320fae64563ba323b749314",
+      "full": {
+        "bytes": 346030,
+        "responseSha256": "448dfe8470786a58cd6f1eb7580c6174861a14a894678a622df440476b222093"
+      },
+      "compact": {
+        "bytes": 217250,
+        "responseSha256": "a3d078d04ece7e27344f6d56ef2d944aabd9f1ec36de5a949da207c7f9e50de2"
+      },
+      "fullAgainSha256": "448dfe8470786a58cd6f1eb7580c6174861a14a894678a622df440476b222093",
+      "savedReviewSha256": "81cf440c00a6a417680dc5c33efebe73424400952072ade199a3e764d817a37a",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/seed.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-051",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+        "b": "44eb7a50a060b48b0aafeb598e1def9f6c3ba323",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+          "b": "2a5e5daf9173ccbb278b64cfd6aab37335a6ca08"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+          "b": "ce0d85eef3b311536114c6e805096cf64fc567d6"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+          "b": "44eb7a50a060b48b0aafeb598e1def9f6c3ba323"
+        },
+        "commitMessagesSha256": {
+          "a": "4ab64c74251a0d067044b7440d8362e9dbadad18af49f5bfe42fe60fc6407352",
+          "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "762c70ae347214caffcb3330bef3034141d33dcab4802bc6dd979b7dd04801a2"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "b": "ce0d85eef3b311536114c6e805096cf64fc567d6"
+      },
+      "sourceBefore": "c03a06a1b9959c2282ad874a0bb00b9ae694ed4c3c1a328c8d3decbd619070b0",
+      "sourceAfter": "c03a06a1b9959c2282ad874a0bb00b9ae694ed4c3c1a328c8d3decbd619070b0",
+      "full": {
+        "bytes": 346096,
+        "responseSha256": "cc9ca1ea2621f7f5584472d8e192cf619a6ea9832064366530d0f6855c150f4c"
+      },
+      "compact": {
+        "bytes": 217271,
+        "responseSha256": "f038891c20123513d57f9ac5edb6ddb16545981865cb9ee0bd826826dd0c0c8b"
+      },
+      "fullAgainSha256": "cc9ca1ea2621f7f5584472d8e192cf619a6ea9832064366530d0f6855c150f4c",
+      "savedReviewSha256": "6961d0c28f39feda18066badfae24a9772801313237e8fa4eb616f2a079e2735",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "prisma/seed.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-052",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+        "b": "fff7a614b46e292a4b9d1f08261b127d2b9dba3c",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "4a1e6b527b83c0b3015789b7bdc8baaae9756f7c",
+          "b": "f0a84bac3c7479cf2fca0fc63d2a1ec1bdf1a714"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+          "b": "085bf7e8908779a6e3c4e16b80beb2c2f0f703db"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+          "b": "fff7a614b46e292a4b9d1f08261b127d2b9dba3c"
+        },
+        "commitMessagesSha256": {
+          "a": "e091d96d4037818082e554d78ff6e470da35714099eb7becf58f319c59f46d6e",
+          "b": "508e8e593dc70374bebe95ae72770d4aef53caa241cce6a330fb4f67aa3d3005"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "60f15e5c07fbd3f1178f4ac3a264f9a39066a195050db379c9b38ec9f515da06"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "b": "085bf7e8908779a6e3c4e16b80beb2c2f0f703db"
+      },
+      "sourceBefore": "b89799771f5285dd985172afda2b7845929bf11e9179845621b2824952c01933",
+      "sourceAfter": "b89799771f5285dd985172afda2b7845929bf11e9179845621b2824952c01933",
+      "full": {
+        "bytes": 319054,
+        "responseSha256": "cf20db7a009f61849c2d8301356853854ed44799b7fa8c4c8535f847696c19e1"
+      },
+      "compact": {
+        "bytes": 202893,
+        "responseSha256": "2614ed85b21497bb86f443fedbd7467d9eeaff87176d8dd2886262386156c75b"
+      },
+      "fullAgainSha256": "cf20db7a009f61849c2d8301356853854ed44799b7fa8c4c8535f847696c19e1",
+      "savedReviewSha256": "4b1ee402534667337f3461f9fa890cdb02b82487017e68843aa0181ffce9bdcf",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "src/middleware/articlesValidator/articlesCreateValidator.table.test.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ]
+    },
+    {
+      "caseId": "rw-053",
+      "request": {
+        "repo": "[PREPARED_SOURCE_REPOSITORY]",
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+        "b": "bd59461bdb7555d8d4b6c52b30d8f6560142aa97",
+        "detail": "full"
+      },
+      "provenance": {
+        "originalCommits": {
+          "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+          "a": "3a1374ab66885e3e28d4ba5515a0a5daa58cadd1",
+          "b": "e75933296827a4567c1bf4595f7f0246edb62c87"
+        },
+        "originalTrees": {
+          "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+          "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+          "b": "b900bc63748c7f4d575bc507178d10907d6d00a0"
+        },
+        "reconstructedCommits": {
+          "base": "8c46877a876e851199f220b773af11531f40d82f",
+          "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+          "b": "bd59461bdb7555d8d4b6c52b30d8f6560142aa97"
+        },
+        "commitMessagesSha256": {
+          "a": "e091d96d4037818082e554d78ff6e470da35714099eb7becf58f319c59f46d6e",
+          "b": "508e8e593dc70374bebe95ae72770d4aef53caa241cce6a330fb4f67aa3d3005"
+        },
+        "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+        "taskSha256": "60f15e5c07fbd3f1178f4ac3a264f9a39066a195050db379c9b38ec9f515da06"
+      },
+      "reconstructedTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "b": "b900bc63748c7f4d575bc507178d10907d6d00a0"
+      },
+      "sourceBefore": "901de03a1be7a7df19541176157b8514ced97e4fa1bfd62e851265ca0665d730",
+      "sourceAfter": "901de03a1be7a7df19541176157b8514ced97e4fa1bfd62e851265ca0665d730",
+      "full": {
+        "bytes": 319171,
+        "responseSha256": "e85fce48a2fd0efc81f527f3a9e39905b18c4228cb261a8b0925367351ed5eb8"
+      },
+      "compact": {
+        "bytes": 202932,
+        "responseSha256": "5fef6a4a474437855611a4f805e150234ffd747b42121445b3d36a0499e09c66"
+      },
+      "fullAgainSha256": "e85fce48a2fd0efc81f527f3a9e39905b18c4228cb261a8b0925367351ed5eb8",
+      "savedReviewSha256": "4720c16ea8af809e38ce258fa4afc674f1972374957cde8fd946d1e2c415d26e",
+      "preserved": true,
+      "unsupported": [
+        {
+          "path": "src/middleware/articlesValidator/articlesCreateValidator.table.test.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ]
+    }
+  ]
+}

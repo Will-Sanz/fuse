@@ -1,0 +1,796 @@
+{
+  "schemaVersion": 1,
+  "cohort": "before-r2",
+  "auditedAt": "2026-11-09T18:12:57.772141+00:00",
+  "completeCohort": true,
+  "manifestSha256": "9ecf6e8318dcae24adc4825c1ac27c27572bccf5cd6cfba5667eeb0d13a9300e",
+  "metrics": {
+    "attemptedRows": 106,
+    "expectedCases": 53,
+    "sameCompletedPairs": 53,
+    "pairIds": [
+      "rw-001",
+      "rw-002",
+      "rw-003",
+      "rw-004",
+      "rw-005",
+      "rw-006",
+      "rw-007",
+      "rw-008",
+      "rw-009",
+      "rw-010",
+      "rw-011",
+      "rw-012",
+      "rw-013",
+      "rw-014",
+      "rw-015",
+      "rw-016",
+      "rw-017",
+      "rw-018",
+      "rw-019",
+      "rw-020",
+      "rw-021",
+      "rw-022",
+      "rw-023",
+      "rw-024",
+      "rw-025",
+      "rw-026",
+      "rw-027",
+      "rw-028",
+      "rw-029",
+      "rw-030",
+      "rw-031",
+      "rw-032",
+      "rw-033",
+      "rw-034",
+      "rw-035",
+      "rw-036",
+      "rw-037",
+      "rw-038",
+      "rw-039",
+      "rw-040",
+      "rw-041",
+      "rw-042",
+      "rw-043",
+      "rw-044",
+      "rw-045",
+      "rw-046",
+      "rw-047",
+      "rw-048",
+      "rw-049",
+      "rw-050",
+      "rw-051",
+      "rw-052",
+      "rw-053"
+    ],
+    "arms": {
+      "agent": {
+        "states": {
+          "complete": 53
+        },
+        "determinate": 53,
+        "abstentions": 0,
+        "allTokens": {
+          "cached_input_tokens": 3511808,
+          "reasoning_output_tokens": 2221,
+          "output_tokens": 29743,
+          "input_tokens": 4384644
+        },
+        "unknownUsage": 0,
+        "matchedCorrect": 49,
+        "matchedTP": 31,
+        "matchedPositiveDenominator": 35,
+        "matchedFP": 0,
+        "matchedNegativeDenominator": 18,
+        "matchedDurationMs": {
+          "median": 24106,
+          "sum": 1319339,
+          "n": 53
+        },
+        "matchedTokens": {
+          "cached_input_tokens": 3511808,
+          "reasoning_output_tokens": 2221,
+          "output_tokens": 29743,
+          "input_tokens": 4384644
+        },
+        "matchedUnknownUsage": 0,
+        "inspectAttempts": 0,
+        "inspectSuccesses": 0,
+        "unsupportedCases": []
+      },
+      "fuse": {
+        "states": {
+          "complete": 53
+        },
+        "determinate": 53,
+        "abstentions": 0,
+        "allTokens": {
+          "cached_input_tokens": 4657024,
+          "reasoning_output_tokens": 2984,
+          "output_tokens": 43831,
+          "input_tokens": 5972997
+        },
+        "unknownUsage": 0,
+        "matchedCorrect": 49,
+        "matchedTP": 31,
+        "matchedPositiveDenominator": 35,
+        "matchedFP": 0,
+        "matchedNegativeDenominator": 18,
+        "matchedDurationMs": {
+          "median": 33601,
+          "sum": 2346231,
+          "n": 53
+        },
+        "matchedTokens": {
+          "cached_input_tokens": 4657024,
+          "reasoning_output_tokens": 2984,
+          "output_tokens": 43831,
+          "input_tokens": 5972997
+        },
+        "matchedUnknownUsage": 0,
+        "inspectAttempts": 66,
+        "inspectSuccesses": 66,
+        "unsupportedCases": [
+          "rw-001",
+          "rw-002",
+          "rw-013",
+          "rw-018",
+          "rw-021",
+          "rw-027",
+          "rw-029",
+          "rw-050",
+          "rw-051",
+          "rw-052",
+          "rw-053"
+        ]
+      }
+    },
+    "wins": ["rw-022"],
+    "losses": ["rw-039"]
+  },
+  "rowAudits": [
+    {
+      "key": "rw-001-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-JSHmyT", "[RUN]/work/source-Kn1jcK"],
+      "issues": []
+    },
+    {
+      "key": "rw-001-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-JSHmyT", "[RUN]/work/source-Kn1jcK"],
+      "issues": []
+    },
+    {
+      "key": "rw-002-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4TZvtr", "[RUN]/work/source-J5BEcg"],
+      "issues": []
+    },
+    {
+      "key": "rw-002-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4TZvtr", "[RUN]/work/source-J5BEcg"],
+      "issues": []
+    },
+    {
+      "key": "rw-003-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-q2RXZa", "[RUN]/work/source-uvnikX"],
+      "issues": []
+    },
+    {
+      "key": "rw-003-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-q2RXZa", "[RUN]/work/source-uvnikX"],
+      "issues": []
+    },
+    {
+      "key": "rw-004-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-8LhoFg", "[RUN]/work/source-nJ81Mw"],
+      "issues": []
+    },
+    {
+      "key": "rw-004-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-8LhoFg", "[RUN]/work/source-nJ81Mw"],
+      "issues": []
+    },
+    {
+      "key": "rw-005-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-e33w8w", "[RUN]/work/source-xLjFqO"],
+      "issues": []
+    },
+    {
+      "key": "rw-005-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-e33w8w", "[RUN]/work/source-xLjFqO"],
+      "issues": []
+    },
+    {
+      "key": "rw-006-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-7qYFMR", "[RUN]/work/source-U4i5G4"],
+      "issues": []
+    },
+    {
+      "key": "rw-006-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-7qYFMR", "[RUN]/work/source-U4i5G4"],
+      "issues": []
+    },
+    {
+      "key": "rw-007-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-GKp5tO", "[RUN]/work/source-iIsDKO"],
+      "issues": []
+    },
+    {
+      "key": "rw-007-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-GKp5tO", "[RUN]/work/source-iIsDKO"],
+      "issues": []
+    },
+    {
+      "key": "rw-008-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4aYcFy", "[RUN]/work/source-7y74GU"],
+      "issues": []
+    },
+    {
+      "key": "rw-008-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4aYcFy", "[RUN]/work/source-7y74GU"],
+      "issues": []
+    },
+    {
+      "key": "rw-009-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-X4LMjt", "[RUN]/work/source-XKdyAU"],
+      "issues": []
+    },
+    {
+      "key": "rw-009-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-X4LMjt", "[RUN]/work/source-XKdyAU"],
+      "issues": []
+    },
+    {
+      "key": "rw-010-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4Aa1s6", "[RUN]/work/source-FxlfVN"],
+      "issues": []
+    },
+    {
+      "key": "rw-010-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4Aa1s6", "[RUN]/work/source-FxlfVN"],
+      "issues": []
+    },
+    {
+      "key": "rw-011-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-bJpoXU", "[RUN]/work/source-krUfaz"],
+      "issues": []
+    },
+    {
+      "key": "rw-011-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-bJpoXU", "[RUN]/work/source-krUfaz"],
+      "issues": []
+    },
+    {
+      "key": "rw-012-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Lv3Iga", "[RUN]/work/source-fPy2sH"],
+      "issues": []
+    },
+    {
+      "key": "rw-012-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Lv3Iga", "[RUN]/work/source-fPy2sH"],
+      "issues": []
+    },
+    {
+      "key": "rw-013-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-FzRyH7", "[RUN]/work/source-XjWdRT"],
+      "issues": []
+    },
+    {
+      "key": "rw-013-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-FzRyH7", "[RUN]/work/source-XjWdRT"],
+      "issues": []
+    },
+    {
+      "key": "rw-014-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4JPY5q", "[RUN]/work/source-nwNtXa"],
+      "issues": []
+    },
+    {
+      "key": "rw-014-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-4JPY5q", "[RUN]/work/source-nwNtXa"],
+      "issues": []
+    },
+    {
+      "key": "rw-015-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-CwvvwD", "[RUN]/work/source-Iy51L0"],
+      "issues": []
+    },
+    {
+      "key": "rw-015-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-CwvvwD", "[RUN]/work/source-Iy51L0"],
+      "issues": []
+    },
+    {
+      "key": "rw-016-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Q86R9p", "[RUN]/work/source-jF8Rz1"],
+      "issues": []
+    },
+    {
+      "key": "rw-016-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Q86R9p", "[RUN]/work/source-jF8Rz1"],
+      "issues": []
+    },
+    {
+      "key": "rw-017-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-SAxahH", "[RUN]/work/source-iE9TWs"],
+      "issues": []
+    },
+    {
+      "key": "rw-017-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-SAxahH", "[RUN]/work/source-iE9TWs"],
+      "issues": []
+    },
+    {
+      "key": "rw-018-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-YTvnsY", "[RUN]/work/source-g5PDSn"],
+      "issues": []
+    },
+    {
+      "key": "rw-018-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-YTvnsY", "[RUN]/work/source-g5PDSn"],
+      "issues": []
+    },
+    {
+      "key": "rw-019-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-QoURhU", "[RUN]/work/source-VGJoQ0"],
+      "issues": []
+    },
+    {
+      "key": "rw-019-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-QoURhU", "[RUN]/work/source-VGJoQ0"],
+      "issues": []
+    },
+    {
+      "key": "rw-020-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-pcZZsg", "[RUN]/work/source-qLo82Y"],
+      "issues": []
+    },
+    {
+      "key": "rw-020-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-pcZZsg", "[RUN]/work/source-qLo82Y"],
+      "issues": []
+    },
+    {
+      "key": "rw-021-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-6svddE", "[RUN]/work/source-mmZCLf"],
+      "issues": []
+    },
+    {
+      "key": "rw-021-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-6svddE", "[RUN]/work/source-mmZCLf"],
+      "issues": []
+    },
+    {
+      "key": "rw-022-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-LzbEkr", "[RUN]/work/source-lSIBfr"],
+      "issues": []
+    },
+    {
+      "key": "rw-022-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-LzbEkr", "[RUN]/work/source-lSIBfr"],
+      "issues": []
+    },
+    {
+      "key": "rw-023-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-FBhHZn", "[RUN]/work/source-bniP6k"],
+      "issues": []
+    },
+    {
+      "key": "rw-023-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-FBhHZn", "[RUN]/work/source-bniP6k"],
+      "issues": []
+    },
+    {
+      "key": "rw-024-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-NXHDXT", "[RUN]/work/source-x164n3"],
+      "issues": []
+    },
+    {
+      "key": "rw-024-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-NXHDXT", "[RUN]/work/source-x164n3"],
+      "issues": []
+    },
+    {
+      "key": "rw-025-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-6p6iPK", "[RUN]/work/source-e0qEW9"],
+      "issues": []
+    },
+    {
+      "key": "rw-025-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-6p6iPK", "[RUN]/work/source-e0qEW9"],
+      "issues": []
+    },
+    {
+      "key": "rw-026-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Ko9PoY", "[RUN]/work/source-k6bTwe"],
+      "issues": []
+    },
+    {
+      "key": "rw-026-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Ko9PoY", "[RUN]/work/source-k6bTwe"],
+      "issues": []
+    },
+    {
+      "key": "rw-027-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-8rs8jL", "[RUN]/work/source-yEr5wT"],
+      "issues": []
+    },
+    {
+      "key": "rw-027-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-8rs8jL", "[RUN]/work/source-yEr5wT"],
+      "issues": []
+    },
+    {
+      "key": "rw-028-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-kAvNLN", "[RUN]/work/source-sYyKfl"],
+      "issues": []
+    },
+    {
+      "key": "rw-028-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-kAvNLN", "[RUN]/work/source-sYyKfl"],
+      "issues": []
+    },
+    {
+      "key": "rw-029-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-R7Fndp", "[RUN]/work/source-fa42i0"],
+      "issues": []
+    },
+    {
+      "key": "rw-029-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-R7Fndp", "[RUN]/work/source-fa42i0"],
+      "issues": []
+    },
+    {
+      "key": "rw-030-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-D1Pk3o", "[RUN]/work/source-lWDb1o"],
+      "issues": []
+    },
+    {
+      "key": "rw-030-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-D1Pk3o", "[RUN]/work/source-lWDb1o"],
+      "issues": []
+    },
+    {
+      "key": "rw-031-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-09FDFF", "[RUN]/work/source-ViiEI6"],
+      "issues": []
+    },
+    {
+      "key": "rw-031-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-09FDFF", "[RUN]/work/source-ViiEI6"],
+      "issues": []
+    },
+    {
+      "key": "rw-032-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-kUVqTd", "[RUN]/work/source-tYb77I"],
+      "issues": []
+    },
+    {
+      "key": "rw-032-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-kUVqTd", "[RUN]/work/source-tYb77I"],
+      "issues": []
+    },
+    {
+      "key": "rw-033-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-paGekq", "[RUN]/work/source-u5G3bJ"],
+      "issues": []
+    },
+    {
+      "key": "rw-033-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-paGekq", "[RUN]/work/source-u5G3bJ"],
+      "issues": []
+    },
+    {
+      "key": "rw-034-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-jAEZsU", "[RUN]/work/source-vRFpT1"],
+      "issues": []
+    },
+    {
+      "key": "rw-034-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-jAEZsU", "[RUN]/work/source-vRFpT1"],
+      "issues": []
+    },
+    {
+      "key": "rw-035-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Qnn0sh", "[RUN]/work/source-gMdyW8"],
+      "issues": []
+    },
+    {
+      "key": "rw-035-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Qnn0sh", "[RUN]/work/source-gMdyW8"],
+      "issues": []
+    },
+    {
+      "key": "rw-036-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-VSRod4", "[RUN]/work/source-gYHtuv"],
+      "issues": []
+    },
+    {
+      "key": "rw-036-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-VSRod4", "[RUN]/work/source-gYHtuv"],
+      "issues": []
+    },
+    {
+      "key": "rw-037-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-ITBGUl", "[RUN]/work/source-KMK7Yn"],
+      "issues": []
+    },
+    {
+      "key": "rw-037-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-ITBGUl", "[RUN]/work/source-KMK7Yn"],
+      "issues": []
+    },
+    {
+      "key": "rw-038-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-15Upvc", "[RUN]/work/source-NL4yvX"],
+      "issues": []
+    },
+    {
+      "key": "rw-038-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-15Upvc", "[RUN]/work/source-NL4yvX"],
+      "issues": []
+    },
+    {
+      "key": "rw-039-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-6VCFlo", "[RUN]/work/source-8dZUD4"],
+      "issues": []
+    },
+    {
+      "key": "rw-039-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-6VCFlo", "[RUN]/work/source-8dZUD4"],
+      "issues": []
+    },
+    {
+      "key": "rw-040-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-82roqK", "[RUN]/work/source-aOhf1N"],
+      "issues": []
+    },
+    {
+      "key": "rw-040-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-82roqK", "[RUN]/work/source-aOhf1N"],
+      "issues": []
+    },
+    {
+      "key": "rw-041-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-3p0m69", "[RUN]/work/source-P8ERKV"],
+      "issues": []
+    },
+    {
+      "key": "rw-041-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-3p0m69", "[RUN]/work/source-P8ERKV"],
+      "issues": []
+    },
+    {
+      "key": "rw-042-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Av6nba", "[RUN]/work/source-PVpinJ"],
+      "issues": []
+    },
+    {
+      "key": "rw-042-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Av6nba", "[RUN]/work/source-PVpinJ"],
+      "issues": []
+    },
+    {
+      "key": "rw-043-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-OqVRXx", "[RUN]/work/source-gjf2E3"],
+      "issues": []
+    },
+    {
+      "key": "rw-043-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-OqVRXx", "[RUN]/work/source-gjf2E3"],
+      "issues": []
+    },
+    {
+      "key": "rw-044-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-L5pUmx", "[RUN]/work/source-gKRRbA"],
+      "issues": []
+    },
+    {
+      "key": "rw-044-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-L5pUmx", "[RUN]/work/source-gKRRbA"],
+      "issues": []
+    },
+    {
+      "key": "rw-045-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-ZaCCrc", "[RUN]/work/source-knPJ9F"],
+      "issues": []
+    },
+    {
+      "key": "rw-045-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-ZaCCrc", "[RUN]/work/source-knPJ9F"],
+      "issues": []
+    },
+    {
+      "key": "rw-046-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-XJH0NE", "[RUN]/work/source-Z144eH"],
+      "issues": []
+    },
+    {
+      "key": "rw-046-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-XJH0NE", "[RUN]/work/source-Z144eH"],
+      "issues": []
+    },
+    {
+      "key": "rw-047-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Q8ptgl", "[RUN]/work/source-hGeLCY"],
+      "issues": []
+    },
+    {
+      "key": "rw-047-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Q8ptgl", "[RUN]/work/source-hGeLCY"],
+      "issues": []
+    },
+    {
+      "key": "rw-048-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-KsIRn0", "[RUN]/work/source-vF4Cv3"],
+      "issues": []
+    },
+    {
+      "key": "rw-048-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-KsIRn0", "[RUN]/work/source-vF4Cv3"],
+      "issues": []
+    },
+    {
+      "key": "rw-049-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Hzdd5u", "[RUN]/work/source-PndL3N"],
+      "issues": []
+    },
+    {
+      "key": "rw-049-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Hzdd5u", "[RUN]/work/source-PndL3N"],
+      "issues": []
+    },
+    {
+      "key": "rw-050-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-dBqjZr", "[RUN]/work/source-eF2lPP"],
+      "issues": []
+    },
+    {
+      "key": "rw-050-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-dBqjZr", "[RUN]/work/source-eF2lPP"],
+      "issues": []
+    },
+    {
+      "key": "rw-051-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-ZuCH21", "[RUN]/work/source-gZZMRZ"],
+      "issues": []
+    },
+    {
+      "key": "rw-051-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-ZuCH21", "[RUN]/work/source-gZZMRZ"],
+      "issues": []
+    },
+    {
+      "key": "rw-052-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Fmn2Lj", "[RUN]/work/source-QESE4w"],
+      "issues": []
+    },
+    {
+      "key": "rw-052-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-Fmn2Lj", "[RUN]/work/source-QESE4w"],
+      "issues": []
+    },
+    {
+      "key": "rw-053-agent",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-hJNyHl", "[RUN]/work/source-hJpdqZ"],
+      "issues": []
+    },
+    {
+      "key": "rw-053-fuse",
+      "status": "complete",
+      "sourceStores": ["[RUN]/work/source-hJNyHl", "[RUN]/work/source-hJpdqZ"],
+      "issues": []
+    }
+  ],
+  "currentSourceStores": 106,
+  "nativeInspectCalls": 66,
+  "clientVersions": {
+    "codex-cli 0.167.0-alpha.3.2": 106
+  },
+  "uniqueAgentThreads": 106,
+  "issues": []
+}

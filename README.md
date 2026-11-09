@@ -4,8 +4,8 @@
 
 The inline candidate adds a compact, expandable MCP review card with the actual
 ybouane/liquidglass library. It preserves the two human decisions and isolated
-verification safeguards. Native rendering acceptance remains pending;
-[the support record](docs/inline-review.md) and [issue #3](https://github.com/Will-Sanz/fuse/issues/3)
+verification safeguards. Full native interaction acceptance remains pending;
+[the support record](docs/inline-review.md) and [issue #5](https://github.com/Will-Sanz/fuse/issues/5)
 distinguish tested client privacy/transport and component behavior from native proof.
 
 ## MCP-first behavioral proposals
@@ -47,7 +47,7 @@ Open a Git repository with a TypeScript edit or merge conflict and ask your codi
 
 The assistant calls `fuse_explain` with the project's absolute `repo` path. The MCP reads your local repository, sends bounded source context to the hosted Fuse AI service, and returns a fresh image with meaningful choices. `fuse_present_review` presents the saved review inline on a compatible host; `fuse_open_review` supplies an explicitly requested browser fallback. Choose intended behavior, let the coding agent submit and verify a correction, then inspect and approve the exact code. Model-callable tools never write working source; authorized component actions apply only the approved, verified candidate.
 
-One connection works across repositories: pass `repo` on each tool call. An optional `--repo PATH` launch argument restricts a connection to one repository. Inspection without AI is available through `fuse_inspect`.
+One connection works across repositories: pass `repo` on each tool call. An optional `--repo PATH` launch argument restricts a connection to one repository. Inspection without AI is available through `fuse_inspect`. For source investigations, `detail: "compact"` avoids repeated code while retaining exact inputs and evidence; the complete response remains available through `fuse_review` with `detail: "full"`.
 
 ## Show it working in a meeting
 
@@ -140,3 +140,8 @@ Fuse MCP on 53 pinned conflict/compatible branch pairs. It measures source-based
 detection separately from repair and executed application checks. Run the deterministic
 harness checks with `npm run benchmark:test`; real-agent runs require an explicit
 `npm run benchmark:run` invocation and use the operator's existing Codex account.
+
+The [follow-through protocol](docs/benchmark-next.md) adds repeated comparisons and
+eight authored interaction probes on pinned Python and JavaScript projects with
+executable oracles. These test agent reasoning and unsupported-file handling;
+they do not extend Fuse's TypeScript engine or application support.

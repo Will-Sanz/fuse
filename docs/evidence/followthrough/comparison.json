@@ -1,0 +1,126 @@
+{
+  "sameCompletedCasesAcrossAllCohorts": [
+    "rw-001",
+    "rw-002",
+    "rw-003",
+    "rw-004",
+    "rw-005",
+    "rw-006",
+    "rw-007",
+    "rw-008",
+    "rw-009",
+    "rw-010",
+    "rw-011",
+    "rw-012",
+    "rw-013",
+    "rw-014",
+    "rw-015",
+    "rw-016",
+    "rw-017",
+    "rw-018",
+    "rw-019",
+    "rw-020",
+    "rw-021",
+    "rw-022",
+    "rw-023",
+    "rw-024",
+    "rw-025",
+    "rw-026",
+    "rw-027",
+    "rw-028",
+    "rw-029",
+    "rw-030",
+    "rw-031",
+    "rw-032",
+    "rw-033",
+    "rw-034",
+    "rw-035",
+    "rw-036",
+    "rw-037",
+    "rw-038",
+    "rw-039",
+    "rw-040",
+    "rw-041",
+    "rw-042",
+    "rw-043",
+    "rw-044",
+    "rw-045",
+    "rw-046",
+    "rw-047",
+    "rw-048",
+    "rw-049",
+    "rw-050",
+    "rw-051",
+    "rw-052",
+    "rw-053"
+  ],
+  "cohorts": {
+    "before-r2": {
+      "agent": {
+        "correct": 49,
+        "denominator": 53,
+        "medianDurationMs": 24106,
+        "inputPlusOutputTokens": 4414387,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 0,
+        "medianFuseTextBytes": 0,
+        "totalCommonSourceTextBytes": 2414574
+      },
+      "fuse": {
+        "correct": 49,
+        "denominator": 53,
+        "medianDurationMs": 33601,
+        "inputPlusOutputTokens": 6016828,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 10462203,
+        "medianFuseTextBytes": 52859,
+        "totalCommonSourceTextBytes": 2298611
+      }
+    },
+    "after-1-r2": {
+      "agent": {
+        "correct": 48,
+        "denominator": 53,
+        "medianDurationMs": 23774,
+        "inputPlusOutputTokens": 4299007,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 0,
+        "medianFuseTextBytes": 0,
+        "totalCommonSourceTextBytes": 2268077
+      },
+      "fuse": {
+        "correct": 49,
+        "denominator": 53,
+        "medianDurationMs": 31265,
+        "inputPlusOutputTokens": 5346812,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 6587568,
+        "medianFuseTextBytes": 39846,
+        "totalCommonSourceTextBytes": 2116620
+      }
+    },
+    "after-2-r2": {
+      "agent": {
+        "correct": 48,
+        "denominator": 53,
+        "medianDurationMs": 23163,
+        "inputPlusOutputTokens": 4315226,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 0,
+        "medianFuseTextBytes": 0,
+        "totalCommonSourceTextBytes": 2210237
+      },
+      "fuse": {
+        "correct": 47,
+        "denominator": 53,
+        "medianDurationMs": 31319,
+        "inputPlusOutputTokens": 5391450,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 6974861,
+        "medianFuseTextBytes": 39846,
+        "totalCommonSourceTextBytes": 2011137
+      }
+    }
+  },
+  "note": "Conventional median averages the middle two values for even N; context/token counts and text bytes are distinct measurements."
+}

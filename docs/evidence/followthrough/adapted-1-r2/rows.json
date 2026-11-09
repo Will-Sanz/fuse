@@ -1,0 +1,2150 @@
+[
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 1,
+    "category": "runtime",
+    "explanation": "Side A renames DateTime._try_to_convert_date to _parse_date without retaining an alias. Side B adds parse_iso in src/click/iso_date.py:4, which calls the removed name. The changes affect separate files and merge cleanly, but calling parse_iso('2026-11-09') in the combined code raises AttributeError instead of returning a datetime. This conclusion follows from source inspection; tests were not executed.",
+    "involved_symbols": [
+      "DateTime._try_to_convert_date",
+      "DateTime._parse_date",
+      "click.iso_date.parse_iso"
+    ],
+    "durationMs": 17163,
+    "timing": {
+      "processStartedAt": 1794249841205,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249858285,
+      "agentProcessDurationMs": 17080,
+      "watchdogDelayMs": null,
+      "postprocessMs": 83
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 49147,
+      "cached_input_tokens": 39936,
+      "output_tokens": 396,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "fa80592af960994e75d90974f2326db65a986fd4ef165b614b066876014a7671",
+    "sourceAfter": "fa80592af960994e75d90974f2326db65a986fd4ef165b614b066876014a7671",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-001-agent/events.jsonl",
+      "sha256": "0d66a35a56ef45e0f37c60601afae9523b5b86fd44b8cde41cf51cb208771e25",
+      "stderrPath": "[RUN]/traces/bx-001-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "d6d39183d3675c39a70574f48de28db0b49111b518d2022fbe7ffaac01cf2cf0",
+    "costUsd": null,
+    "caseId": "bx-001",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "fca74a2994b9d5f90d5cc1d84cbb53f4ea3a81e7",
+        "b": "7cabcc5fe76c83f8096d3dc584c41997440b538b"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+        "b": "366cfab4bad61815072958367bbad08f28da120c"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "004d615d6cfe36da48446ee7e8954f97c07b0b25",
+        "b": "ebb6c71b05a3ca7f7f82bff376500d19cf27ef2e"
+      },
+      "commitMessagesSha256": {
+        "a": "8d323eb82b2017a0d33ca6b00f574f1542a78132db0928841601df91bfb0571d",
+        "b": "fca67ac8e093b501cf2d19941b8eff93162aa3de6023140dfb1eff19a351eb77"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f1a6bbdaaddc2ee81c78f02286d4feccf99fd35a6a7d58e9bf4d96a885b0adfa"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 1,
+    "category": "runtime",
+    "explanation": "Side A renames DateTime._try_to_convert_date to _parse_date in src/click/types.py:371 without retaining an alias. Side B adds parse_iso in src/click/iso_date.py:4, which calls the removed method. The changes affect separate files, but combining them makes parse_iso('2026-11-09') raise AttributeError instead of returning a datetime. Fuse marked both Python files unsupported; source inspection establishes this interaction. No tests were run.",
+    "involved_symbols": ["DateTime._try_to_convert_date", "DateTime._parse_date", "parse_iso"],
+    "durationMs": 21730,
+    "timing": {
+      "processStartedAt": 1794249819075,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249840749,
+      "agentProcessDurationMs": 21674,
+      "watchdogDelayMs": null,
+      "postprocessMs": 55
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 71844,
+      "cached_input_tokens": 50176,
+      "output_tokens": 594,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 10,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "src/click/iso_date.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "src/click/types.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "fa80592af960994e75d90974f2326db65a986fd4ef165b614b066876014a7671",
+    "sourceAfter": "fa80592af960994e75d90974f2326db65a986fd4ef165b614b066876014a7671",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-001-fuse/events.jsonl",
+      "sha256": "e2b97ff1e77303e13b0c97a85dd48b4dde34f8b8424f91b7003693917fa8a7ba",
+      "stderrPath": "[RUN]/traces/bx-001-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "ffe377fde20ae85f5aef664150f4fc9022e4ce193fca991048c0e8f4560f9271",
+    "costUsd": null,
+    "caseId": "bx-001",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "fca74a2994b9d5f90d5cc1d84cbb53f4ea3a81e7",
+        "b": "7cabcc5fe76c83f8096d3dc584c41997440b538b"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+        "b": "366cfab4bad61815072958367bbad08f28da120c"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "004d615d6cfe36da48446ee7e8954f97c07b0b25",
+        "b": "ebb6c71b05a3ca7f7f82bff376500d19cf27ef2e"
+      },
+      "commitMessagesSha256": {
+        "a": "8d323eb82b2017a0d33ca6b00f574f1542a78132db0928841601df91bfb0571d",
+        "b": "fca67ac8e093b501cf2d19941b8eff93162aa3de6023140dfb1eff19a351eb77"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f1a6bbdaaddc2ee81c78f02286d4feccf99fd35a6a7d58e9bf4d96a885b0adfa"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "Side A renames DateTime._try_to_convert_date to _parse_date and updates DateTime.convert to call it, preserving parsing and error behavior. Side B adds parse_iso, which calls the unchanged public DateTime.convert interface and never references the renamed private method. The changes affect separate files and remain compatible when combined. Tests were not executed.",
+    "involved_symbols": [
+      "DateTime._try_to_convert_date",
+      "DateTime._parse_date",
+      "DateTime.convert",
+      "parse_iso"
+    ],
+    "durationMs": 21842,
+    "timing": {
+      "processStartedAt": 1794249819425,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249841207,
+      "agentProcessDurationMs": 21782,
+      "watchdogDelayMs": null,
+      "postprocessMs": 60
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 47618,
+      "cached_input_tokens": 38400,
+      "output_tokens": 397,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b3247ea0f5d577ddf49c8dbf60b78eb49cd916bf6dd5095adac908e5575e5db9",
+    "sourceAfter": "b3247ea0f5d577ddf49c8dbf60b78eb49cd916bf6dd5095adac908e5575e5db9",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-002-agent/events.jsonl",
+      "sha256": "0cca7e4d558ccbb0ce4be2dfd3b8a17fe52bb23f3a6c737828de997e3e00cc7a",
+      "stderrPath": "[RUN]/traces/bx-002-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "fced2a4573d6e18b28c20c4c0139668ef773d0db6cbc8e4f1ea24aa0ccb91787",
+    "costUsd": null,
+    "caseId": "bx-002",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "fca74a2994b9d5f90d5cc1d84cbb53f4ea3a81e7",
+        "b": "241320a8ec27c448ca11b91536cd71ae57ee098d"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+        "b": "5b5b01a16c2eea4c05ca96c067056b23914179ee"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "004d615d6cfe36da48446ee7e8954f97c07b0b25",
+        "b": "7713d042e11e7d224afbbe247a59db11fc119b86"
+      },
+      "commitMessagesSha256": {
+        "a": "8d323eb82b2017a0d33ca6b00f574f1542a78132db0928841601df91bfb0571d",
+        "b": "fca67ac8e093b501cf2d19941b8eff93162aa3de6023140dfb1eff19a351eb77"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f1a6bbdaaddc2ee81c78f02286d4feccf99fd35a6a7d58e9bf4d96a885b0adfa"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "Side A renames DateTime._try_to_convert_date to _parse_date and updates DateTime.convert to call it, preserving parsing and error behavior. Side B's parse_iso calls the unchanged public convert method and never references the renamed helper. The changes affect separate files and remain compatible. Fuse marked both Python files unsupported; this assessment follows direct source inspection at base/A/B. Tests were not run.",
+    "involved_symbols": [
+      "DateTime._try_to_convert_date",
+      "DateTime._parse_date",
+      "DateTime.convert",
+      "parse_iso"
+    ],
+    "durationMs": 23137,
+    "timing": {
+      "processStartedAt": 1794249841636,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249864695,
+      "agentProcessDurationMs": 23059,
+      "watchdogDelayMs": null,
+      "postprocessMs": 78
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 69739,
+      "cached_input_tokens": 50048,
+      "output_tokens": 523,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 9,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "src/click/iso_date.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "src/click/types.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b3247ea0f5d577ddf49c8dbf60b78eb49cd916bf6dd5095adac908e5575e5db9",
+    "sourceAfter": "b3247ea0f5d577ddf49c8dbf60b78eb49cd916bf6dd5095adac908e5575e5db9",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-002-fuse/events.jsonl",
+      "sha256": "d320c64047ea474ab209e2f7b55c33f5da3ffa0313c71c8cfd14707a1f402458",
+      "stderrPath": "[RUN]/traces/bx-002-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "09f7f835ea19c1f1729396f6e410f31a1eef900b6b241b70a228bf98c3a86a71",
+    "costUsd": null,
+    "caseId": "bx-002",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "fca74a2994b9d5f90d5cc1d84cbb53f4ea3a81e7",
+        "b": "241320a8ec27c448ca11b91536cd71ae57ee098d"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+        "b": "5b5b01a16c2eea4c05ca96c067056b23914179ee"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "004d615d6cfe36da48446ee7e8954f97c07b0b25",
+        "b": "7713d042e11e7d224afbbe247a59db11fc119b86"
+      },
+      "commitMessagesSha256": {
+        "a": "8d323eb82b2017a0d33ca6b00f574f1542a78132db0928841601df91bfb0571d",
+        "b": "fca67ac8e093b501cf2d19941b8eff93162aa3de6023140dfb1eff19a351eb77"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f1a6bbdaaddc2ee81c78f02286d4feccf99fd35a6a7d58e9bf4d96a885b0adfa"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "Side A renames click.utils.make_str to _stringify without retaining an alias. Side B adds src/click/filename_labels.py, which imports and calls make_str. The changes merge textually, but importing click.filename_labels then raises ImportError, preventing the new feature from being used. This conclusion is based on source inspection; tests were not run.",
+    "involved_symbols": [
+      "click.utils.make_str",
+      "click.utils._stringify",
+      "click.filename_labels.filename_labels"
+    ],
+    "durationMs": 18746,
+    "timing": {
+      "processStartedAt": 1794249842086,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249860758,
+      "agentProcessDurationMs": 18672,
+      "watchdogDelayMs": null,
+      "postprocessMs": 74
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 48191,
+      "cached_input_tokens": 40064,
+      "output_tokens": 425,
+      "reasoning_output_tokens": 28
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 9,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "83250711eaec923bf72f4d7bed302b21604d478dcfe43f39171c9ea23601b132",
+    "sourceAfter": "83250711eaec923bf72f4d7bed302b21604d478dcfe43f39171c9ea23601b132",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-003-agent/events.jsonl",
+      "sha256": "52c3d08627ebf4bdf534403fbc7dc3e8be6737d8ad6816660a58ccdf6722f5ad",
+      "stderrPath": "[RUN]/traces/bx-003-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "c698d40d4e07782499f2e0779ccd5b58a7d914973e6d92ed323666530cb5e78f",
+    "costUsd": null,
+    "caseId": "bx-003",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "620dc6277560a7c9b70f814a2b062b263faf2b68",
+        "b": "0bf40c1bdb297de742135af87cbb3bdc90848782"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+        "b": "28ca5420b78b50e18f1b741d58fc842af80973b2"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "086254a256fae060f4883c34b279f94814445fb8",
+        "b": "285180aa16318b4c5f9a9ff3268c574253c14de7"
+      },
+      "commitMessagesSha256": {
+        "a": "5b763445bbf93eefdd9e67cca0a94228b4b3d7f9676aa574dd8f8aa218b4ad32",
+        "b": "d93c5c5ca9bca3e4c9bff19cbd25a536b18ae00069968019ad480f3c8ffea061"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "849fea27d397a1519ef411c2f26c6870b608cbe375bcb37b884446bb9326abb4"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A renames utils.make_str to _stringify without retaining an alias. B adds src/click/filename_labels.py, which imports make_str on line 1 and calls it on line 4. The changes merge textually, but importing click.filename_labels then raises ImportError, preventing B's feature from being used. Fuse marked the Python files unsupported; source inspection confirms the incompatible dependency. No tests were run.",
+    "involved_symbols": [
+      "click.utils.make_str",
+      "click.utils._stringify",
+      "click.filename_labels.filename_labels"
+    ],
+    "durationMs": 21895,
+    "timing": {
+      "processStartedAt": 1794249819803,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249841638,
+      "agentProcessDurationMs": 21835,
+      "watchdogDelayMs": null,
+      "postprocessMs": 60
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 62865,
+      "cached_input_tokens": 38784,
+      "output_tokens": 532,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 9,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "src/click/core.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "src/click/filename_labels.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "src/click/utils.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "83250711eaec923bf72f4d7bed302b21604d478dcfe43f39171c9ea23601b132",
+    "sourceAfter": "83250711eaec923bf72f4d7bed302b21604d478dcfe43f39171c9ea23601b132",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-003-fuse/events.jsonl",
+      "sha256": "30e2d308f746adc2b284b8ca302e2880e936ab1c11b1ef95416ef77c46e39aba",
+      "stderrPath": "[RUN]/traces/bx-003-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "1b9c6c6cf3e3c00289bbb6f2d8cc3f4ce717d28cda69d06b35b808c3c421c62a",
+    "costUsd": null,
+    "caseId": "bx-003",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "620dc6277560a7c9b70f814a2b062b263faf2b68",
+        "b": "0bf40c1bdb297de742135af87cbb3bdc90848782"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+        "b": "28ca5420b78b50e18f1b741d58fc842af80973b2"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "086254a256fae060f4883c34b279f94814445fb8",
+        "b": "285180aa16318b4c5f9a9ff3268c574253c14de7"
+      },
+      "commitMessagesSha256": {
+        "a": "5b763445bbf93eefdd9e67cca0a94228b4b3d7f9676aa574dd8f8aa218b4ad32",
+        "b": "d93c5c5ca9bca3e4c9bff19cbd25a536b18ae00069968019ad480f3c8ffea061"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "849fea27d397a1519ef411c2f26c6870b608cbe375bcb37b884446bb9326abb4"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "Side A renames make_str to _stringify and updates command dispatch's import and call without changing its implementation. Side B adds filename_labels, which calls the unchanged format_filename helper. That helper does not depend on make_str or _stringify, so the changes have no conflicting dependency or overlapping edits. Assessment is based on source inspection; tests were not executed.",
+    "involved_symbols": [
+      "make_str",
+      "_stringify",
+      "MultiCommand.resolve_command",
+      "filename_labels",
+      "format_filename"
+    ],
+    "durationMs": 25099,
+    "timing": {
+      "processStartedAt": 1794249820242,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249845221,
+      "agentProcessDurationMs": 24979,
+      "watchdogDelayMs": null,
+      "postprocessMs": 120
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 75449,
+      "cached_input_tokens": 59136,
+      "output_tokens": 452,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 10,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "dabff82e37e13787a015a8222261e6e7e7db671d92911551259ed93c9972304f",
+    "sourceAfter": "dabff82e37e13787a015a8222261e6e7e7db671d92911551259ed93c9972304f",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-004-agent/events.jsonl",
+      "sha256": "9405ced538769852b9832c79ce99eb983ca1400b1567b0a0e8bc088f0b885344",
+      "stderrPath": "[RUN]/traces/bx-004-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "2897d20e2c0dbd281d88a435adf39830b977f73707cbcf8261724f8e7ce3f63e",
+    "costUsd": null,
+    "caseId": "bx-004",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "620dc6277560a7c9b70f814a2b062b263faf2b68",
+        "b": "0b3c4a73ecc5de2112190dad7ec0c16d30fd8f0f"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+        "b": "388de70ab406e74c5b1bc02ce4d7f09a80e9770c"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "086254a256fae060f4883c34b279f94814445fb8",
+        "b": "0e533460fffcc7b15f4e32a3cd452d875454ede6"
+      },
+      "commitMessagesSha256": {
+        "a": "5b763445bbf93eefdd9e67cca0a94228b4b3d7f9676aa574dd8f8aa218b4ad32",
+        "b": "d93c5c5ca9bca3e4c9bff19cbd25a536b18ae00069968019ad480f3c8ffea061"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "849fea27d397a1519ef411c2f26c6870b608cbe375bcb37b884446bb9326abb4"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "A renames make_str to _stringify and updates the command-dispatch import and call without changing behavior. B adds filename_labels, which calls the unchanged format_filename; that function does not depend on the renamed helper. The changes affect separate code and have no incompatible dependency. Fuse inspection marked Python files unsupported, so this assessment relies on source inspection. Tests were not run.",
+    "involved_symbols": [
+      "make_str",
+      "_stringify",
+      "MultiCommand.resolve_command",
+      "filename_labels",
+      "format_filename"
+    ],
+    "durationMs": 23499,
+    "timing": {
+      "processStartedAt": 1794249845689,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249869109,
+      "agentProcessDurationMs": 23420,
+      "watchdogDelayMs": null,
+      "postprocessMs": 79
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 88510,
+      "cached_input_tokens": 70400,
+      "output_tokens": 677,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 13,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "src/click/core.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "src/click/filename_labels.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        },
+        {
+          "path": "src/click/utils.py",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "dabff82e37e13787a015a8222261e6e7e7db671d92911551259ed93c9972304f",
+    "sourceAfter": "dabff82e37e13787a015a8222261e6e7e7db671d92911551259ed93c9972304f",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-004-fuse/events.jsonl",
+      "sha256": "541b1f7b04166aa9992729153106e2bffc53e3d45b8618c0aa965550a535490f",
+      "stderrPath": "[RUN]/traces/bx-004-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "5a0c513741cc000cbd5829c10b05e570d29e13f1660f681bf2d729b879a48cce",
+    "costUsd": null,
+    "caseId": "bx-004",
+    "provenance": {
+      "originalCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "620dc6277560a7c9b70f814a2b062b263faf2b68",
+        "b": "0b3c4a73ecc5de2112190dad7ec0c16d30fd8f0f"
+      },
+      "originalTrees": {
+        "base": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+        "a": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+        "b": "388de70ab406e74c5b1bc02ce4d7f09a80e9770c"
+      },
+      "reconstructedCommits": {
+        "base": "26e048c9f19352a8527351b5c7263522cc21616d",
+        "a": "086254a256fae060f4883c34b279f94814445fb8",
+        "b": "0e533460fffcc7b15f4e32a3cd452d875454ede6"
+      },
+      "commitMessagesSha256": {
+        "a": "5b763445bbf93eefdd9e67cca0a94228b4b3d7f9676aa574dd8f8aa218b4ad32",
+        "b": "d93c5c5ca9bca3e4c9bff19cbd25a536b18ae00069968019ad480f3c8ffea061"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "849fea27d397a1519ef411c2f26c6870b608cbe375bcb37b884446bb9326abb4"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 1,
+    "category": "runtime",
+    "explanation": "Side A changes index.js parse() to return { milliseconds: number }, adapting only the main exported function. Side B adds module.exports.seconds(), which divides parse(text) directly by 1000. The edits do not overlap, but combined, seconds('1s') returns NaN because it divides an object by 1000; side B alone returns 1. This follows from source inspection; tests were not executed.",
+    "involved_symbols": ["parse", "module.exports", "module.exports.seconds"],
+    "durationMs": 17587,
+    "timing": {
+      "processStartedAt": 1794249878909,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249896435,
+      "agentProcessDurationMs": 17526,
+      "watchdogDelayMs": null,
+      "postprocessMs": 61
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 48592,
+      "cached_input_tokens": 39680,
+      "output_tokens": 337,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 7,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "24ddecf9874a387bf9cc2dfd39fd6fb6948ddade52d9192d68ea6e0c7b09e60d",
+    "sourceAfter": "24ddecf9874a387bf9cc2dfd39fd6fb6948ddade52d9192d68ea6e0c7b09e60d",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-005-agent/events.jsonl",
+      "sha256": "1b8fe8adb95d25cebd8edde4cc4677c628f6fd7992cb3627f0113095684ea451",
+      "stderrPath": "[RUN]/traces/bx-005-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "a5201ac1fd29afadbb4278a7e7e52fd639f749e5430f07fa7a874536f8bf088e",
+    "costUsd": null,
+    "caseId": "bx-005",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "d0fdddbd901271c14d48e46f5e4c94cdc3ec0845",
+        "b": "dd7f553736e1784f1286549f6b7d08ee1fba19ee"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+        "b": "2335372477ac0038cde76003864d31dd223d21de"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "8c6988bd72b34f9e9fdb760ead095b72c77d03bc",
+        "b": "adba5c70370882baf4215f1e603fe2a142556250"
+      },
+      "commitMessagesSha256": {
+        "a": "4a0f55dcd09dcf4b62b6f62eefc0ca32d7990062908108db193e862e2f2a74d8",
+        "b": "cb33ab99b3e7634aecb285b6c4f0d63390e4b9227ccf0ce7bfaff7a2124df11c"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "011e85f9d2b69dee354fa95cc925030c180d97567297d0e306f715be5acf8b0d"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 1,
+    "category": "runtime",
+    "explanation": "A changes index.js parse() to return { milliseconds: number } and updates the main export to unwrap it. B adds module.exports.seconds(), which directly divides parse(text) by 1000. Combining these non-overlapping edits makes seconds('2s') return NaN instead of 2 because it divides an object by 1000. Fuse marked index.js unsupported; full source at base/A/B confirms the incompatible return contract. No tests were run.",
+    "involved_symbols": ["parse", "module.exports", "module.exports.seconds"],
+    "durationMs": 20167,
+    "timing": {
+      "processStartedAt": 1794249858553,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249878654,
+      "agentProcessDurationMs": 20101,
+      "watchdogDelayMs": null,
+      "postprocessMs": 66
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 58261,
+      "cached_input_tokens": 45184,
+      "output_tokens": 502,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "index.js",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "24ddecf9874a387bf9cc2dfd39fd6fb6948ddade52d9192d68ea6e0c7b09e60d",
+    "sourceAfter": "24ddecf9874a387bf9cc2dfd39fd6fb6948ddade52d9192d68ea6e0c7b09e60d",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-005-fuse/events.jsonl",
+      "sha256": "840e238abc42e428f4ff517866d140cd8bca5b3dc65dfb9894a89aad0bdb486c",
+      "stderrPath": "[RUN]/traces/bx-005-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "2f0203df3361e9a0c25c7963aa2c461fefd108bc5de500ca31e9ddef8658ee97",
+    "costUsd": null,
+    "caseId": "bx-005",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "d0fdddbd901271c14d48e46f5e4c94cdc3ec0845",
+        "b": "dd7f553736e1784f1286549f6b7d08ee1fba19ee"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+        "b": "2335372477ac0038cde76003864d31dd223d21de"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "8c6988bd72b34f9e9fdb760ead095b72c77d03bc",
+        "b": "adba5c70370882baf4215f1e603fe2a142556250"
+      },
+      "commitMessagesSha256": {
+        "a": "4a0f55dcd09dcf4b62b6f62eefc0ca32d7990062908108db193e862e2f2a74d8",
+        "b": "cb33ab99b3e7634aecb285b6c4f0d63390e4b9227ccf0ce7bfaff7a2124df11c"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "011e85f9d2b69dee354fa95cc925030c180d97567297d0e306f715be5acf8b0d"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "Side A changes private parse() results to objects but unwraps milliseconds in module.exports, preserving its public behavior. Side B’s seconds() helper calls that public export, so it still receives a number and divides by 1000 correctly; for example, seconds('2s') remains 2. The edits affect separate regions. Assessment is based on source inspection; tests were not executed.",
+    "involved_symbols": ["parse", "module.exports", "module.exports.seconds"],
+    "durationMs": 15379,
+    "timing": {
+      "processStartedAt": 1794249861018,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249876353,
+      "agentProcessDurationMs": 15335,
+      "watchdogDelayMs": null,
+      "postprocessMs": 44
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 49374,
+      "cached_input_tokens": 38656,
+      "output_tokens": 326,
+      "reasoning_output_tokens": 25
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "a00fbf5b939379cecb70d92da614c53accb809b53c8eb44ab5161e46026e574b",
+    "sourceAfter": "a00fbf5b939379cecb70d92da614c53accb809b53c8eb44ab5161e46026e574b",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-006-agent/events.jsonl",
+      "sha256": "10d3c530e2c9ca91a27705db7ce5e9aa088119abfe2acc8a931136d439695e47",
+      "stderrPath": "[RUN]/traces/bx-006-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "64a74cf16aab5a82e9f730c2609533299a9cdf55f47d0de8b67bf3804ce40e5d",
+    "costUsd": null,
+    "caseId": "bx-006",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "d0fdddbd901271c14d48e46f5e4c94cdc3ec0845",
+        "b": "970c5e5361e08cf1b1e5a9bde1d13659cfcdc7f6"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+        "b": "4e639372bbd37cf0f943d9786c8041e156bddb0f"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "8c6988bd72b34f9e9fdb760ead095b72c77d03bc",
+        "b": "92a82f858712babe8c22b2ea1d146b07ec04f75a"
+      },
+      "commitMessagesSha256": {
+        "a": "4a0f55dcd09dcf4b62b6f62eefc0ca32d7990062908108db193e862e2f2a74d8",
+        "b": "cb33ab99b3e7634aecb285b6c4f0d63390e4b9227ccf0ce7bfaff7a2124df11c"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "011e85f9d2b69dee354fa95cc925030c180d97567297d0e306f715be5acf8b0d"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "A changes parse() to return { milliseconds } but unwraps that object in the exported function (index.js:30–31). B’s seconds helper calls that exported function, so it still receives numeric milliseconds and divides by 1000 correctly. The edits occupy separate locations. Fuse marked index.js unsupported; full source inspection at base/A/B supports compatibility. No tests were executed.",
+    "involved_symbols": ["parse", "module.exports", "module.exports.seconds"],
+    "durationMs": 23064,
+    "timing": {
+      "processStartedAt": 1794249876583,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249899580,
+      "agentProcessDurationMs": 22997,
+      "watchdogDelayMs": null,
+      "postprocessMs": 67
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 58263,
+      "cached_input_tokens": 45184,
+      "output_tokens": 499,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "index.js",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "a00fbf5b939379cecb70d92da614c53accb809b53c8eb44ab5161e46026e574b",
+    "sourceAfter": "a00fbf5b939379cecb70d92da614c53accb809b53c8eb44ab5161e46026e574b",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-006-fuse/events.jsonl",
+      "sha256": "3ad3bc1f41ed257b4a846a996bfefa2a49c8f794829865617cf4ee023809e163",
+      "stderrPath": "[RUN]/traces/bx-006-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "137b2307a821746c39b03c4c9bdbf0b1a129e756e053fb3b589ed535f6b256cf",
+    "costUsd": null,
+    "caseId": "bx-006",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "d0fdddbd901271c14d48e46f5e4c94cdc3ec0845",
+        "b": "970c5e5361e08cf1b1e5a9bde1d13659cfcdc7f6"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+        "b": "4e639372bbd37cf0f943d9786c8041e156bddb0f"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "8c6988bd72b34f9e9fdb760ead095b72c77d03bc",
+        "b": "92a82f858712babe8c22b2ea1d146b07ec04f75a"
+      },
+      "commitMessagesSha256": {
+        "a": "4a0f55dcd09dcf4b62b6f62eefc0ca32d7990062908108db193e862e2f2a74d8",
+        "b": "cb33ab99b3e7634aecb285b6c4f0d63390e4b9227ccf0ce7bfaff7a2124df11c"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "011e85f9d2b69dee354fa95cc925030c180d97567297d0e306f715be5acf8b0d"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 1,
+    "category": "runtime",
+    "explanation": "Side A renames fmtLong to formatLong in index.js, while side B adds module.exports.verbose calling fmtLong (line 164). The edits do not overlap, but combining them leaves verbose referencing an undefined function. Calling verbose(1000) would throw ReferenceError instead of returning '1 second'. This conclusion follows from source inspection; tests were not executed.",
+    "involved_symbols": ["fmtLong", "formatLong", "module.exports.verbose"],
+    "durationMs": 16946,
+    "timing": {
+      "processStartedAt": 1794249886146,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249903024,
+      "agentProcessDurationMs": 16878,
+      "watchdogDelayMs": null,
+      "postprocessMs": 68
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 47929,
+      "cached_input_tokens": 39424,
+      "output_tokens": 327,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 7,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "8d6e3904b701660939f10f237b26f82332f55106254fcb6758ed394906d28016",
+    "sourceAfter": "8d6e3904b701660939f10f237b26f82332f55106254fcb6758ed394906d28016",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-007-agent/events.jsonl",
+      "sha256": "61874029126959081b17596024f8658b8c274dcbc4c2f7be00f2637a8a527228",
+      "stderrPath": "[RUN]/traces/bx-007-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "650678256d818f109273c68079307efd169ba2f091a720cc0a7ae01a19a4188a",
+    "costUsd": null,
+    "caseId": "bx-007",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "ea3c927873a30099dfdb82fae30433cbed9bd6f3",
+        "b": "9ea3552b1280cec6f121cf52b6756a3c7d99e34f"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+        "b": "b4a3414234ad24ef1a98d12e7dfece9866f46ba8"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "4da957935148f36e4e68aafb14ac69db06130ff6",
+        "b": "3d24f189cec59688ab4155645c850aff13e6e946"
+      },
+      "commitMessagesSha256": {
+        "a": "42386d428f42f08c06ce43ba29a2db36e1bf1f9e6c8752a73a077d153a102dc0",
+        "b": "ae0094662d14fdc1b0cbc26dfbb2673c18a827a5b98902125f64e852e9b5fb11"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "8ef6245ee3c797f18c83b82b452c187afac29e498dffd61ce5bc5abb6463720a"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 1,
+    "category": "runtime",
+    "explanation": "A renames fmtLong to formatLong in index.js:138 and updates the existing caller. B adds module.exports.verbose at index.js:164, calling fmtLong. The non-overlapping edits leave that new call referencing an undefined function: verbose(1000) would throw ReferenceError instead of returning '1 second'. Full source at base/A/B confirms no compatibility alias. Fuse inspection marked JavaScript unsupported; this conclusion comes from source inspection, without executing tests.",
+    "involved_symbols": ["fmtLong", "formatLong", "module.exports.verbose"],
+    "durationMs": 20983,
+    "timing": {
+      "processStartedAt": 1794249864970,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249885905,
+      "agentProcessDurationMs": 20935,
+      "watchdogDelayMs": null,
+      "postprocessMs": 48
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 57471,
+      "cached_input_tokens": 44800,
+      "output_tokens": 526,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "index.js",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "8d6e3904b701660939f10f237b26f82332f55106254fcb6758ed394906d28016",
+    "sourceAfter": "8d6e3904b701660939f10f237b26f82332f55106254fcb6758ed394906d28016",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-007-fuse/events.jsonl",
+      "sha256": "36cfcef5836e47cf38024df245008c69e63d6e4082264bbd249aa68ebaf042f1",
+      "stderrPath": "[RUN]/traces/bx-007-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "93f966c0f9f75a8213cb3fe0c26119af26d8b40e061ea5203cc55fa2246de618",
+    "costUsd": null,
+    "caseId": "bx-007",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "ea3c927873a30099dfdb82fae30433cbed9bd6f3",
+        "b": "9ea3552b1280cec6f121cf52b6756a3c7d99e34f"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+        "b": "b4a3414234ad24ef1a98d12e7dfece9866f46ba8"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "4da957935148f36e4e68aafb14ac69db06130ff6",
+        "b": "3d24f189cec59688ab4155645c850aff13e6e946"
+      },
+      "commitMessagesSha256": {
+        "a": "42386d428f42f08c06ce43ba29a2db36e1bf1f9e6c8752a73a077d153a102dc0",
+        "b": "ae0094662d14fdc1b0cbc26dfbb2673c18a827a5b98902125f64e852e9b5fb11"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "8ef6245ee3c797f18c83b82b452c187afac29e498dffd61ce5bc5abb6463720a"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "Side A renames fmtLong to formatLong and updates its caller without changing behavior. Side B adds module.exports.verbose, which calls the public export with { long: true } rather than referencing the internal formatter. Combined, verbose reaches the renamed formatter correctly. The edits do not overlap. Assessment is based on source inspection; tests were not executed.",
+    "involved_symbols": ["fmtLong", "formatLong", "module.exports", "module.exports.verbose"],
+    "durationMs": 15950,
+    "timing": {
+      "processStartedAt": 1794249869364,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249885249,
+      "agentProcessDurationMs": 15885,
+      "watchdogDelayMs": null,
+      "postprocessMs": 65
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 48925,
+      "cached_input_tokens": 39936,
+      "output_tokens": 378,
+      "reasoning_output_tokens": 16
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "4a8400a4f69565728cfdb54aa59ed87bdfc40a06d8b3479a58e54e182b4ae79f",
+    "sourceAfter": "4a8400a4f69565728cfdb54aa59ed87bdfc40a06d8b3479a58e54e182b4ae79f",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-008-agent/events.jsonl",
+      "sha256": "397e4f8467d6c92b573642b10b3d6fe0eb1eb26aa27ea4303f45de01147eb0cc",
+      "stderrPath": "[RUN]/traces/bx-008-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "a525d9c75b667e6ce6b7ddd0cbd38b14198b5c21874f270dc492e08a5f7e7e14",
+    "costUsd": null,
+    "caseId": "bx-008",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "ea3c927873a30099dfdb82fae30433cbed9bd6f3",
+        "b": "4a401d5e45be52c50295ff53bffb05128480e5b8"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+        "b": "56c220e74a15f2e9a224cf625a73c6fa370693a0"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "4da957935148f36e4e68aafb14ac69db06130ff6",
+        "b": "3cede78b122bc3f96cba49f8875af8ab77970c77"
+      },
+      "commitMessagesSha256": {
+        "a": "42386d428f42f08c06ce43ba29a2db36e1bf1f9e6c8752a73a077d153a102dc0",
+        "b": "ae0094662d14fdc1b0cbc26dfbb2673c18a827a5b98902125f64e852e9b5fb11"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "8ef6245ee3c797f18c83b82b452c187afac29e498dffd61ce5bc5abb6463720a"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.99,
+    "category": "none",
+    "explanation": "A renames fmtLong to formatLong and updates its caller in index.js. B adds module.exports.verbose, which calls the public export with { long: true } rather than referencing the private formatter. Combining these non-overlapping edits preserves both behaviors. Full source at base/A/B confirms this call path. Fuse marked index.js unsupported, so this assessment relies on source inspection; no tests were run.",
+    "involved_symbols": ["fmtLong", "formatLong", "module.exports", "module.exports.verbose"],
+    "durationMs": 21168,
+    "timing": {
+      "processStartedAt": 1794249885491,
+      "watchdogFiredAt": null,
+      "sigtermSentAt": null,
+      "sigkillSentAt": null,
+      "processClosedAt": 1794249906587,
+      "agentProcessDurationMs": 21096,
+      "watchdogDelayMs": null,
+      "postprocessMs": 72
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "tokens": {
+      "input_tokens": 57528,
+      "cached_input_tokens": 44800,
+      "output_tokens": 527,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 8,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "index.js",
+          "reason": "Only TypeScript source (.ts) is analyzed. This change is retained for manual review."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "4a8400a4f69565728cfdb54aa59ed87bdfc40a06d8b3479a58e54e182b4ae79f",
+    "sourceAfter": "4a8400a4f69565728cfdb54aa59ed87bdfc40a06d8b3479a58e54e182b4ae79f",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/bx-008-fuse/events.jsonl",
+      "sha256": "52b2f0959a7f9fec2067a310b9d765d9c0e91adc0e4ca4c999832c9052ca3930",
+      "stderrPath": "[RUN]/traces/bx-008-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "6fc15a8a1922a01d1ee9a2bebc702d3cfe3eb9781c7829255b960138447929af",
+    "costUsd": null,
+    "caseId": "bx-008",
+    "provenance": {
+      "originalCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "ea3c927873a30099dfdb82fae30433cbed9bd6f3",
+        "b": "4a401d5e45be52c50295ff53bffb05128480e5b8"
+      },
+      "originalTrees": {
+        "base": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+        "a": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+        "b": "56c220e74a15f2e9a224cf625a73c6fa370693a0"
+      },
+      "reconstructedCommits": {
+        "base": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+        "a": "4da957935148f36e4e68aafb14ac69db06130ff6",
+        "b": "3cede78b122bc3f96cba49f8875af8ab77970c77"
+      },
+      "commitMessagesSha256": {
+        "a": "42386d428f42f08c06ce43ba29a2db36e1bf1f9e6c8752a73a077d153a102dc0",
+        "b": "ae0094662d14fdc1b0cbc26dfbb2673c18a827a5b98902125f64e852e9b5fb11"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "8ef6245ee3c797f18c83b82b452c187afac29e498dffd61ce5bc5abb6463720a"
+    }
+  }
+]

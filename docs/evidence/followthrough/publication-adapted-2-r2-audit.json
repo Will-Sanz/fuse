@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-09",
+  "cohort": "adapted-2-r2",
+  "status": "pass",
+  "rows": 16,
+  "nativeRecords": 16,
+  "gzipSha256": "f5d1a40d95fa20839ed63ead250866b6b57bb7931d3f212ec76d2a7364b75856",
+  "checks": [
+    "published manifest/rows/summary JSON exactly equal raw after documented path/thread normalization",
+    "all raw trace/stderr SHA256 match retained original files and index",
+    "all normalized record SHA256/event counts match indexed compressed lines",
+    "all normalized native event arrays exactly equal documented transformation of original events",
+    "all per-row native MCP payload byte counts and compact/full call counts independently recompute",
+    "all client versions0.167 and source-before/source-after fingerprints retained",
+    "no actual project/home prefix remains in published native record bytes",
+    "all current actor source/ref/index fingerprints match before/after rows and exact original source trees",
+    "actor stores have three commits with no remote or alternates",
+    "candidate product/harness hashes match immutable recorded inputs",
+    "candidate scorer exactly reproduces raw summary; actual native usage and matched MCP provenance independently recompute"
+  ],
+  "actualInspectCompact": 8,
+  "actualInspectFull": 0,
+  "actualReviewCompact": 0,
+  "scope": "Publication integrity audit, not exhaustive manual causal validation of all explanations or native UI acceptance",
+  "currentSourceStoresVerified": 16,
+  "exactCurrentSourceTreesVerified": true,
+  "frozenScorerReproduction": true,
+  "mcpProvenanceAndUsageRecomputed": true
+}

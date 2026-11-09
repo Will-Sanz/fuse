@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { loadDataset, prepareCase } from './dataset.mjs';
+import { loadAdaptedDataset } from './adapted.mjs';
 import { runAgent } from './agent.mjs';
 import { scoreRuns } from './score.mjs';
 
@@ -46,6 +47,7 @@ export async function main(argv = process.argv.slice(2)) {
     args: argv,
     options: {
       upstream: { type: 'string' },
+      dataset: { type: 'string' },
       out: { type: 'string' },
       model: { type: 'string', default: 'gpt-6-astra' },
       effort: { type: 'string', default: 'high' },
@@ -65,9 +67,11 @@ export async function main(argv = process.argv.slice(2)) {
     throw new Error('--timeout-seconds must be from 1 to 900');
   const directory = dirname(fileURLToPath(import.meta.url)),
     fuseRoot = resolve(directory, '../..');
-  const dataset = loadDataset(resolve(args.upstream), {
-    lock: JSON.parse(readFileSync(join(directory, 'dataset-lock.json'), 'utf8')),
-  });
+  const dataset = args.dataset
+    ? loadAdaptedDataset(resolve(args.upstream), resolve(args.dataset))
+    : loadDataset(resolve(args.upstream), {
+        lock: JSON.parse(readFileSync(join(directory, 'dataset-lock.json'), 'utf8')),
+      });
   const requested = new Set(args.case || dataset.cases.map((c) => c.id));
   if ([...requested].some((id) => !dataset.cases.some((c) => c.id === id)))
     throw new Error('Unknown case requested');
@@ -130,7 +134,7 @@ export async function main(argv = process.argv.slice(2)) {
           let row, result, prepared;
           try {
             prepared = prepareCase({
-              sourceRepo: resolve(args.upstream),
+              sourceRepo: testCase.sourceRepo || resolve(args.upstream),
               case: testCase,
               root: join(out, 'work'),
             });

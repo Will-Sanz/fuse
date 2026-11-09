@@ -1,0 +1,647 @@
+{
+  "schemaVersion": 1,
+  "study": "One paired source-only detection run per case; no target tests executed by the agent and no repair evaluation.",
+  "expectedCases": 53,
+  "expectedRuns": 106,
+  "observedRuns": 106,
+  "arms": {
+    "agent": {
+      "caseCount": 53,
+      "states": {
+        "complete": 53,
+        "error": 0,
+        "timeout": 0,
+        "protocol_error": 0
+      },
+      "abstentions": 0,
+      "determinateCount": 53,
+      "determinateCoverage": 1,
+      "unresolved": [],
+      "validOnly": {
+        "coverage": 1,
+        "denominator": 53,
+        "truePositives": 30,
+        "falseNegatives": 5,
+        "falsePositives": 0,
+        "trueNegatives": 18,
+        "precision": 1,
+        "recall": 0.8571428571428571,
+        "accuracy": 0.9056603773584906,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 0.9666666666666667,
+        "misses": ["rw-014", "rw-015", "rw-028", "rw-034", "rw-039"],
+        "falseAlarms": []
+      },
+      "officialCompatibility": {
+        "policy": "Upstream-style compatibility only: errors, timeouts, protocol errors and abstentions are predicted no-conflict. These are unresolved, not safe outcomes.",
+        "denominator": 53,
+        "truePositives": 30,
+        "falseNegatives": 5,
+        "falsePositives": 0,
+        "trueNegatives": 18,
+        "precision": 1,
+        "recall": 0.8571428571428571,
+        "accuracy": 0.9056603773584906,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 0.9666666666666667,
+        "misses": ["rw-014", "rw-015", "rw-028", "rw-034", "rw-039"],
+        "falseAlarms": []
+      },
+      "byType": {
+        "test": {
+          "total": 4,
+          "determinate": 4,
+          "validOnly": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "build": {
+          "total": 4,
+          "determinate": 4,
+          "validOnly": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "negative": {
+          "total": 18,
+          "determinate": 18,
+          "validOnly": {
+            "denominator": 18,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 18,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 18,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 18,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "textual": {
+          "total": 3,
+          "determinate": 3,
+          "validOnly": {
+            "denominator": 3,
+            "truePositives": 3,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 0.6666666666666666,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 3,
+            "truePositives": 3,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 0.6666666666666666,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "runtime": {
+          "total": 18,
+          "determinate": 18,
+          "validOnly": {
+            "denominator": 18,
+            "truePositives": 18,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 18,
+            "truePositives": 18,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "intent": {
+          "total": 6,
+          "determinate": 6,
+          "validOnly": {
+            "denominator": 6,
+            "truePositives": 1,
+            "falseNegatives": 5,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 0.16666666666666666,
+            "accuracy": 0.16666666666666666,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": ["rw-014", "rw-015", "rw-028", "rw-034", "rw-039"],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 6,
+            "truePositives": 1,
+            "falseNegatives": 5,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 0.16666666666666666,
+            "accuracy": 0.16666666666666666,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": ["rw-014", "rw-015", "rw-028", "rw-034", "rw-039"],
+            "falseAlarms": []
+          }
+        }
+      },
+      "mcp": {
+        "countPolicy": "Use exact-repo/ref matched counts when supplied; retain raw call totals separately.",
+        "inspectAttempts": 0,
+        "inspectSuccesses": 0,
+        "rawInspectAttempts": 0,
+        "rawInspectSuccesses": 0,
+        "failedInspectCases": [],
+        "unsupportedCases": [],
+        "successfulAssistanceSubset": null
+      },
+      "durationMs": {
+        "total": 1320536,
+        "median": 23774,
+        "p90": 31671,
+        "max": 45653
+      },
+      "tokens": {
+        "knownRecords": 53,
+        "totalRecords": 53,
+        "totals": {
+          "input_tokens": 4269982,
+          "cached_input_tokens": 3406464,
+          "output_tokens": 29025,
+          "reasoning_output_tokens": 2220
+        }
+      },
+      "costUsd": null,
+      "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+    },
+    "fuse": {
+      "caseCount": 53,
+      "states": {
+        "complete": 53,
+        "error": 0,
+        "timeout": 0,
+        "protocol_error": 0
+      },
+      "abstentions": 0,
+      "determinateCount": 53,
+      "determinateCoverage": 1,
+      "unresolved": [],
+      "validOnly": {
+        "coverage": 1,
+        "denominator": 53,
+        "truePositives": 31,
+        "falseNegatives": 4,
+        "falsePositives": 0,
+        "trueNegatives": 18,
+        "precision": 1,
+        "recall": 0.8857142857142857,
+        "accuracy": 0.9245283018867925,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 0.967741935483871,
+        "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+        "falseAlarms": []
+      },
+      "officialCompatibility": {
+        "policy": "Upstream-style compatibility only: errors, timeouts, protocol errors and abstentions are predicted no-conflict. These are unresolved, not safe outcomes.",
+        "denominator": 53,
+        "truePositives": 31,
+        "falseNegatives": 4,
+        "falsePositives": 0,
+        "trueNegatives": 18,
+        "precision": 1,
+        "recall": 0.8857142857142857,
+        "accuracy": 0.9245283018867925,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 0.967741935483871,
+        "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+        "falseAlarms": []
+      },
+      "byType": {
+        "test": {
+          "total": 4,
+          "determinate": 4,
+          "validOnly": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "build": {
+          "total": 4,
+          "determinate": 4,
+          "validOnly": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "negative": {
+          "total": 18,
+          "determinate": 18,
+          "validOnly": {
+            "denominator": 18,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 18,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 18,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 18,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "textual": {
+          "total": 3,
+          "determinate": 3,
+          "validOnly": {
+            "denominator": 3,
+            "truePositives": 3,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 0.6666666666666666,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 3,
+            "truePositives": 3,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 0.6666666666666666,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "runtime": {
+          "total": 18,
+          "determinate": 18,
+          "validOnly": {
+            "denominator": 18,
+            "truePositives": 18,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 18,
+            "truePositives": 18,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "intent": {
+          "total": 6,
+          "determinate": 6,
+          "validOnly": {
+            "denominator": 6,
+            "truePositives": 2,
+            "falseNegatives": 4,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 0.3333333333333333,
+            "accuracy": 0.3333333333333333,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 6,
+            "truePositives": 2,
+            "falseNegatives": 4,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 0.3333333333333333,
+            "accuracy": 0.3333333333333333,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+            "falseAlarms": []
+          }
+        }
+      },
+      "mcp": {
+        "countPolicy": "Use exact-repo/ref matched counts when supplied; retain raw call totals separately.",
+        "inspectAttempts": 62,
+        "inspectSuccesses": 62,
+        "rawInspectAttempts": 62,
+        "rawInspectSuccesses": 62,
+        "failedInspectCases": [],
+        "unsupportedCases": [
+          "rw-001",
+          "rw-002",
+          "rw-013",
+          "rw-018",
+          "rw-021",
+          "rw-027",
+          "rw-029",
+          "rw-050",
+          "rw-051",
+          "rw-052",
+          "rw-053"
+        ],
+        "successfulAssistanceSubset": {
+          "coverage": 1,
+          "denominator": 53,
+          "truePositives": 31,
+          "falseNegatives": 4,
+          "falsePositives": 0,
+          "trueNegatives": 18,
+          "precision": 1,
+          "recall": 0.8857142857142857,
+          "accuracy": 0.9245283018867925,
+          "falsePositiveRate": 0,
+          "categoryAccuracy": 0.967741935483871,
+          "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+          "falseAlarms": []
+        }
+      },
+      "durationMs": {
+        "total": 2106262,
+        "median": 31265,
+        "p90": 69817,
+        "max": 88283
+      },
+      "tokens": {
+        "knownRecords": 53,
+        "totalRecords": 53,
+        "totals": {
+          "input_tokens": 5304461,
+          "cached_input_tokens": 4153216,
+          "output_tokens": 42351,
+          "reasoning_output_tokens": 2841
+        }
+      },
+      "costUsd": null,
+      "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+    }
+  },
+  "paired": {
+    "bothDeterminate": 53,
+    "totalCases": 53,
+    "coverage": 1,
+    "fuseOnlyCorrect": ["rw-015"],
+    "agentOnlyCorrect": [],
+    "accuracyDeltaOnBothDeterminate": 0.018867924528301886,
+    "officialCompatibilityAccuracyDelta": 0.018867924528301883,
+    "arms": {
+      "agent": {
+        "denominator": 53,
+        "truePositives": 30,
+        "falseNegatives": 5,
+        "falsePositives": 0,
+        "trueNegatives": 18,
+        "precision": 1,
+        "recall": 0.8571428571428571,
+        "accuracy": 0.9056603773584906,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 0.9666666666666667,
+        "misses": ["rw-014", "rw-015", "rw-028", "rw-034", "rw-039"],
+        "falseAlarms": [],
+        "durationMs": {
+          "total": 1320536,
+          "median": 23774,
+          "p90": 31671,
+          "max": 45653
+        },
+        "tokens": {
+          "knownRecords": 53,
+          "totalRecords": 53,
+          "totals": {
+            "input_tokens": 4269982,
+            "cached_input_tokens": 3406464,
+            "output_tokens": 29025,
+            "reasoning_output_tokens": 2220
+          }
+        },
+        "costUsd": null,
+        "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+      },
+      "fuse": {
+        "denominator": 53,
+        "truePositives": 31,
+        "falseNegatives": 4,
+        "falsePositives": 0,
+        "trueNegatives": 18,
+        "precision": 1,
+        "recall": 0.8857142857142857,
+        "accuracy": 0.9245283018867925,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 0.967741935483871,
+        "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+        "falseAlarms": [],
+        "durationMs": {
+          "total": 2106262,
+          "median": 31265,
+          "p90": 69817,
+          "max": 88283
+        },
+        "tokens": {
+          "knownRecords": 53,
+          "totalRecords": 53,
+          "totals": {
+            "input_tokens": 5304461,
+            "cached_input_tokens": 4153216,
+            "output_tokens": 42351,
+            "reasoning_output_tokens": 2841
+          }
+        },
+        "costUsd": null,
+        "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+      }
+    }
+  },
+  "limitations": [
+    "Authored cases with limited repository/language coverage; one run per arm does not establish production reliability or statistical significance.",
+    "Binary benchmark labels do not assess whether an explanation identified the right causal interaction; review explanations separately.",
+    "Intent conflicts include coordination/duplication judgments rather than necessarily failing behavior.",
+    "Source-only agent study is not directly comparable to the upstream merge-check-plus-LLM pipeline.",
+    "Successful-assistance and valid-only subsets must be read with their all-case denominators and coverage."
+  ]
+}

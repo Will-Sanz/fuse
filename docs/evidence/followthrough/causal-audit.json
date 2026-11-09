@@ -1,0 +1,422 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent manual source-grounded review; labels remain authored labels and executed target tests are not inferred from agent traces.",
+  "records": [
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-011",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct causal explanation",
+      "finding": "Both connect orphan-tag deletion to GET /api/tags cache invalidation only on article creation. Deleting the last article leaves stale cached tags. No executed-test claim. Fuse agent explicitly acknowledges empty structural conflicts.",
+      "source": "Pinned original base/A/B trees; articleDeletePrisma, articleDelete controller, tags cache and create controller."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-012",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct causal explanation",
+      "finding": "Both trace the password endpoint's pre-hash into the changed DB helper's second hash, then direct login comparison. They correctly distinguish shallow stored-value tests from missing login coverage and do not claim execution.",
+      "source": "Pinned original base/A/B trees; userChangePassword, userUpdatePrisma, usersLogin and B's tests."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-014",
+      "arms": ["agent", "fuse"],
+      "verdict": "official label miss; no invented runtime fault",
+      "finding": "The agent correctly recognizes safe composition of orphan deletion and used-tag filtering, but does not flag the benchmark's overlapping-goal coordination policy. Preserve the official intent miss.",
+      "source": "Pinned original base/A/B trees; Tag.article relation, articleDeletePrisma and getTags."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-016",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct intent duplication explanation",
+      "finding": "The agent identifies middleware and controller repeating user/article loads and ownership checks, while saying response behavior remains consistent. This is a coordination warning rather than an invented runtime or test failure.",
+      "source": "Pinned original base/A/B trees; requireArticleAuthor and articlesDelete."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-015",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct intent duplication explanation",
+      "finding": "Both trace database filtering before pagination followed by a redundant controller filter on the inverse sides of the same follow relationship. They explicitly avoid claiming an established merged runtime/test failure.",
+      "source": "Pinned base/A/B trees: articleFeedPrisma, articlesFeed and Prisma UserFollows relationship."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-019",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "Prisma middleware invalidates the shared tag cache after Tag/Article writes, including the new orphan-tag deleteMany; both recognize that common invalidation covers the new deletion.",
+      "source": "Pinned base/A/B trees: Prisma singleton middleware, tag cache, articleDeletePrisma."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-020",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "The new password route hashes once then bypasses userUpdatePrisma through a dedicated password writer; moving hashing into userUpdatePrisma therefore does not double-process this route.",
+      "source": "Pinned base/A/B trees: userChangePassword, userSetPasswordPrisma, userUpdatePrisma."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-021",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "Login token secret rename does not affect the independent password-reset secret. Fuse output explicitly acknowledges unsupported env/docs evidence and follows it with common source tools.",
+      "source": "Pinned base/A/B trees: login auth, reset-token helper and .env.test."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-022",
+      "arms": ["agent", "fuse"],
+      "verdict": "Fuse correct causal judgment; control official miss",
+      "finding": "Control accurately describes each pagination mode but accepts incompatible continuity. Fuse correctly explains default page returns1\u201310 while page=2 starts at21, skipping11\u201320 for a client moving between modes. Native local engine conflicts remain empty; this is the agent reasoning from evidence, not standalone detection.",
+      "source": "Pinned base/A/B trees: articlesListPrisma default10, parseArticleListQuery PAGE_SIZE20 and controller wiring."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-028",
+      "arms": ["agent", "fuse"],
+      "verdict": "official intent-policy miss; source observations accurate",
+      "finding": "Both correctly recognize trim/lowercase normalization is idempotent in controller and DB layers, then fail to flag authored duplication policy. Fuse also checks missing/nonstring input guards. Preserve the official miss; do not invent a merged runtime fault.",
+      "source": "Pinned base/A/B trees: normalizeEmail, register/login controllers, userCreatePrisma, userGetEmailPrisma and route validation."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-034",
+      "arms": ["agent", "fuse"],
+      "verdict": "official intent-policy miss; source observations accurate",
+      "finding": "Both correctly trace new favorites endpoint and favorited=me filter to the same unchanged helper; routes and response formats coexist. They miss authored overlapping-feature policy rather than a demonstrated runtime failure.",
+      "source": "Pinned base/A/B trees: userFavorites, user route, articlesList and articlesListPrisma."
+    },
+    {
+      "cohort": "before-r2",
+      "caseId": "rw-039",
+      "arms": ["agent", "fuse"],
+      "verdict": "control correct intent judgment; Fuse official miss; historical Fuse win reversed",
+      "finding": "Control correctly traces B-only130character API request truncated120 versus merged HTTP400 before the DB helper, and distinguishes B direct-helper tests from API intent. Fuse accurately describes those layers but accepts coexistence and misses the authored intent warning. No executed-test claim. Preserve this control-only win alongside Fuse-only rw022; historical+2gain is not stable.",
+      "source": "Pinned base/A/B trees: articlesCreateValidator, route order, articleCreatePrisma, titleLimit/titleTruncate tests."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-011",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct causal explanation",
+      "finding": "Both connect orphan-tag deletion to GET /api/tags cache invalidation only on article creation. Deleting the last article leaves stale cached tags. No executed-test claim. Fuse agent explicitly acknowledges empty structural conflicts.",
+      "source": "Pinned original base/A/B trees; articleDeletePrisma, articleDelete controller, tags cache and create controller."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-012",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct causal explanation",
+      "finding": "Both trace the password endpoint's pre-hash into the changed DB helper's second hash, then direct login comparison. They correctly distinguish shallow stored-value tests from missing login coverage and do not claim execution.",
+      "source": "Pinned original base/A/B trees; userChangePassword, userUpdatePrisma, usersLogin and B's tests."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-014",
+      "arms": ["agent", "fuse"],
+      "verdict": "official label miss; no invented runtime fault",
+      "finding": "The agent correctly recognizes safe composition of orphan deletion and used-tag filtering, but does not flag the benchmark's overlapping-goal coordination policy. Preserve the official intent miss.",
+      "source": "Pinned original base/A/B trees; Tag.article relation, articleDeletePrisma and getTags."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-016",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct intent duplication explanation",
+      "finding": "The agent identifies middleware and controller repeating user/article loads and ownership checks, while saying response behavior remains consistent. This is a coordination warning rather than an invented runtime or test failure.",
+      "source": "Pinned original base/A/B trees; requireArticleAuthor and articlesDelete."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-019",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "Prisma middleware invalidates the shared tag cache after Tag/Article writes, including the new orphan-tag deleteMany; both recognize that common invalidation covers the new deletion.",
+      "source": "Pinned base/A/B trees: Prisma singleton middleware, tag cache, articleDeletePrisma."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-020",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "The new password route hashes once then bypasses userUpdatePrisma through a dedicated password writer; moving hashing into userUpdatePrisma therefore does not double-process this route.",
+      "source": "Pinned base/A/B trees: userChangePassword, userSetPasswordPrisma, userUpdatePrisma."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-021",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "Login token secret rename does not affect the independent password-reset secret. Fuse output explicitly acknowledges unsupported env/docs evidence and follows it with common source tools.",
+      "source": "Pinned base/A/B trees: login auth, reset-token helper and .env.test."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-028",
+      "arms": ["agent", "fuse"],
+      "verdict": "official intent-policy miss; source observations accurate",
+      "finding": "Both correctly recognize trim/lowercase normalization is idempotent in controller and DB layers, then fail to flag authored duplication policy. Fuse also checks missing/nonstring input guards. Preserve the official miss; do not invent a merged runtime fault.",
+      "source": "Pinned base/A/B trees: normalizeEmail, register/login controllers, userCreatePrisma, userGetEmailPrisma and route validation."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-015",
+      "arms": ["agent", "fuse"],
+      "verdict": "Fuse correct intent warning; control official miss",
+      "finding": "Both accurately describe database filtering before pagination and redundant controller filtering on the same follow relation. Fuse flags competing implementation intent; control accepts compatibility. Neither invents an established merged runtime/test fault. This is another policy-judgment flip across fresh sessions.",
+      "source": "Same pinned base/A/B trees; feed DB helper/controller and Prisma follow relation."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-022",
+      "arms": ["agent", "fuse"],
+      "verdict": "both correct source-grounded pagination judgment",
+      "finding": "Both now trace default page1\u201310 followed by page=2 starting21, skipping11\u201320. Control no longer misses this case; Fuse again acknowledges no local engine conflict. No test-execution claim.",
+      "source": "Same pinned base/A/B trees; list query helper/default and query parser."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-034",
+      "arms": ["agent", "fuse"],
+      "verdict": "official intent-policy miss; source observations accurate",
+      "finding": "Both correctly trace new favorites endpoint and favorited=me filter to the same unchanged helper; routes and response formats coexist. They miss authored overlapping-feature policy rather than a demonstrated runtime failure.",
+      "source": "Pinned base/A/B trees: userFavorites, user route, articlesList and articlesListPrisma."
+    },
+    {
+      "cohort": "after-1-r2",
+      "caseId": "rw-039",
+      "arms": ["agent", "fuse"],
+      "verdict": "both official intent-policy misses; control changed from correct before-r2",
+      "finding": "Both accurately describe validator100 preceding persistence120 and B direct-helper tests, then accept coexistence. They do not flag authored API-intent contradiction. Preserve both misses; no invented runtime or executed-test claim. Fresh control judgments flipped on015/022/039 despite identical agent/source tools, illustrating model variability.",
+      "source": "Same pinned base/A/B trees: article validator, route order, DB create helper and title tests."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-011",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct causal explanation",
+      "finding": "Both connect orphan-tag deletion to GET /api/tags cache invalidation only on article creation. Deleting the last article leaves stale cached tags. No executed-test claim. Fuse agent explicitly acknowledges empty structural conflicts.",
+      "source": "Pinned original base/A/B trees; articleDeletePrisma, articleDelete controller, tags cache and create controller."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-012",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct causal explanation",
+      "finding": "Both trace the password endpoint's pre-hash into the changed DB helper's second hash, then direct login comparison. They correctly distinguish shallow stored-value tests from missing login coverage and do not claim execution.",
+      "source": "Pinned original base/A/B trees; userChangePassword, userUpdatePrisma, usersLogin and B's tests."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-014",
+      "arms": ["agent", "fuse"],
+      "verdict": "official label miss; no invented runtime fault",
+      "finding": "The agent correctly recognizes safe composition of orphan deletion and used-tag filtering, but does not flag the benchmark's overlapping-goal coordination policy. Preserve the official intent miss.",
+      "source": "Pinned original base/A/B trees; Tag.article relation, articleDeletePrisma and getTags."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-016",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct intent duplication explanation",
+      "finding": "The agent identifies middleware and controller repeating user/article loads and ownership checks, while saying response behavior remains consistent. This is a coordination warning rather than an invented runtime or test failure.",
+      "source": "Pinned original base/A/B trees; requireArticleAuthor and articlesDelete."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-019",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "Prisma middleware invalidates the shared tag cache after Tag/Article writes, including the new orphan-tag deleteMany; both recognize that common invalidation covers the new deletion.",
+      "source": "Pinned base/A/B trees: Prisma singleton middleware, tag cache, articleDeletePrisma."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-020",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "The new password route hashes once then bypasses userUpdatePrisma through a dedicated password writer; moving hashing into userUpdatePrisma therefore does not double-process this route.",
+      "source": "Pinned base/A/B trees: userChangePassword, userSetPasswordPrisma, userUpdatePrisma."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-021",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "Login token secret rename does not affect the independent password-reset secret. Fuse output explicitly acknowledges unsupported env/docs evidence and follows it with common source tools.",
+      "source": "Pinned base/A/B trees: login auth, reset-token helper and .env.test."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-028",
+      "arms": ["agent", "fuse"],
+      "verdict": "official intent-policy miss; source observations accurate",
+      "finding": "Both correctly recognize trim/lowercase normalization is idempotent in controller and DB layers, then fail to flag authored duplication policy. Fuse also checks missing/nonstring input guards. Preserve the official miss; do not invent a merged runtime fault.",
+      "source": "Pinned base/A/B trees: normalizeEmail, register/login controllers, userCreatePrisma, userGetEmailPrisma and route validation."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-034",
+      "arms": ["agent", "fuse"],
+      "verdict": "official intent-policy miss; source observations accurate",
+      "finding": "Both correctly trace new favorites endpoint and favorited=me filter to the same unchanged helper; routes and response formats coexist. They miss authored overlapping-feature policy rather than a demonstrated runtime failure.",
+      "source": "Pinned base/A/B trees: userFavorites, user route, articlesList and articlesListPrisma."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-015",
+      "arms": ["agent", "fuse"],
+      "verdict": "control correct intent warning; Fuse official miss",
+      "finding": "Both accurately trace DB filtering before pagination plus redundant controller filtering on inverse follow relations. Control flags competing implementation intent; Fuse accepts compatible redundancy. This reverses after1 and cannot be hidden in a best-run comparison.",
+      "source": "Same pinned base/A/B trees: feed helper/controller and Prisma follow relation."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-022",
+      "arms": ["agent", "fuse"],
+      "verdict": "both official misses",
+      "finding": "Both accurately describe default10 and explicit page20 modes but accept separate internally consistent modes, missing the defined continuity hazard when moving from default list to page2(start21). Both changed from correct after1; retain misses and source-only limits.",
+      "source": "Same pinned base/A/B trees: list helper default and page query parser."
+    },
+    {
+      "cohort": "after-2-r2",
+      "caseId": "rw-039",
+      "arms": ["agent", "fuse"],
+      "verdict": "both official intent-policy misses",
+      "finding": "Both correctly trace validator100 before persistence120 and direct-helper tests but accept coexistence, missing authored contradictory API intent. Neither claims executed checks or invents a merged runtime fault.",
+      "source": "Same pinned base/A/B trees: creation validator, route order, DBhelper and title tests."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-001",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "A renames DateTime private parser; B retains old private method call. Both correctly predict AttributeError on parse_iso(valid date), matching executed oracle. No execution claim. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-002",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B uses public DateTime.convert; A updates its internal private call. Both correctly trace unchanged public interface through renamed implementation. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-003",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "B imports removed make_str after A renames it and existing callers. Both correctly predict ImportError at filename_labels module import, matching executed oracle. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-004",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B calls unchanged public format_filename, which does not depend on renamed make_str. Both give this exact independent dependency explanation. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-005",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "A private parse returns an object and main API unwraps it; B divides the private object by1000. Both correctly predict NaN for valid strings, matching numeric assertion oracle. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-006",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B calls public API that unwraps milliseconds, so numeric seconds stay valid. Both correctly follow that wrapper rather than assuming private return type. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-007",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "A renames fmtLong and existing call; B calls old fmtLong from new verbose export. Both correctly predict ReferenceError when verbose executes, matching oracle. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "caseId": "bx-008",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B delegates verbose through unchanged public export with long:true; A updates its internal formatter call. Both correctly trace compatibility. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-001",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "A renames DateTime private parser; B retains old private method call. Both correctly predict AttributeError on parse_iso(valid date), matching executed oracle. No execution claim. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-002",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B uses public DateTime.convert; A updates its internal private call. Both correctly trace unchanged public interface through renamed implementation. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-003",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "B imports removed make_str after A renames it and existing callers. Both correctly predict ImportError at filename_labels module import, matching executed oracle. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-004",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B calls unchanged public format_filename, which does not depend on renamed make_str. Both give this exact independent dependency explanation. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-005",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "A private parse returns an object and main API unwraps it; B divides the private object by1000. Both correctly predict NaN for valid strings, matching numeric assertion oracle. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-006",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B calls public API that unwraps milliseconds, so numeric seconds stay valid. Both correctly follow that wrapper rather than assuming private return type. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-007",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct runtime explanation",
+      "finding": "A renames fmtLong and existing call; B calls old fmtLong from new verbose export. Both correctly predict ReferenceError when verbose executes, matching oracle. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "caseId": "bx-008",
+      "arms": ["agent", "fuse"],
+      "verdict": "correct compatible twin",
+      "finding": "B delegates verbose through unchanged public export with long:true; A updates its internal formatter call. Both correctly trace compatibility. Both explicitly describe source-only reasoning; Fuse arm accurately acknowledges unsupported language files.",
+      "source": "Exact locked authored base/A/B trees on pinned Click/ms; controller-only oracle results and original upstream regression suites."
+    }
+  ]
+}

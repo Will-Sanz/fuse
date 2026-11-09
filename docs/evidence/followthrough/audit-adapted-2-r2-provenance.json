@@ -1,0 +1,11 @@
+{
+  "cohort": "adapted-2-r2",
+  "productRoot": "benchmark-work/candidate-6c74f6a",
+  "expectedCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+  "actualCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+  "actualProductHash": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+  "expectedProductHash": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+  "actualHarnessHash": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+  "expectedHarnessHash": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+  "issues": []
+}

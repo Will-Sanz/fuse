@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "reviewer": "compact_mcp independently inspected release_review raw captures",
+  "cliVersion": "0.167.0-alpha.3.2",
+  "projectionPrivateMarkerMatchedNative": true,
+  "projectionPrivateMarkerExcludedFromModel": true,
+  "publicContentAndStructuredIncluded": true,
+  "uiActionArgumentMatchedPrivateMarker": true,
+  "uiActionMarkerPresentInNativeHistory": true,
+  "uiActionNameArgumentResultExcludedFromSubsequentModel": true,
+  "projectionRequestSha256": "fec3f285051e1dc0649bfa1b3e20ca2c4dc61904e249ac1f16493c78cecfe2cf",
+  "appserverRequestSha256": "0fa2b8230427a84efadcefc6769ef0f6faa70e1c0923b439c5245cb1885e708c"
+}

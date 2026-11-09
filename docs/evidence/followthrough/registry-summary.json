@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "sourceCommit": "e04ab05",
+  "cliVersion": "codex-cli 0.167.0-alpha.3.2",
+  "nodeVersion": "v24.3.0",
+  "provider": "Deterministic local fake Responses provider; no authentication or real model calls",
+  "controlTools": [
+    "apply_patch",
+    "clock__curr_time",
+    "create_goal",
+    "get_goal",
+    "list_mcp_resource_templates",
+    "list_mcp_resources",
+    "mcp__source__source_diff",
+    "mcp__source__source_list",
+    "mcp__source__source_log",
+    "mcp__source__source_read",
+    "read_mcp_resource",
+    "update_goal"
+  ],
+  "fuseTools": [
+    "apply_patch",
+    "clock__curr_time",
+    "create_goal",
+    "get_goal",
+    "list_mcp_resource_templates",
+    "list_mcp_resources",
+    "mcp__fuse__fuse_inspect",
+    "mcp__fuse__fuse_review",
+    "mcp__source__source_diff",
+    "mcp__source__source_list",
+    "mcp__source__source_log",
+    "mcp__source__source_read",
+    "read_mcp_resource",
+    "update_goal"
+  ],
+  "forbiddenContextAbsent": true,
+  "rawRequestSha256": [
+    "781191d6f5ab37e05974b46369f26b4278dcf85b2287d7e98d75b26bc975663a",
+    "7aac5328ce081d7e9bd851e3a24f868798d5eac2597fcc7d4c8d6cd8f01d49d7",
+    "b41d0d4e6e841b723d1e9e3a3f4c80f249f83d47f2a57efe6a49a98d79c29b18",
+    "f8c7599683aee0370f0e677d30c4045df2765003af446239ab7ad129041f5ceb"
+  ],
+  "scope": "Effective registry and injected instruction boundaries only; denied action attempts tested separately."
+}

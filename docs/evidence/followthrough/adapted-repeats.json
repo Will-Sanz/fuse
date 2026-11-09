@@ -1,0 +1,36 @@
+{
+  "cohorts": ["adapted-1-r2", "adapted-2-r2"],
+  "uniqueCases": 8,
+  "expectedPairs": 16,
+  "warning": "Repeated observations of the same authored cases and correlated twins; not independent new repositories or a replacement for per-epoch completion results.",
+  "arms": {
+    "agent": {
+      "states": {
+        "complete": 16
+      },
+      "determinate": 16,
+      "correct": 16,
+      "correctDenominator": 16,
+      "falseAlarms": 0,
+      "negativeDenominator": 8,
+      "medianDurationMs": 16966.0,
+      "inputPlusOutputTokens": 843991,
+      "unknownUsage": 0,
+      "changedPredictions": {}
+    },
+    "fuse": {
+      "states": {
+        "complete": 16
+      },
+      "determinate": 16,
+      "correct": 16,
+      "correctDenominator": 16,
+      "falseAlarms": 0,
+      "negativeDenominator": 8,
+      "medianDurationMs": 21449.0,
+      "inputPlusOutputTokens": 1059969,
+      "unknownUsage": 0,
+      "changedPredictions": {}
+    }
+  }
+}

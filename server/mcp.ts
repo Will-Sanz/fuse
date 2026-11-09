@@ -25,6 +25,7 @@ import {
 import { LocalStore } from './local-store';
 import { generateVisual } from './visual-ai';
 import { visualPng } from './visual-renderer';
+import { compactReview } from './mcp-review';
 
 /** Vendor-independent MCP interface. Deliberately offers proposals, never application or human confirmation. */
 export function createMcp(boundRepo?: string) {
@@ -62,6 +63,12 @@ export function createMcp(boundRepo?: string) {
   const reply = (data: unknown) => ({
     content: [{ type: 'text' as const, text: JSON.stringify({ schemaVersion: 1, data }) }],
   });
+  const detailInput = z
+    .enum(['compact', 'full'])
+    .optional()
+    .describe(
+      'Prefer compact for source review: exact file inputs once, without repeated code. Omit or use full for the complete legacy Review.',
+    );
   const illustrated = async (store: LocalStore, id: string, regenerate = false) => {
     const review = await generateVisual(store.repo, id, { regenerate });
     return {
@@ -150,16 +157,20 @@ export function createMcp(boundRepo?: string) {
     'fuse_inspect',
     {
       description:
-        'Inspect actual working changes or two Git revisions, with source evidence and supported actions.',
+        'Inspect actual working changes or two Git revisions, with source evidence and supported actions. Prefer detail="compact" to avoid repeated source; full remains the default.',
       inputSchema: {
         repo: repoInput,
         base: z.string().optional(),
         a: z.string().optional(),
         b: z.string().optional(),
         sessions: z.boolean().optional(),
+        detail: detailInput,
       },
     },
-    async ({ repo, ...args }) => reply(inspect({ ...args, repo: storeFor(repo).repo })),
+    async ({ repo, detail, ...args }) => {
+      const review = inspect({ ...args, repo: storeFor(repo).repo });
+      return reply(detail === 'compact' ? compactReview(review) : review);
+    },
   );
   server.registerTool(
     'fuse_watch_once',
@@ -173,11 +184,15 @@ export function createMcp(boundRepo?: string) {
   server.registerTool(
     'fuse_review',
     {
-      description: 'Read a saved decision, exact evidence, checks, and Git-linked status.',
-      inputSchema: { repo: repoInput, id: z.string() },
+      description:
+        'Read a saved decision, exact evidence, checks, and Git-linked status. Prefer detail="compact" for source review; full remains the default and retrieves every original field.',
+      inputSchema: { repo: repoInput, id: z.string(), detail: detailInput },
       annotations: { readOnlyHint: true },
     },
-    async ({ repo, id }) => reply(storeFor(repo).get(id)),
+    async ({ repo, id, detail }) => {
+      const review = storeFor(repo).get(id);
+      return reply(detail === 'compact' ? compactReview(review) : review);
+    },
   );
   server.registerTool(
     'fuse_history',

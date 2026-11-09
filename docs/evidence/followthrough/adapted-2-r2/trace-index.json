@@ -1,0 +1,118 @@
+{
+  "redactions": "Run paths, home paths, temporary paths and ephemeral thread IDs normalized. Raw hashes cover locally retained unmodified traces; published hashes cover normalized JSONL records. Stderr content is not published.",
+  "gzipSha256": "f5d1a40d95fa20839ed63ead250866b6b57bb7931d3f212ec76d2a7364b75856",
+  "records": [
+    {
+      "caseId": "bx-001",
+      "arm": "agent",
+      "originalTraceSha256": "ce4fb18fc69041ef5487a6ffaf0cbbbb9350affb5deaf4775f779ef3b1f67d5f",
+      "publishedRecordSha256": "e1128f81cacf82706c28b000912c722cd86ad2b209bec52129818b275ced5234",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-001",
+      "arm": "fuse",
+      "originalTraceSha256": "f58cf80af60e86af19832f26cb51eb4e19e3b695b84320f88e1960fbd3a94f34",
+      "publishedRecordSha256": "f6c9b892857475a56d39275944ac79a78b909a530adce216b0d1f3714659db3c",
+      "eventCount": 26
+    },
+    {
+      "caseId": "bx-002",
+      "arm": "agent",
+      "originalTraceSha256": "8575bab9f70898e4e74edcefe2f1add40ad245993c11147181f74d545f7898df",
+      "publishedRecordSha256": "5ca818b075e33cc83f99ff6714e4bf9578fabd9bd52a1c0edb7d9241daf6f949",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-002",
+      "arm": "fuse",
+      "originalTraceSha256": "506cf54ede9e5f5ad9d94000e9e1aeff1818cd1b4a23740dc6a2ec0a202de7d9",
+      "publishedRecordSha256": "e3371a41f38e362b731cae2152aec5b1cc1354c2d4bc31470971e7ff78ff220b",
+      "eventCount": 24
+    },
+    {
+      "caseId": "bx-003",
+      "arm": "agent",
+      "originalTraceSha256": "8b4e0523ee406767d16718c350de6803bb067a528624f93ba3dc4b2ff1d96e15",
+      "publishedRecordSha256": "131ddfd7f92942840963874a06044c71eac78e980d3f3d8ad139b6827066043a",
+      "eventCount": 24
+    },
+    {
+      "caseId": "bx-003",
+      "arm": "fuse",
+      "originalTraceSha256": "733be10ec39a32b9f21b595dc6910c7f0a81c4a86b22e42f6f525534bfc44352",
+      "publishedRecordSha256": "0e5b2e4c1b5d408912eb2dcd1fa554ec8d255b8e55688503af38e2ca5526f18d",
+      "eventCount": 24
+    },
+    {
+      "caseId": "bx-004",
+      "arm": "agent",
+      "originalTraceSha256": "a031a42b8c1f3818459d2a5d6b97cb1cc8ceb0870b3a5e2cd44bf9e8af826c4a",
+      "publishedRecordSha256": "0be5a712919385f8b79e4d1870cf009ace5c06bf54c87de7b71a7d72e8d0adbd",
+      "eventCount": 28
+    },
+    {
+      "caseId": "bx-004",
+      "arm": "fuse",
+      "originalTraceSha256": "f138513b93f734feb14b2635a6c947247dd5b6ff97ac1482c3be8403f83060fa",
+      "publishedRecordSha256": "06a62c277e6e84841b07159e83d1ad776ed78a340cc41220ffa0534da81dba68",
+      "eventCount": 32
+    },
+    {
+      "caseId": "bx-005",
+      "arm": "agent",
+      "originalTraceSha256": "7c92e0fd8674806a2f46d55a79dc34b895f3a30b184ebe410c58b02de5e8850d",
+      "publishedRecordSha256": "5600e36da8e2c595069ee1502ea922cfb52a11d2e6eaf94896d2cddbf15d70ef",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-005",
+      "arm": "fuse",
+      "originalTraceSha256": "073fb03f24b3bb65fd8a624a959643e161387e222f255648921a27a9b58ce2b2",
+      "publishedRecordSha256": "b2cdc298a8c7342244211b586a893edff45335bd0f62ad8c6086692a58af8665",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-006",
+      "arm": "agent",
+      "originalTraceSha256": "2956de1301b831145b6422cf2936c7e064253619418af2553fd23c7dac16aaf9",
+      "publishedRecordSha256": "ef411b2209f2c805dd48ec57d1c8bf029f3c9566a168d62d0a9539fbd023afed",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-006",
+      "arm": "fuse",
+      "originalTraceSha256": "e3a1ec28586f37febdae3c164ccdcd5550dda59f97d48843e01f0303cfb236fe",
+      "publishedRecordSha256": "0f73524727b4fbc46677be0f3a1ed06e9b3c5b64aaca3a1ba5c15552c2ce417b",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-007",
+      "arm": "agent",
+      "originalTraceSha256": "48c0eb651962b166406252c2562da78aba4c44fbce319250005733499063ae3e",
+      "publishedRecordSha256": "e7afccddfefcf3596ff41ff5927911754ad41e0d23941311592a04b8c69f18fd",
+      "eventCount": 20
+    },
+    {
+      "caseId": "bx-007",
+      "arm": "fuse",
+      "originalTraceSha256": "45dbf4a0b078c8f92b561c6ec716729611a864d36842283d787d516f0eaf50a2",
+      "publishedRecordSha256": "15df2cda7b155da4edb0d0919d0a7188edb7f958839ef6ec391c7ed9f5560046",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-008",
+      "arm": "agent",
+      "originalTraceSha256": "44f935dc7a57232edfe1a0e9651cc35ad015464ae50ea313bf0262dbfa7c5531",
+      "publishedRecordSha256": "3c43309529b40ef9fbeb7dbd51dafe1fe231b24e7fccdab67dab01b3452d30e6",
+      "eventCount": 22
+    },
+    {
+      "caseId": "bx-008",
+      "arm": "fuse",
+      "originalTraceSha256": "a2219a011bef9673b02a8976bfcbe5f03b1dadc27d69ddda1326654b74573501",
+      "publishedRecordSha256": "bc482bf558f87c725deb933c616c53b94f0b002185d84e4ceefddc35206b0802",
+      "eventCount": 22
+    }
+  ]
+}

@@ -1,0 +1,354 @@
+{
+  "python": "3.13.0",
+  "pytest": "8.3.5",
+  "node": "v24.3.0",
+  "mocha": "4.0.1",
+  "expectjs": "0.3.1",
+  "checks": [
+    {
+      "target": "click",
+      "tree": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+      "exampleCase": "bx-001",
+      "side": "base",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-wxs2hhy2/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.53s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+      "exampleCase": "bx-001",
+      "side": "a",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-fpvnv06l/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.05s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "366cfab4bad61815072958367bbad08f28da120c",
+      "exampleCase": "bx-001",
+      "side": "b",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-8ld0r603/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 0.96s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "08d62188a23ac31e65eeda8d974b42bc17c27137",
+      "exampleCase": "bx-001",
+      "side": "merged",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-bz8r2pwa/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 0.88s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "5b5b01a16c2eea4c05ca96c067056b23914179ee",
+      "exampleCase": "bx-002",
+      "side": "b",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-ndma41y0/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.79s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "bb815d07619711cae63ee0c702a6bf9535aa91ee",
+      "exampleCase": "bx-002",
+      "side": "merged",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-ow_n71r2/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.12s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+      "exampleCase": "bx-003",
+      "side": "a",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-ix1z5fnd/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 0.99s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "28ca5420b78b50e18f1b741d58fc842af80973b2",
+      "exampleCase": "bx-003",
+      "side": "b",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-514yamkj/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.43s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "748eb4802e12d9ad2872f20f492c18e08ad38f8f",
+      "exampleCase": "bx-003",
+      "side": "merged",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-vqk9dqum/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.38s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "388de70ab406e74c5b1bc02ce4d7f09a80e9770c",
+      "exampleCase": "bx-004",
+      "side": "b",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-t8o8v7ak/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.58s\n",
+      "stderr": ""
+    },
+    {
+      "target": "click",
+      "tree": "439ad594c74fb4860be9fc5f57209d9c69a46cbb",
+      "exampleCase": "bx-004",
+      "side": "merged",
+      "command": [
+        "<test-tools>/python-venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/var/folders/z7/wj_630p57kd8kk2_31dk4qmm0000gn/T/fuse-upstream-check-6x3caldy/_test-tmp",
+        "tests"
+      ],
+      "exitCode": 0,
+      "stdout": "........................................................................ [ 11%]\n...................................x.................................... [ 23%]\n........................................................................ [ 35%]\n........................................................................ [ 47%]\n........................................................................ [ 58%]\n........................................................ssssssssssssssss [ 70%]\nsssss................................................................... [ 82%]\n.......s................................................................ [ 94%]\n...................................                                      [100%]\n588 passed, 22 skipped, 1 xfailed in 1.10s\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+      "exampleCase": "bx-005",
+      "side": "base",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (42ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+      "exampleCase": "bx-005",
+      "side": "a",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (42ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "2335372477ac0038cde76003864d31dd223d21de",
+      "exampleCase": "bx-005",
+      "side": "b",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (36ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "d1764ff3b755601e4d7dec75f5842a5165073ef1",
+      "exampleCase": "bx-005",
+      "side": "merged",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (26ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "4e639372bbd37cf0f943d9786c8041e156bddb0f",
+      "exampleCase": "bx-006",
+      "side": "b",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (38ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "fa9ca9b09408e94b2bfe0e79ad70aecbbae38429",
+      "exampleCase": "bx-006",
+      "side": "merged",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (24ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+      "exampleCase": "bx-007",
+      "side": "a",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (22ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "b4a3414234ad24ef1a98d12e7dfece9866f46ba8",
+      "exampleCase": "bx-007",
+      "side": "b",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (32ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "ded8b9edac49d8777cbaa1815034fbe875cd4b2b",
+      "exampleCase": "bx-007",
+      "side": "merged",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (21ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "56c220e74a15f2e9a224cf625a73c6fa370693a0",
+      "exampleCase": "bx-008",
+      "side": "b",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (22ms)\n\n",
+      "stderr": ""
+    },
+    {
+      "target": "ms",
+      "tree": "8b777e94d9e81b5490f6bae9a2a8508231630443",
+      "exampleCase": "bx-008",
+      "side": "merged",
+      "command": ["node", "<test-tools>/ms/node_modules/mocha/bin/mocha", "tests.js"],
+      "exitCode": 0,
+      "stdout": "\n\n  ms(string)\n    \u2713 should not throw an error\n    \u2713 should preserve ms\n    \u2713 should convert from m to ms\n    \u2713 should convert from h to ms\n    \u2713 should convert d to ms\n    \u2713 should convert w to ms\n    \u2713 should convert s to ms\n    \u2713 should convert ms to ms\n    \u2713 should work with decimals\n    \u2713 should work with multiple spaces\n    \u2713 should return NaN if invalid\n    \u2713 should be case-insensitive\n    \u2713 should work with numbers starting with .\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(long string)\n    \u2713 should not throw an error\n    \u2713 should convert milliseconds to ms\n    \u2713 should convert msecs to ms\n    \u2713 should convert sec to ms\n    \u2713 should convert from min to ms\n    \u2713 should convert from hr to ms\n    \u2713 should convert days to ms\n    \u2713 should work with decimals\n    \u2713 should work with negative integers\n    \u2713 should work with negative decimals\n    \u2713 should work with negative decimals starting with \".\"\n\n  ms(number, { long: true })\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(number)\n    \u2713 should not throw an error\n    \u2713 should support milliseconds\n    \u2713 should support seconds\n    \u2713 should support minutes\n    \u2713 should support hours\n    \u2713 should support days\n    \u2713 should round\n\n  ms(invalid inputs)\n    \u2713 should throw an error, when ms(\"\")\n    \u2713 should throw an error, when ms(undefined)\n    \u2713 should throw an error, when ms(null)\n    \u2713 should throw an error, when ms([])\n    \u2713 should throw an error, when ms({})\n    \u2713 should throw an error, when ms(NaN)\n    \u2713 should throw an error, when ms(Infinity)\n    \u2713 should throw an error, when ms(-Infinity)\n\n\n  49 passing (33ms)\n\n",
+      "stderr": ""
+    }
+  ],
+  "publication": {
+    "normalization": "Only temporary oracle/test/tool paths replaced with placeholders; results unchanged.",
+    "rawSha256": "f4a40a8fb80241680bcfe3db96ca62aaf2e2a8c5a193669e1b29ffb154fa4414"
+  }
+}

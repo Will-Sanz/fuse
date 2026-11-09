@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-09",
+  "cohort": "before-r2",
+  "status": "pass",
+  "rows": 106,
+  "nativeRecords": 106,
+  "gzipSha256": "1cfa3253b0ad83acec4ff3ecd45045f5d4bdef5ab6dca0fa421cfa14f46fdcda",
+  "checks": [
+    "published manifest/rows/summary JSON exactly equal raw after documented path/thread normalization",
+    "all raw trace/stderr SHA256 match retained original files and index",
+    "all normalized record SHA256/event counts match indexed compressed lines",
+    "all normalized native event arrays exactly equal documented transformation of original events",
+    "all per-row native MCP payload byte counts and compact/full call counts independently recompute",
+    "all client versions0.167 and source-before/source-after fingerprints retained",
+    "no actual project/home prefix remains in published native record bytes"
+  ],
+  "scope": "Publication integrity audit, not exhaustive manual causal validation of all explanations or native UI acceptance"
+}

@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "cliVersion": "0.167.0-alpha.3.2",
+  "provider": "Deterministic local provider; no model or authentication",
+  "outcomes": {
+    "agent": {
+      "patch": {
+        "error": "patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings"
+      },
+      "goal": {
+        "error": "Goal tools require a persistent thread."
+      }
+    },
+    "fuse": {
+      "patch": {
+        "error": "patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings"
+      },
+      "goal": {
+        "error": "Goal tools require a persistent thread."
+      }
+    }
+  },
+  "sourceFingerprintUnchangedInBothArms": true,
+  "rawRequestSha256": [
+    "0a9a3c5c8f2cffcb5c6937ea7ddb3867b937b28b0a3d8d277dd91dcad2f6c1b4",
+    "a6be2dcf2fd95992a3f8507ae096d73b619fa9093d82e82390e7c401ff8b7d27",
+    "5d429906af74a2aaf75b855e98656adb572de762ff472902ef5cf8eefc353409",
+    "cd34ea2cf579c1b42de91e9c93aabd63219ed2e951d68921625a622473086f02"
+  ],
+  "probeSourceSha256": "f1ef4bd93ea8a3a4cd69c76e991703adde36fd380a5a899a1b34912412e6daec",
+  "priorDiagnosticAttempt": "A first diagnostic run safely denied both actions in the control arm but its assertion expected the old goal-error wording; preserved separately, then corrected exact denial wording and confirmed both arms."
+}

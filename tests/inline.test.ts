@@ -64,6 +64,7 @@ describe('inline review authority', () => {
     ['unknown-client', '1', false],
     ['unknown-client', '1', true],
     ['codex-mcp-client', '0.166.0-alpha.5.2', true],
+    ['codex-mcp-client', '0.167.0-alpha.3.3', true],
   ])('keeps unsupported client %s@%s read-only (UI declaration: %s)', async (name, version, ui) => {
     const d = fixture(),
       server = createMcp(d.repo),
@@ -174,56 +175,70 @@ describe('inline review authority', () => {
     ).toThrow(/verification/);
     expect(readFileSync(join(d.repo, 'checkout.ts'))).toEqual(before);
   });
-  it('registers static resources and app-only actions; known-name generic tools/call cannot mutate without a private capability', async () => {
-    const d = fixture(),
-      before = readFileSync(join(d.repo, 'checkout.ts'));
-    const server = createMcp(d.repo),
-      // Exact initialize identity captured from the installed CLI and app-server engine.
-      client = new Client({ name: 'codex-mcp-client', version: '0.166.0-alpha.5.1' });
-    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
-    await client.connect(clientTransport);
-    try {
-      const catalog = await client.listTools();
-      const present = catalog.tools.find((t) => t.name === 'fuse_present_review')!;
-      const action = catalog.tools.find((t) => t.name === 'fuse_ui_action')!;
-      expect(present._meta?.ui).toEqual({ resourceUri: INLINE_REVIEW_URI });
-      expect(action._meta?.ui).toEqual({ visibility: ['app'] });
-      expect(catalog.tools.some((t) => ['fuse_apply', 'fuse_confirm'].includes(t.name))).toBe(
-        false,
-      );
-      const result = await client.callTool({
-        name: 'fuse_present_review',
-        arguments: { id: d.review.id },
-      });
-      expect(result.isError).not.toBe(true);
-      const capability = (result._meta as { fuse: { capability: string } }).fuse.capability;
-      const resource = await client.readResource({ uri: INLINE_REVIEW_URI });
-      expect(resource.contents[0].mimeType).toBe('text/html;profile=mcp-app');
-      expect(JSON.stringify(resource)).not.toContain(capability);
-      expect(JSON.stringify(resource)).not.toContain(d.review.id);
-      for (const args of [{}, { capability: 'a'.repeat(64) }]) {
-        const denied = await client.callTool({
-          name: 'fuse_ui_action',
-          arguments: {
-            repo: d.repo,
-            id: d.review.id,
-            revision: d.review.revision,
-            action: 'confirm',
-            behaviorId: d.review.behavioral!.issue!.options[0].id,
-            ...args,
-          },
+  it.each(['0.166.0-alpha.5.1', '0.167.0-alpha.3.2'])(
+    'grants reviewed client %s private actions; generic calls still require a capability',
+    async (version) => {
+      const d = fixture(),
+        before = readFileSync(join(d.repo, 'checkout.ts'));
+      const server = createMcp(d.repo),
+        // Exact initialize identity captured from the installed CLI and app-server engine.
+        client = new Client({ name: 'codex-mcp-client', version });
+      const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+      await server.connect(serverTransport);
+      await client.connect(clientTransport);
+      try {
+        const catalog = await client.listTools();
+        const present = catalog.tools.find((t) => t.name === 'fuse_present_review')!;
+        const action = catalog.tools.find((t) => t.name === 'fuse_ui_action')!;
+        expect(present._meta?.ui).toEqual({ resourceUri: INLINE_REVIEW_URI });
+        expect(action._meta?.ui).toEqual({ visibility: ['app'] });
+        expect(catalog.tools.some((t) => ['fuse_apply', 'fuse_confirm'].includes(t.name))).toBe(
+          false,
+        );
+        const result = await client.callTool({
+          name: 'fuse_present_review',
+          arguments: { id: d.review.id },
         });
-        expect(denied.isError).toBe(true);
-        expect(JSON.stringify(denied)).not.toContain(capability);
+        expect(result.isError).not.toBe(true);
+        const capability = (result._meta as { fuse: { capability: string } }).fuse.capability;
+        expect(capability).toMatch(/^[a-f0-9]{64}$/);
+        expect(JSON.stringify(result.content)).not.toContain(capability);
+        expect(JSON.stringify(result.structuredContent)).not.toContain(capability);
+        const resource = await client.readResource({ uri: INLINE_REVIEW_URI });
+        expect(resource.contents[0].mimeType).toBe('text/html;profile=mcp-app');
+        expect(JSON.stringify(resource)).not.toContain(capability);
+        expect(JSON.stringify(resource)).not.toContain(d.review.id);
+        for (const args of [{}, { capability: 'a'.repeat(64) }]) {
+          const denied = await client.callTool({
+            name: 'fuse_ui_action',
+            arguments: {
+              repo: d.repo,
+              id: d.review.id,
+              revision: d.review.revision,
+              action: 'confirm',
+              behaviorId: d.review.behavioral!.issue!.options[0].id,
+              ...args,
+            },
+          });
+          expect(denied.isError).toBe(true);
+          expect(JSON.stringify(denied)).not.toContain(capability);
+        }
+        expect(d.store.get(d.review.id).behavioral!.intent).toBeUndefined();
+        expect(readFileSync(join(d.repo, 'checkout.ts'))).toEqual(before);
+        const refreshed = await client.callTool({
+          name: 'fuse_ui_action',
+          arguments: input(d.review, capability, 'refresh'),
+        });
+        expect(refreshed.isError).not.toBe(true);
+        const rotated = (refreshed._meta as { fuse: { capability: string } }).fuse.capability;
+        expect(rotated).toMatch(/^[a-f0-9]{64}$/);
+        expect(rotated).not.toBe(capability);
+      } finally {
+        await client.close();
+        await server.close();
       }
-      expect(d.store.get(d.review.id).behavioral!.intent).toBeUndefined();
-      expect(readFileSync(join(d.repo, 'checkout.ts'))).toEqual(before);
-    } finally {
-      await client.close();
-      await server.close();
-    }
-  });
+    },
+  );
 });
 
 it.skipIf(!process.env.FUSE_TEST_IMAGE)(

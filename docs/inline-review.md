@@ -43,8 +43,8 @@ Implementation and host-specific setup details are added as the bridge is verifi
 
 ## Verified protocol and privacy compatibility
 
-The installed desktop distribution is 26.1027.61615 and its Codex engine is
-0.166.0-alpha.5.1. The installed renderer recognizes generic local MCP app resources
+The November 8 implementation inspected desktop distribution 26.1027.61615 and
+Codex engine 0.166.0-alpha.5.1. That renderer exposed generic local MCP app resources
 using `text/html;profile=mcp-app` and descriptor `ui.resourceUri` /
 `openai/outputTemplate` metadata. This establishes a code path, not observed native
 rendering. The new `fuse_present_review` presents an existing saved review rather
@@ -60,7 +60,7 @@ the tool name or supplying a fabricated result is not enough. Existing execution
 and application guards still enforce the actual result.
 
 Privacy compatibility is narrowly allowlisted to the exact observed MCP client
-name `codex-mcp-client` and version `0.166.0-alpha.5.1`. This is a compatibility
+name `codex-mcp-client` and versions `0.166.0-alpha.5.1` and `0.167.0-alpha.3.2`. This is a compatibility
 check, not authentication and not proof of native display. Other versions/clients
 receive no capability and remain read-only until their projection is verified.
 An unrestricted local process or malicious client remains outside Fuse's scoped-tool
@@ -76,6 +76,22 @@ The independent reviewer verified the captures. These are real client/transport
 privacy tests with simulated provider responses, not AI investigation or native UI
 acceptance claims. No real API credentials or repository source were sent to the
 local test provider.
+
+After the November 9 environment restart, the installed CLI reported
+`0.167.0-alpha.3.2`. Both portable privacy probes were rerun against that actual
+client before adding its exact version to the allowlist. Captures again showed
+public tool data reaching the model while private metadata and accepted/rejected
+direct component actions stayed out of subsequent model input. This extends only
+the verified privacy compatibility; native rendering and UI negotiation remain
+unverified. Other versions, including the next patch version, stay read-only.
+
+In a separate live-host check on November 9, actual Fuse MCP inspection, issue
+reporting and `fuse_present_review` succeeded on a disposable checkout. The user
+confirmed that the card appeared and was expanded in the actual chat. This is
+user-reported native appearance, not an automated screenshot or click-through
+acceptance. Native Computer Use remains denied, and the permitted MCP Apps
+interface exposed no component tab after expansion. Full interaction acceptance
+remains open in [issue #5](https://github.com/Will-Sanz/fuse/issues/5).
 
 ## Use in a supported host
 
@@ -112,7 +128,8 @@ action-handler execution, and omission from the subsequent model input. A failed
 or unavailable probe is not a compatibility pass. A passing newer client version
 still needs independent review before the production compatibility gate is extended.
 
-Sanitized results are in `docs/evidence/inline-review/host-privacy.json`. The images
+Sanitized results are in [the original November 8 evidence](evidence/inline-review/host-privacy.json)
+and [the November 9 client recheck](evidence/inline-review/host-privacy-20261109.json). The images
 `simulated-host-compact.png` and `simulated-host-applied.png` show the real component
 inside the explicitly simulated browser test host. They are not screenshots of
 native Codex and do not establish native rendering.

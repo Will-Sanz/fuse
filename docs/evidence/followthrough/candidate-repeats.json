@@ -1,0 +1,54 @@
+{
+  "cohorts": ["after-1-r2", "after-2-r2"],
+  "uniqueCases": 53,
+  "expectedPairs": 106,
+  "warning": "Repeated observations of the same authored cases and correlated twins; not independent new repositories or a replacement for per-epoch completion results.",
+  "arms": {
+    "agent": {
+      "states": {
+        "complete": 106
+      },
+      "determinate": 106,
+      "correct": 96,
+      "correctDenominator": 106,
+      "falseAlarms": 0,
+      "negativeDenominator": 36,
+      "medianDurationMs": 23394.5,
+      "inputPlusOutputTokens": 8614233,
+      "unknownUsage": 0,
+      "changedPredictions": {
+        "rw-015": [
+          ["after-1-r2", "complete", "no-conflict"],
+          ["after-2-r2", "complete", "conflict"]
+        ],
+        "rw-022": [
+          ["after-1-r2", "complete", "conflict"],
+          ["after-2-r2", "complete", "no-conflict"]
+        ]
+      }
+    },
+    "fuse": {
+      "states": {
+        "complete": 106
+      },
+      "determinate": 106,
+      "correct": 96,
+      "correctDenominator": 106,
+      "falseAlarms": 0,
+      "negativeDenominator": 36,
+      "medianDurationMs": 31292.0,
+      "inputPlusOutputTokens": 10738262,
+      "unknownUsage": 0,
+      "changedPredictions": {
+        "rw-015": [
+          ["after-1-r2", "complete", "conflict"],
+          ["after-2-r2", "complete", "no-conflict"]
+        ],
+        "rw-022": [
+          ["after-1-r2", "complete", "conflict"],
+          ["after-2-r2", "complete", "no-conflict"]
+        ]
+      }
+    }
+  }
+}

@@ -59,6 +59,24 @@ test('errors and abstentions stay unresolved instead of becoming safe outcomes',
   assert.match(report.arms.fuse.officialCompatibility.policy, /unresolved, not safe/);
   assert.equal(report.paired.bothDeterminate, 0);
   assert.equal(report.paired.accuracyDeltaOnBothDeterminate, null);
+  assert.equal(report.paired.arms.fuse.durationMs.median, null);
+  assert.equal(report.paired.arms.fuse.tokens.totalRecords, 0);
+});
+
+test('matched-pair usage excludes unresolved pairs and averages middle durations', () => {
+  const rows = paired();
+  rows[0].durationMs = 10;
+  rows[2].durationMs = 30;
+  const complete = scoreRuns(cases, rows);
+  assert.equal(complete.paired.arms.agent.durationMs.median, 20);
+  assert.equal(complete.arms.agent.durationMs.p90, 30);
+  rows[3].status = 'timeout';
+  rows[3].tokens = null;
+  const incomplete = scoreRuns(cases, rows);
+  assert.equal(incomplete.paired.arms.agent.denominator, 1);
+  assert.equal(incomplete.paired.arms.agent.durationMs.median, 10);
+  assert.equal(incomplete.paired.arms.agent.tokens.totals.input_tokens, 100);
+  assert.equal(incomplete.arms.agent.tokens.totals.input_tokens, 200);
 });
 
 test('failed MCP attempt remains in intent-to-treat and successful subset shows its denominator', () => {

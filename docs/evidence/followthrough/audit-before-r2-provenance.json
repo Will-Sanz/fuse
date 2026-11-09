@@ -1,0 +1,11 @@
+{
+  "cohort": "before-r2",
+  "productRoot": "benchmark-work/before-7ad3058",
+  "expectedCommit": "7ad3058f931a0b284c4968ed0770f7a651fbf871",
+  "actualCommit": "7ad3058f931a0b284c4968ed0770f7a651fbf871",
+  "actualProductHash": "048d2a1a99b59896cd33fbd98e68f34857dcd65be09b3ac5b472b8cf557b4e84",
+  "expectedProductHash": "048d2a1a99b59896cd33fbd98e68f34857dcd65be09b3ac5b472b8cf557b4e84",
+  "actualHarnessHash": "d0fe34e0c8b4367bd7cf4180faf163085b001f719c8e5caf64e9f62ee957f659",
+  "expectedHarnessHash": "d0fe34e0c8b4367bd7cf4180faf163085b001f719c8e5caf64e9f62ee957f659",
+  "issues": []
+}
