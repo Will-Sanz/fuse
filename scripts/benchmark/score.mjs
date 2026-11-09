@@ -241,7 +241,7 @@ export function scoreRuns(cases, rows) {
       ),
     },
     limitations: [
-      'Authored cases from one repository; one run per arm does not establish production reliability or statistical significance.',
+      'Authored cases with limited repository/language coverage; one run per arm does not establish production reliability or statistical significance.',
       'Binary benchmark labels do not assess whether an explanation identified the right causal interaction; review explanations separately.',
       'Intent conflicts include coordination/duplication judgments rather than necessarily failing behavior.',
       'Source-only agent study is not directly comparable to the upstream merge-check-plus-LLM pipeline.',
