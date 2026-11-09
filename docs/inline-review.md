@@ -85,6 +85,14 @@ direct component actions stayed out of subsequent model input. This extends only
 the verified privacy compatibility; native rendering and UI negotiation remain
 unverified. Other versions, including the next patch version, stay read-only.
 
+In a separate live-host check on November 9, actual Fuse MCP inspection, issue
+reporting and `fuse_present_review` succeeded on a disposable checkout. The user
+confirmed that the card appeared and was expanded in the actual chat. This is
+user-reported native appearance, not an automated screenshot or click-through
+acceptance. Native Computer Use remains denied, and the permitted MCP Apps
+interface exposed no component tab after expansion. Full interaction acceptance
+remains open in [issue #5](https://github.com/Will-Sanz/fuse/issues/5).
+
 ## Use in a supported host
 
 1. Ask the coding agent to inspect branches and investigate the pinned evidence.

@@ -5,6 +5,10 @@ Fuse MCP. It measures source-based conflict assessment, not repair, executed
 application tests, native UI rendering or developer comprehension. Demo work is
 deferred. Tracking: [issue #6](https://github.com/Will-Sanz/fuse/issues/6).
 
+The later [follow-through protocol](benchmark-next.md) and
+[results/status](evidence/followthrough/RESULTS.md) keep new repeated and adapted
+epochs separate from this historical baseline.
+
 ## Frozen inputs
 
 The upstream repository is

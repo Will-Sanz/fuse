@@ -4,8 +4,8 @@
 
 The inline candidate adds a compact, expandable MCP review card with the actual
 ybouane/liquidglass library. It preserves the two human decisions and isolated
-verification safeguards. Native rendering acceptance remains pending;
-[the support record](docs/inline-review.md) and [issue #3](https://github.com/Will-Sanz/fuse/issues/3)
+verification safeguards. Full native interaction acceptance remains pending;
+[the support record](docs/inline-review.md) and [issue #5](https://github.com/Will-Sanz/fuse/issues/5)
 distinguish tested client privacy/transport and component behavior from native proof.
 
 ## MCP-first behavioral proposals
