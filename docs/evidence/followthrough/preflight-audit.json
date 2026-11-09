@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-09",
+  "status": "pass",
+  "scope": "All53 compact payload preservation plus actual installed-client registry/denial preflight; no scored agent calls",
+  "frozenCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+  "payload": {
+    "reportSha256": "fb5d596720028668e91b1e01accbdfa0c4458713cf90fa2e2281a805cb86cbec",
+    "cases": 53,
+    "fullBytes": 6554688,
+    "compactBytes": 4293027,
+    "reduction": 0.3450447984709569,
+    "unsupportedCases": 11,
+    "checks": [
+      "all individual report rows equal aggregate entries",
+      "original and reconstructed base/A/B commits and trees match locked dataset",
+      "every current source/ref/index fingerprint equals recorded before and after",
+      "saved full reviews reproduce exact full/compact response hashes and UTF-8 byte counts",
+      "default full-read hashes and persistent-review hashes unchanged",
+      "unsupported entries preserved",
+      "frozen product/harness/script hashes match",
+      "published payload report JSON-equivalent to audited raw report after formatting"
+    ],
+    "publishedFileSha256": "4729fcdb290ca63ca83425ff2c9c5e72463822235a157c4649bf8e310ae201dd",
+    "publishedNormalization": "Prettier JSON formatting only; independently verified parsed JSON is identical to the original raw report. reportSha256 covers the unformatted raw report; publishedFileSha256 covers the formatted published file."
+  },
+  "clientControls": {
+    "version": "0.167.0-alpha.3.2",
+    "checks": [
+      "all8 registry/boundary raw request hashes match published summaries",
+      "both arms effective tools exactly match source-only whitelist; Fuse adds only inspect/review",
+      "both first-request inputs omit skill/AGENTS/evaluator sentinel context",
+      "both forced patch attempts return read-only rejection",
+      "both forced goal attempts require persistent thread",
+      "boundary probe source hash matches report; passing probe asserts before/after source fingerprint equality",
+      "source-only agent and source-server code byte-identical between canary copy and final candidate",
+      "published summaries byte-identical to audited originals"
+    ]
+  },
+  "limitations": [
+    "Synthetic-provider canaries verify controls; they are not scored model runs.",
+    "Some denied builtin attempts are absent from native action events; inspect captured function result for the denial.",
+    "No new native UI acceptance or scored study audit is established by these checks."
+  ]
+}
