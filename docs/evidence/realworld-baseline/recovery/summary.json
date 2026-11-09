@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "study": "One paired source-only detection run per case; no target tests executed by the agent and no repair evaluation.",
+  "expectedCases": 7,
+  "expectedRuns": 14,
+  "observedRuns": 14,
+  "arms": {
+    "agent": {
+      "caseCount": 7,
+      "states": {
+        "complete": 7,
+        "error": 0,
+        "timeout": 0,
+        "protocol_error": 0
+      },
+      "abstentions": 0,
+      "determinateCount": 7,
+      "determinateCoverage": 1,
+      "unresolved": [],
+      "validOnly": {
+        "coverage": 1,
+        "denominator": 7,
+        "truePositives": 4,
+        "falseNegatives": 0,
+        "falsePositives": 0,
+        "trueNegatives": 3,
+        "precision": 1,
+        "recall": 1,
+        "accuracy": 1,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 1,
+        "misses": [],
+        "falseAlarms": []
+      },
+      "officialCompatibility": {
+        "policy": "Upstream-style compatibility only: errors, timeouts, protocol errors and abstentions are predicted no-conflict. These are unresolved, not safe outcomes.",
+        "denominator": 7,
+        "truePositives": 4,
+        "falseNegatives": 0,
+        "falsePositives": 0,
+        "trueNegatives": 3,
+        "precision": 1,
+        "recall": 1,
+        "accuracy": 1,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 1,
+        "misses": [],
+        "falseAlarms": []
+      },
+      "byType": {
+        "runtime": {
+          "total": 4,
+          "determinate": 4,
+          "validOnly": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "negative": {
+          "total": 3,
+          "determinate": 3,
+          "validOnly": {
+            "denominator": 3,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 3,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 3,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 3,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          }
+        }
+      },
+      "mcp": {
+        "countPolicy": "Use exact-repo/ref matched counts when supplied; retain raw call totals separately.",
+        "inspectAttempts": 0,
+        "inspectSuccesses": 0,
+        "rawInspectAttempts": 0,
+        "rawInspectSuccesses": 0,
+        "failedInspectCases": [],
+        "unsupportedCases": [],
+        "successfulAssistanceSubset": null
+      },
+      "durationMs": {
+        "total": 205604,
+        "median": 27608,
+        "p90": 45731,
+        "max": 45731
+      },
+      "tokens": {
+        "knownRecords": 7,
+        "totalRecords": 7,
+        "totals": {
+          "input_tokens": 952051,
+          "cached_input_tokens": 715008,
+          "output_tokens": 5121,
+          "reasoning_output_tokens": 480
+        }
+      },
+      "costUsd": null,
+      "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+    },
+    "fuse": {
+      "caseCount": 7,
+      "states": {
+        "complete": 7,
+        "error": 0,
+        "timeout": 0,
+        "protocol_error": 0
+      },
+      "abstentions": 0,
+      "determinateCount": 7,
+      "determinateCoverage": 1,
+      "unresolved": [],
+      "validOnly": {
+        "coverage": 1,
+        "denominator": 7,
+        "truePositives": 4,
+        "falseNegatives": 0,
+        "falsePositives": 0,
+        "trueNegatives": 3,
+        "precision": 1,
+        "recall": 1,
+        "accuracy": 1,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 1,
+        "misses": [],
+        "falseAlarms": []
+      },
+      "officialCompatibility": {
+        "policy": "Upstream-style compatibility only: errors, timeouts, protocol errors and abstentions are predicted no-conflict. These are unresolved, not safe outcomes.",
+        "denominator": 7,
+        "truePositives": 4,
+        "falseNegatives": 0,
+        "falsePositives": 0,
+        "trueNegatives": 3,
+        "precision": 1,
+        "recall": 1,
+        "accuracy": 1,
+        "falsePositiveRate": 0,
+        "categoryAccuracy": 1,
+        "misses": [],
+        "falseAlarms": []
+      },
+      "byType": {
+        "runtime": {
+          "total": 4,
+          "determinate": 4,
+          "validOnly": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 4,
+            "truePositives": 4,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 0,
+            "precision": 1,
+            "recall": 1,
+            "accuracy": 1,
+            "falsePositiveRate": null,
+            "categoryAccuracy": 1,
+            "misses": [],
+            "falseAlarms": []
+          }
+        },
+        "negative": {
+          "total": 3,
+          "determinate": 3,
+          "validOnly": {
+            "denominator": 3,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 3,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          },
+          "officialCompatibility": {
+            "denominator": 3,
+            "truePositives": 0,
+            "falseNegatives": 0,
+            "falsePositives": 0,
+            "trueNegatives": 3,
+            "precision": null,
+            "recall": null,
+            "accuracy": 1,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": null,
+            "misses": [],
+            "falseAlarms": []
+          }
+        }
+      },
+      "mcp": {
+        "countPolicy": "Use exact-repo/ref matched counts when supplied; retain raw call totals separately.",
+        "inspectAttempts": 7,
+        "inspectSuccesses": 7,
+        "rawInspectAttempts": 7,
+        "rawInspectSuccesses": 7,
+        "failedInspectCases": [],
+        "unsupportedCases": ["rw-050", "rw-051", "rw-052", "rw-053"],
+        "successfulAssistanceSubset": {
+          "coverage": 1,
+          "denominator": 7,
+          "truePositives": 4,
+          "falseNegatives": 0,
+          "falsePositives": 0,
+          "trueNegatives": 3,
+          "precision": 1,
+          "recall": 1,
+          "accuracy": 1,
+          "falsePositiveRate": 0,
+          "categoryAccuracy": 1,
+          "misses": [],
+          "falseAlarms": []
+        }
+      },
+      "durationMs": {
+        "total": 456271,
+        "median": 61902,
+        "p90": 84422,
+        "max": 84422
+      },
+      "tokens": {
+        "knownRecords": 7,
+        "totalRecords": 7,
+        "totals": {
+          "input_tokens": 1174102,
+          "cached_input_tokens": 913920,
+          "output_tokens": 7531,
+          "reasoning_output_tokens": 445
+        }
+      },
+      "costUsd": null,
+      "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+    }
+  },
+  "paired": {
+    "bothDeterminate": 7,
+    "totalCases": 7,
+    "coverage": 1,
+    "fuseOnlyCorrect": [],
+    "agentOnlyCorrect": [],
+    "accuracyDeltaOnBothDeterminate": 0,
+    "officialCompatibilityAccuracyDelta": 0
+  },
+  "limitations": [
+    "Authored cases from one repository; one run per arm does not establish production reliability or statistical significance.",
+    "Binary benchmark labels do not assess whether an explanation identified the right causal interaction; review explanations separately.",
+    "Intent conflicts include coordination/duplication judgments rather than necessarily failing behavior.",
+    "Source-only agent study is not directly comparable to the upstream merge-check-plus-LLM pipeline.",
+    "Successful-assistance and valid-only subsets must be read with their all-case denominators and coverage."
+  ]
+}

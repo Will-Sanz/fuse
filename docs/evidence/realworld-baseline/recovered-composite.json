@@ -1,0 +1,798 @@
+{
+  "policy": "Secondary multi-epoch composite: initial completed46pairs plus separately repeated7recoverypairs. Not a single uninterrupted53pair experiment; original and recovery metrics remain separately preserved.",
+  "selection": [
+    {
+      "caseId": "rw-001",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-002",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-003",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-004",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-005",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-006",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-007",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-008",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-009",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-010",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-011",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-012",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-013",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-014",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-015",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-016",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-017",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-018",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-019",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-020",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-021",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-022",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-023",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-024",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-025",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-026",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-027",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-028",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-029",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-030",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-031",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-032",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-033",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-034",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-035",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-036",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-037",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-038",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-039",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-040",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-041",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-042",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-043",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-044",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-045",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-046",
+      "cohort": "initial"
+    },
+    {
+      "caseId": "rw-047",
+      "cohort": "recovery"
+    },
+    {
+      "caseId": "rw-048",
+      "cohort": "recovery"
+    },
+    {
+      "caseId": "rw-049",
+      "cohort": "recovery"
+    },
+    {
+      "caseId": "rw-050",
+      "cohort": "recovery"
+    },
+    {
+      "caseId": "rw-051",
+      "cohort": "recovery"
+    },
+    {
+      "caseId": "rw-052",
+      "cohort": "recovery"
+    },
+    {
+      "caseId": "rw-053",
+      "cohort": "recovery"
+    }
+  ],
+  "summary": {
+    "schemaVersion": 1,
+    "study": "One paired source-only detection run per case; no target tests executed by the agent and no repair evaluation.",
+    "expectedCases": 53,
+    "expectedRuns": 106,
+    "observedRuns": 106,
+    "arms": {
+      "agent": {
+        "caseCount": 53,
+        "states": {
+          "complete": 53,
+          "error": 0,
+          "timeout": 0,
+          "protocol_error": 0
+        },
+        "abstentions": 0,
+        "determinateCount": 53,
+        "determinateCoverage": 1,
+        "unresolved": [],
+        "validOnly": {
+          "coverage": 1,
+          "denominator": 53,
+          "truePositives": 30,
+          "falseNegatives": 5,
+          "falsePositives": 0,
+          "trueNegatives": 18,
+          "precision": 1,
+          "recall": 0.8571428571428571,
+          "accuracy": 0.9056603773584906,
+          "falsePositiveRate": 0,
+          "categoryAccuracy": 0.9666666666666667,
+          "misses": ["rw-014", "rw-022", "rw-028", "rw-034", "rw-039"],
+          "falseAlarms": []
+        },
+        "officialCompatibility": {
+          "policy": "Upstream-style compatibility only: errors, timeouts, protocol errors and abstentions are predicted no-conflict. These are unresolved, not safe outcomes.",
+          "denominator": 53,
+          "truePositives": 30,
+          "falseNegatives": 5,
+          "falsePositives": 0,
+          "trueNegatives": 18,
+          "precision": 1,
+          "recall": 0.8571428571428571,
+          "accuracy": 0.9056603773584906,
+          "falsePositiveRate": 0,
+          "categoryAccuracy": 0.9666666666666667,
+          "misses": ["rw-014", "rw-022", "rw-028", "rw-034", "rw-039"],
+          "falseAlarms": []
+        },
+        "byType": {
+          "test": {
+            "total": 4,
+            "determinate": 4,
+            "validOnly": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "build": {
+            "total": 4,
+            "determinate": 4,
+            "validOnly": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "negative": {
+            "total": 18,
+            "determinate": 18,
+            "validOnly": {
+              "denominator": 18,
+              "truePositives": 0,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 18,
+              "precision": null,
+              "recall": null,
+              "accuracy": 1,
+              "falsePositiveRate": 0,
+              "categoryAccuracy": null,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 18,
+              "truePositives": 0,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 18,
+              "precision": null,
+              "recall": null,
+              "accuracy": 1,
+              "falsePositiveRate": 0,
+              "categoryAccuracy": null,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "textual": {
+            "total": 3,
+            "determinate": 3,
+            "validOnly": {
+              "denominator": 3,
+              "truePositives": 3,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 0.6666666666666666,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 3,
+              "truePositives": 3,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 0.6666666666666666,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "runtime": {
+            "total": 18,
+            "determinate": 18,
+            "validOnly": {
+              "denominator": 18,
+              "truePositives": 17,
+              "falseNegatives": 1,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 0.9444444444444444,
+              "accuracy": 0.9444444444444444,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": ["rw-022"],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 18,
+              "truePositives": 17,
+              "falseNegatives": 1,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 0.9444444444444444,
+              "accuracy": 0.9444444444444444,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": ["rw-022"],
+              "falseAlarms": []
+            }
+          },
+          "intent": {
+            "total": 6,
+            "determinate": 6,
+            "validOnly": {
+              "denominator": 6,
+              "truePositives": 2,
+              "falseNegatives": 4,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 0.3333333333333333,
+              "accuracy": 0.3333333333333333,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 6,
+              "truePositives": 2,
+              "falseNegatives": 4,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 0.3333333333333333,
+              "accuracy": 0.3333333333333333,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": ["rw-014", "rw-028", "rw-034", "rw-039"],
+              "falseAlarms": []
+            }
+          }
+        },
+        "mcp": {
+          "countPolicy": "Use exact-repo/ref matched counts when supplied; retain raw call totals separately.",
+          "inspectAttempts": 0,
+          "inspectSuccesses": 0,
+          "rawInspectAttempts": 0,
+          "rawInspectSuccesses": 0,
+          "failedInspectCases": [],
+          "unsupportedCases": [],
+          "successfulAssistanceSubset": null
+        },
+        "durationMs": {
+          "total": 1257919,
+          "median": 22253,
+          "p90": 29531,
+          "max": 45731
+        },
+        "tokens": {
+          "knownRecords": 53,
+          "totalRecords": 53,
+          "totals": {
+            "input_tokens": 4247335,
+            "cached_input_tokens": 3274368,
+            "output_tokens": 29534,
+            "reasoning_output_tokens": 2264
+          }
+        },
+        "costUsd": null,
+        "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+      },
+      "fuse": {
+        "caseCount": 53,
+        "states": {
+          "complete": 53,
+          "error": 0,
+          "timeout": 0,
+          "protocol_error": 0
+        },
+        "abstentions": 0,
+        "determinateCount": 53,
+        "determinateCoverage": 1,
+        "unresolved": [],
+        "validOnly": {
+          "coverage": 1,
+          "denominator": 53,
+          "truePositives": 32,
+          "falseNegatives": 3,
+          "falsePositives": 0,
+          "trueNegatives": 18,
+          "precision": 1,
+          "recall": 0.9142857142857143,
+          "accuracy": 0.9433962264150944,
+          "falsePositiveRate": 0,
+          "categoryAccuracy": 0.96875,
+          "misses": ["rw-014", "rw-028", "rw-034"],
+          "falseAlarms": []
+        },
+        "officialCompatibility": {
+          "policy": "Upstream-style compatibility only: errors, timeouts, protocol errors and abstentions are predicted no-conflict. These are unresolved, not safe outcomes.",
+          "denominator": 53,
+          "truePositives": 32,
+          "falseNegatives": 3,
+          "falsePositives": 0,
+          "trueNegatives": 18,
+          "precision": 1,
+          "recall": 0.9142857142857143,
+          "accuracy": 0.9433962264150944,
+          "falsePositiveRate": 0,
+          "categoryAccuracy": 0.96875,
+          "misses": ["rw-014", "rw-028", "rw-034"],
+          "falseAlarms": []
+        },
+        "byType": {
+          "test": {
+            "total": 4,
+            "determinate": 4,
+            "validOnly": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "build": {
+            "total": 4,
+            "determinate": 4,
+            "validOnly": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 4,
+              "truePositives": 4,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "negative": {
+            "total": 18,
+            "determinate": 18,
+            "validOnly": {
+              "denominator": 18,
+              "truePositives": 0,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 18,
+              "precision": null,
+              "recall": null,
+              "accuracy": 1,
+              "falsePositiveRate": 0,
+              "categoryAccuracy": null,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 18,
+              "truePositives": 0,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 18,
+              "precision": null,
+              "recall": null,
+              "accuracy": 1,
+              "falsePositiveRate": 0,
+              "categoryAccuracy": null,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "textual": {
+            "total": 3,
+            "determinate": 3,
+            "validOnly": {
+              "denominator": 3,
+              "truePositives": 3,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 0.6666666666666666,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 3,
+              "truePositives": 3,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 0.6666666666666666,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "runtime": {
+            "total": 18,
+            "determinate": 18,
+            "validOnly": {
+              "denominator": 18,
+              "truePositives": 18,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 18,
+              "truePositives": 18,
+              "falseNegatives": 0,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 1,
+              "accuracy": 1,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": [],
+              "falseAlarms": []
+            }
+          },
+          "intent": {
+            "total": 6,
+            "determinate": 6,
+            "validOnly": {
+              "denominator": 6,
+              "truePositives": 3,
+              "falseNegatives": 3,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 0.5,
+              "accuracy": 0.5,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": ["rw-014", "rw-028", "rw-034"],
+              "falseAlarms": []
+            },
+            "officialCompatibility": {
+              "denominator": 6,
+              "truePositives": 3,
+              "falseNegatives": 3,
+              "falsePositives": 0,
+              "trueNegatives": 0,
+              "precision": 1,
+              "recall": 0.5,
+              "accuracy": 0.5,
+              "falsePositiveRate": null,
+              "categoryAccuracy": 1,
+              "misses": ["rw-014", "rw-028", "rw-034"],
+              "falseAlarms": []
+            }
+          }
+        },
+        "mcp": {
+          "countPolicy": "Use exact-repo/ref matched counts when supplied; retain raw call totals separately.",
+          "inspectAttempts": 54,
+          "inspectSuccesses": 54,
+          "rawInspectAttempts": 54,
+          "rawInspectSuccesses": 54,
+          "failedInspectCases": [],
+          "unsupportedCases": [
+            "rw-001",
+            "rw-002",
+            "rw-013",
+            "rw-018",
+            "rw-021",
+            "rw-027",
+            "rw-029",
+            "rw-050",
+            "rw-051",
+            "rw-052",
+            "rw-053"
+          ],
+          "successfulAssistanceSubset": {
+            "coverage": 1,
+            "denominator": 53,
+            "truePositives": 32,
+            "falseNegatives": 3,
+            "falsePositives": 0,
+            "trueNegatives": 18,
+            "precision": 1,
+            "recall": 0.9142857142857143,
+            "accuracy": 0.9433962264150944,
+            "falsePositiveRate": 0,
+            "categoryAccuracy": 0.96875,
+            "misses": ["rw-014", "rw-028", "rw-034"],
+            "falseAlarms": []
+          }
+        },
+        "durationMs": {
+          "total": 2052507,
+          "median": 31361,
+          "p90": 61902,
+          "max": 84422
+        },
+        "tokens": {
+          "knownRecords": 53,
+          "totalRecords": 53,
+          "totals": {
+            "input_tokens": 6148320,
+            "cached_input_tokens": 4671232,
+            "output_tokens": 43391,
+            "reasoning_output_tokens": 3040
+          }
+        },
+        "costUsd": null,
+        "costNote": "No dollar estimate: token counts are observed; account charges/pricing were not measured."
+      }
+    },
+    "paired": {
+      "bothDeterminate": 53,
+      "totalCases": 53,
+      "coverage": 1,
+      "fuseOnlyCorrect": ["rw-022", "rw-039"],
+      "agentOnlyCorrect": [],
+      "accuracyDeltaOnBothDeterminate": 0.03773584905660377,
+      "officialCompatibilityAccuracyDelta": 0.037735849056603765
+    },
+    "limitations": [
+      "Authored cases from one repository; one run per arm does not establish production reliability or statistical significance.",
+      "Binary benchmark labels do not assess whether an explanation identified the right causal interaction; review explanations separately.",
+      "Intent conflicts include coordination/duplication judgments rather than necessarily failing behavior.",
+      "Source-only agent study is not directly comparable to the upstream merge-check-plus-LLM pipeline.",
+      "Successful-assistance and valid-only subsets must be read with their all-case denominators and coverage."
+    ]
+  }
+}

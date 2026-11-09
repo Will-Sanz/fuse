@@ -1,0 +1,2475 @@
+[
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A changes hashPassword and compareWithHash to trim passwords. B's new userConfirmPassword bypasses those helpers and compares the raw password using bcrypt.compareSync. After combining them, registering with \" secret \" stores a hash of \"secret\", and login accepts \" secret \", but confirming that same password returns 403 instead of 204. This is a concrete behavioral incompatibility despite disjoint edits. Tests were not executed; B's added tests use passwords without surrounding whitespace.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "usersRegister",
+      "userLogin",
+      "userConfirmPassword"
+    ],
+    "durationMs": 23510,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 104009,
+      "cached_input_tokens": 80000,
+      "output_tokens": 523,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 17,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": false
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+    "sourceAfter": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-047-agent/events.jsonl",
+      "sha256": "fb391bc9a38308c2438e1b51410144bf8107a5efe8b587533235216c84232a74",
+      "stderrPath": "[RUN]/traces/rw-047-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "463b121a93cb39294a208ea597d6e3d2f64c1d7e3edbfd1706797cfbe998daef",
+    "costUsd": null,
+    "caseId": "rw-047",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "8f305a8cba52a14cc6d3a6dde6cdf8a0d0db9526",
+        "b": "b78a3919c81bd07995579d8072c0ecf2605f4fb3"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "d1458e4fc01d4ca498f0047653752e5a908de391",
+        "b": "c9c56b7478a820900537dc64931f67d60a19e797"
+      },
+      "commitMessagesSha256": {
+        "a": "96f3b4072c392b7556f8dc98d573112c54469917c49ac6e1e2d41c4797b21be0",
+        "b": "438c430375df6eb17cec438308830ee87f281cf44f8d4bb6c5b4347b2ab75017"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "df32747eca0d7c88f4a673cca05fe07df169518c52aef7c773c1ebde120c1901"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A changes hashPassword and compareWithHash to trim passwords (src/utils/hashPasswords.ts:7–12). B's userConfirmPassword instead calls bcrypt.compareSync on the untrimmed input (src/controllers/userController/userConfirmPassword.ts:27). After combining them, registering with \" secret \" stores a hash of \"secret\" and login accepts \" secret \", but password confirmation with that same password returns 403 instead of 204. Fuse reported no conflicts in its analysis; source tracing establishes this cross-file behavior mismatch. No tests were executed.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "usersRegister",
+      "userLogin",
+      "userConfirmPassword"
+    ],
+    "durationMs": 57969,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 145652,
+      "cached_input_tokens": 112256,
+      "output_tokens": 1018,
+      "reasoning_output_tokens": 54
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 15,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_review",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "success"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+    "sourceAfter": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-047-fuse/events.jsonl",
+      "sha256": "a811a18d48baa8cb6818600c42546c634b3f14c9115dbdafbf61237a96f84467",
+      "stderrPath": "[RUN]/traces/rw-047-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "7f4471aafe3347d88ce98b3fd5ac3236a0cd6c3337d5d529608f1a6bc54a6c04",
+    "costUsd": null,
+    "caseId": "rw-047",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "8f305a8cba52a14cc6d3a6dde6cdf8a0d0db9526",
+        "b": "b78a3919c81bd07995579d8072c0ecf2605f4fb3"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "d1458e4fc01d4ca498f0047653752e5a908de391",
+        "b": "c9c56b7478a820900537dc64931f67d60a19e797"
+      },
+      "commitMessagesSha256": {
+        "a": "96f3b4072c392b7556f8dc98d573112c54469917c49ac6e1e2d41c4797b21be0",
+        "b": "438c430375df6eb17cec438308830ee87f281cf44f8d4bb6c5b4347b2ab75017"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "df32747eca0d7c88f4a673cca05fe07df169518c52aef7c773c1ebde120c1901"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A trims passwords in hashPassword and compareWithHash, used by registration and login. B's userConfirmPassword bypasses that helper and calls bcrypt.compareSync with the untrimmed password (line 27). After combining, registering with \" secret \" stores the hash of \"secret\"; login with \" secret \" succeeds, but confirmation with that same password returns 403 instead of 204. B alone preserves the whitespace during hashing, so that confirmation succeeds. This is a source-grounded runtime incompatibility; tests were not executed.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "usersRegister",
+      "userLogin",
+      "userConfirmPassword"
+    ],
+    "durationMs": 27608,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 119457,
+      "cached_input_tokens": 100608,
+      "output_tokens": 611,
+      "reasoning_output_tokens": 21
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 17,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": false
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b551fa00d20cb5d0c61fcdcdf65171d95ff292f83ddc9cc73bb713373338cee8",
+    "sourceAfter": "b551fa00d20cb5d0c61fcdcdf65171d95ff292f83ddc9cc73bb713373338cee8",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-048-agent/events.jsonl",
+      "sha256": "8b3fc39ed494cd625ed36f3f59cbdd7c45815e4fbf9651c9e4d86e4d522fca6c",
+      "stderrPath": "[RUN]/traces/rw-048-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "84bfa07d5baa8f5c8739a67486dad462d4f4345169815d163470815da4daa3e6",
+    "costUsd": null,
+    "caseId": "rw-048",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "b": "9cb54d388e5df4eafeb4d12c12eb00d072cd5899"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "5cf45b36cc27e3c3991c03664fc928115afb86d7"
+      },
+      "commitMessagesSha256": {
+        "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+        "b": "b624e68730565cc1dcc952df1df20959eab5e7ecebb2199c260f8a4a7c7ff68c"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A trims passwords before hashing and login comparison (src/utils/hashPasswords.ts:7–12). B’s new userConfirmPassword bypasses that helper and compares the untrimmed password directly with bcrypt (src/controllers/userController/userConfirmPassword.ts:27). After combining, registering and logging in with \" secret \" succeeds, but confirming that same password returns 403 instead of 204 because the stored hash represents \"secret\". Fuse reported no local conflicts; its source evidence and the traced registration/storage/login paths establish this cross-file behavioral conflict. Tests were not executed.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "usersRegister",
+      "userLogin",
+      "userConfirmPassword"
+    ],
+    "durationMs": 57722,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 135726,
+      "cached_input_tokens": 109696,
+      "output_tokens": 1042,
+      "reasoning_output_tokens": 25
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 17,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_review",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "success"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b551fa00d20cb5d0c61fcdcdf65171d95ff292f83ddc9cc73bb713373338cee8",
+    "sourceAfter": "b551fa00d20cb5d0c61fcdcdf65171d95ff292f83ddc9cc73bb713373338cee8",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-048-fuse/events.jsonl",
+      "sha256": "0e3eb359f1a2ef901218036a637ae4c2f6d28df04721be40bb2c62097488a3a9",
+      "stderrPath": "[RUN]/traces/rw-048-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "530e79df75dcbe6077ba800eb05f175baf893ce14e09861fc81c63e99dd22f1b",
+    "costUsd": null,
+    "caseId": "rw-048",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "b": "9cb54d388e5df4eafeb4d12c12eb00d072cd5899"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "5cf45b36cc27e3c3991c03664fc928115afb86d7"
+      },
+      "commitMessagesSha256": {
+        "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+        "b": "b624e68730565cc1dcc952df1df20959eab5e7ecebb2199c260f8a4a7c7ff68c"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.97,
+    "category": "none",
+    "explanation": "B's password-confirmation handler calls the shared compareWithHash helper, despite its commit message claiming direct bcrypt use. It therefore inherits A's trimming consistently with registration and login. A's logging additions do not interfere with B's route or exports. No concrete combined regression was identified; tests were not executed.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "userConfirmPassword",
+      "usersRegister",
+      "userLogin"
+    ],
+    "durationMs": 30625,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 137773,
+      "cached_input_tokens": 102528,
+      "output_tokens": 668,
+      "reasoning_output_tokens": 94
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 21,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+    "sourceAfter": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-049-agent/events.jsonl",
+      "sha256": "8e268e060e72edc6a381db6d5b2b0f4f425f1be8db7f8ec97d390e56d7a2fd6d",
+      "stderrPath": "[RUN]/traces/rw-049-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "569989d50f290f9df8fca1ec809be684b2cf462d3c25396f16e6f649f3d5855f",
+    "costUsd": null,
+    "caseId": "rw-049",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "b": "92a8a3a8db8c4077ce7cebba1c5a44f1b48f244c"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "069fb63e9533b509bfc6e99124fcaca282a3bbd6"
+      },
+      "commitMessagesSha256": {
+        "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+        "b": "7978bbe91b6d3ec6695a42931ab147b09318c945636ec0ab94127dcff450a241"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.96,
+    "category": "none",
+    "explanation": "B’s password-confirmation handler calls compareWithHash, despite its commit message claiming direct bcrypt use. It therefore inherits A’s trimming consistently with registration and login; no competing password comparison remains. The route and export additions do not collide with A’s logging changes. Fuse reported no conflict candidates or unsupported files. Source inspection found no concrete combined regression; tests were not executed.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "userConfirmPassword",
+      "usersRegister",
+      "userLogin"
+    ],
+    "durationMs": 84422,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 155389,
+      "cached_input_tokens": 111488,
+      "output_tokens": 961,
+      "reasoning_output_tokens": 85
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 15,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_review",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "success"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+    "sourceAfter": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-049-fuse/events.jsonl",
+      "sha256": "c63e9a5e38c965ffc7143d7d399bd1dfa827e4d776ba89564fb04811b4afbc6a",
+      "stderrPath": "[RUN]/traces/rw-049-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "f3602c7b465264b5c6ba5727dd7770fa7626d06736a6ad54d92a5e11f147268a",
+    "costUsd": null,
+    "caseId": "rw-049",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "b": "92a8a3a8db8c4077ce7cebba1c5a44f1b48f244c"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "069fb63e9533b509bfc6e99124fcaca282a3bbd6"
+      },
+      "commitMessagesSha256": {
+        "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+        "b": "7978bbe91b6d3ec6695a42931ab147b09318c945636ec0ab94127dcff450a241"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "Side A removes user.email from JWTs in createUserToken. Side B's isModerator reads only req.auth.user.email and returns false when it is absent. Consequently, configured moderators logging in after the merge cannot delete other users' comments: deleteComment passes false to commentDeletePrisma, whose author-restricted findFirstOrThrow rejects the deletion. This is a source-traced runtime conflict; tests were not executed.",
+    "involved_symbols": ["createUserToken", "isModerator", "deleteComment", "commentDeletePrisma"],
+    "durationMs": 21682,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 106007,
+      "cached_input_tokens": 79360,
+      "output_tokens": 433,
+      "reasoning_output_tokens": 0
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 14,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b9fda72f08c9419e14af56d3c49adc01dee42ad4c320fae64563ba323b749314",
+    "sourceAfter": "b9fda72f08c9419e14af56d3c49adc01dee42ad4c320fae64563ba323b749314",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-050-agent/events.jsonl",
+      "sha256": "b44bc10758cab41577cb216d01c2a0ef09089d28ca00195f76ae85b9b8504a65",
+      "stderrPath": "[RUN]/traces/rw-050-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "953b233d5ac5c7d0aa35e3ec4996781ce67e7c4b8d52cb6f504a2cee9224ea39",
+    "costUsd": null,
+    "caseId": "rw-050",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+        "b": "590430c3cf8a65e603e7443ce7fa8057c6c1baf0"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+        "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973"
+      },
+      "commitMessagesSha256": {
+        "a": "4ab64c74251a0d067044b7440d8362e9dbadad18af49f5bfe42fe60fc6407352",
+        "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "762c70ae347214caffcb3330bef3034141d33dcab4802bc6dd979b7dd04801a2"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A removes email from JWTs in createUserToken. B's isModerator requires req.auth.user.email and returns false when absent. After combining, a configured moderator logging in receives a username-only token; deleteComment consequently passes false to commentDeletePrisma, whose author-only lookup rejects deletion of another user's comment. This breaks B's moderator functionality even with a clean merge. Fuse exposed these changes but could not analyze the oversized seed script; source reads confirmed the authentication-to-deletion path. Tests were not executed.",
+    "involved_symbols": [
+      "createUserToken",
+      "userLogin",
+      "isModerator",
+      "deleteComment",
+      "commentDeletePrisma"
+    ],
+    "durationMs": 60043,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 113040,
+      "cached_input_tokens": 84864,
+      "output_tokens": 796,
+      "reasoning_output_tokens": 75
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 16,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "prisma/seed.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b9fda72f08c9419e14af56d3c49adc01dee42ad4c320fae64563ba323b749314",
+    "sourceAfter": "b9fda72f08c9419e14af56d3c49adc01dee42ad4c320fae64563ba323b749314",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-050-fuse/events.jsonl",
+      "sha256": "61d8c0986575f6b3b9d11e44c8059730deaa95ebfc4ac6c5e47370ce2ef1f66c",
+      "stderrPath": "[RUN]/traces/rw-050-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "08f05dcbca101201a725a97f0bfeaaf2dc90680931d0081f41466763b19492de",
+    "costUsd": null,
+    "caseId": "rw-050",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+        "b": "590430c3cf8a65e603e7443ce7fa8057c6c1baf0"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "b": "3c5e379b93acc648937bff98262ddfb6b249bac6"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+        "b": "c2f6a7002378a0612c80d5eb3a5422ae7f757973"
+      },
+      "commitMessagesSha256": {
+        "a": "4ab64c74251a0d067044b7440d8362e9dbadad18af49f5bfe42fe60fc6407352",
+        "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "762c70ae347214caffcb3330bef3034141d33dcab4802bc6dd979b7dd04801a2"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.98,
+    "category": "none",
+    "explanation": "A’s logging additions coexist with B’s moderator-aware comment deletion. A also removes email from JWT payloads, but preserves user.username—the only token field B’s isModerator reads. B’s optional asModerator parameter remains compatible with existing callers. The demo seed script does not alter moderation logic. No concrete cross-change incompatibility was found through source inspection; tests were not executed.",
+    "involved_symbols": ["createUserToken", "isModerator", "deleteComment", "commentDeletePrisma"],
+    "durationMs": 29531,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 145630,
+      "cached_input_tokens": 104320,
+      "output_tokens": 841,
+      "reasoning_output_tokens": 76
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 17,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "c03a06a1b9959c2282ad874a0bb00b9ae694ed4c3c1a328c8d3decbd619070b0",
+    "sourceAfter": "c03a06a1b9959c2282ad874a0bb00b9ae694ed4c3c1a328c8d3decbd619070b0",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-051-agent/events.jsonl",
+      "sha256": "c6580f59a142daef4299a82174170379ebb96514612ed080513b81f43ed25326",
+      "stderrPath": "[RUN]/traces/rw-051-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "ba637eb30eb37a0c3177cc402d06f97abe8ef1fe317506309bff3659c3e07b48",
+    "costUsd": null,
+    "caseId": "rw-051",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+        "b": "2a5e5daf9173ccbb278b64cfd6aab37335a6ca08"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "b": "ce0d85eef3b311536114c6e805096cf64fc567d6"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+        "b": "44eb7a50a060b48b0aafeb598e1def9f6c3ba323"
+      },
+      "commitMessagesSha256": {
+        "a": "4ab64c74251a0d067044b7440d8362e9dbadad18af49f5bfe42fe60fc6407352",
+        "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "762c70ae347214caffcb3330bef3034141d33dcab4802bc6dd979b7dd04801a2"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.97,
+    "category": "none",
+    "explanation": "A’s logging additions coexist with B’s moderator argument in deleteComment. A also removes email from JWTs, but B’s isModerator reads only username, which A preserves. The seed script independently upserts users and articles. Fuse flagged whole-file composition as unsupported for the shared controller and skipped the oversized seed; source inspection found no concrete incompatibility. Tests were not executed.",
+    "involved_symbols": ["createUserToken", "isModerator", "deleteComment", "commentDeletePrisma"],
+    "durationMs": 71706,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 229588,
+      "cached_input_tokens": 180608,
+      "output_tokens": 1232,
+      "reasoning_output_tokens": 71
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 21,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_review",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "prisma/seed.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "c03a06a1b9959c2282ad874a0bb00b9ae694ed4c3c1a328c8d3decbd619070b0",
+    "sourceAfter": "c03a06a1b9959c2282ad874a0bb00b9ae694ed4c3c1a328c8d3decbd619070b0",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-051-fuse/events.jsonl",
+      "sha256": "cf578fb2dd222d2c91cdcd2d2ad4da76920c4339b229c2568df56630cf537c54",
+      "stderrPath": "[RUN]/traces/rw-051-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "d2475f836277073bbc2036d01c02459cb744e844285bbc23d78b0a8488e721db",
+    "costUsd": null,
+    "caseId": "rw-051",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "e0f21573d67ca492914dde9184b9a92c4a76f634",
+        "b": "2a5e5daf9173ccbb278b64cfd6aab37335a6ca08"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "1c75d189bf6897fb22a2de5060842ed99fcd2238",
+        "b": "ce0d85eef3b311536114c6e805096cf64fc567d6"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "5a2ca0612d9c384cc2d4163fe7da87db17975fd2",
+        "b": "44eb7a50a060b48b0aafeb598e1def9f6c3ba323"
+      },
+      "commitMessagesSha256": {
+        "a": "4ab64c74251a0d067044b7440d8362e9dbadad18af49f5bfe42fe60fc6407352",
+        "b": "e6334352ac681902bb00fad3b934a99c374b96f7cc441998b625698a3077715a"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "762c70ae347214caffcb3330bef3034141d33dcab4802bc6dd979b7dd04801a2"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "Side A changes commentsGetPrisma to order comments by createdAt descending. Side B’s latestComment handler assumes oldest-first ordering and selects comments[comments.length - 1]. Combined, GET /api/articles/:slug/comments/latest returns the oldest comment when timestamps differ. B’s tests cover only zero or one comment, so they miss this interaction. Tests were not executed.",
+    "involved_symbols": ["commentsGetPrisma", "latestComment"],
+    "durationMs": 26917,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 128576,
+      "cached_input_tokens": 103936,
+      "output_tokens": 721,
+      "reasoning_output_tokens": 27
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 18,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b89799771f5285dd985172afda2b7845929bf11e9179845621b2824952c01933",
+    "sourceAfter": "b89799771f5285dd985172afda2b7845929bf11e9179845621b2824952c01933",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-052-agent/events.jsonl",
+      "sha256": "7d64c3d9a9546ebfafdf3a7f89ce6bf1474a4e07f049397707cd8c1a5c6216ef",
+      "stderrPath": "[RUN]/traces/rw-052-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "1d4c1463eff78b218ed85af90ca83197468cae5e77cc9a63eb7d6599bd7921a6",
+    "costUsd": null,
+    "caseId": "rw-052",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "4a1e6b527b83c0b3015789b7bdc8baaae9756f7c",
+        "b": "f0a84bac3c7479cf2fca0fc63d2a1ec1bdf1a714"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "b": "085bf7e8908779a6e3c4e16b80beb2c2f0f703db"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+        "b": "fff7a614b46e292a4b9d1f08261b127d2b9dba3c"
+      },
+      "commitMessagesSha256": {
+        "a": "e091d96d4037818082e554d78ff6e470da35714099eb7becf58f319c59f46d6e",
+        "b": "508e8e593dc70374bebe95ae72770d4aef53caa241cce6a330fb4f67aa3d3005"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "60f15e5c07fbd3f1178f4ac3a264f9a39066a195050db379c9b38ec9f515da06"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A adds orderBy: { createdAt: \"desc\" } to commentsGetPrisma (src/utils/db/comment/commentsGetPrisma.ts:7). B’s latestComment handler calls that helper and selects comments[comments.length - 1] (src/controllers/commentsController/latestComment.ts:24–30), assuming oldest-first ordering. Combined, GET /api/articles/:slug/comments/latest returns the oldest comment when comments have distinct timestamps. B’s tests cover only zero or one comment, so they do not detect this ordering bug; tests were not executed. Fuse inspection supplied matching source evidence but reported no conflict and marked the large article-validator table test unsupported. Direct source reads confirm the runtime incompatibility.",
+    "involved_symbols": ["commentsGetPrisma", "latestComment"],
+    "durationMs": 62507,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 163198,
+      "cached_input_tokens": 121728,
+      "output_tokens": 1104,
+      "reasoning_output_tokens": 93
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 19,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_review",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "src/middleware/articlesValidator/articlesCreateValidator.table.test.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "b89799771f5285dd985172afda2b7845929bf11e9179845621b2824952c01933",
+    "sourceAfter": "b89799771f5285dd985172afda2b7845929bf11e9179845621b2824952c01933",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-052-fuse/events.jsonl",
+      "sha256": "2dc4b1f3458d664e24c88fd544896d115d9a6a24b241c4b6f1c5209c5de882a1",
+      "stderrPath": "[RUN]/traces/rw-052-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "25e39a7401fd5f5505db92bcfd4a7349d474ca5197f7fd0f30444e0446bdd91d",
+    "costUsd": null,
+    "caseId": "rw-052",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "4a1e6b527b83c0b3015789b7bdc8baaae9756f7c",
+        "b": "f0a84bac3c7479cf2fca0fc63d2a1ec1bdf1a714"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "b": "085bf7e8908779a6e3c4e16b80beb2c2f0f703db"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+        "b": "fff7a614b46e292a4b9d1f08261b127d2b9dba3c"
+      },
+      "commitMessagesSha256": {
+        "a": "e091d96d4037818082e554d78ff6e470da35714099eb7becf58f319c59f46d6e",
+        "b": "508e8e593dc70374bebe95ae72770d4aef53caa241cce6a330fb4f67aa3d3005"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "60f15e5c07fbd3f1178f4ac3a264f9a39066a195050db379c9b38ec9f515da06"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.97,
+    "category": "none",
+    "explanation": "A adds logging, validator tests, and descending createdAt ordering to commentsGetPrisma. B’s new latestComment handler selects the maximum comment ID using reduce, so its result is independent of that ordering. The query’s returned fields and interface remain compatible; no concrete combined regression was identified. Tests were not executed.",
+    "involved_symbols": [
+      "commentsGetPrisma",
+      "latestComment",
+      "getComments",
+      "articlesCreateValidator"
+    ],
+    "durationMs": 45731,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 210599,
+      "cached_input_tokens": 144256,
+      "output_tokens": 1324,
+      "reasoning_output_tokens": 262
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 35,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "901de03a1be7a7df19541176157b8514ced97e4fa1bfd62e851265ca0665d730",
+    "sourceAfter": "901de03a1be7a7df19541176157b8514ced97e4fa1bfd62e851265ca0665d730",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-053-agent/events.jsonl",
+      "sha256": "e3e837ad5041bd69470a8280ebd39d53e0a8e0eb8d58ff3e6613ef0a8523d1ee",
+      "stderrPath": "[RUN]/traces/rw-053-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "306a141c6321740f1fe5997b3cb5be7268b54f48e43f9639d8a10dc142bf1962",
+    "costUsd": null,
+    "caseId": "rw-053",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "3a1374ab66885e3e28d4ba5515a0a5daa58cadd1",
+        "b": "e75933296827a4567c1bf4595f7f0246edb62c87"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "b": "b900bc63748c7f4d575bc507178d10907d6d00a0"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+        "b": "bd59461bdb7555d8d4b6c52b30d8f6560142aa97"
+      },
+      "commitMessagesSha256": {
+        "a": "e091d96d4037818082e554d78ff6e470da35714099eb7becf58f319c59f46d6e",
+        "b": "508e8e593dc70374bebe95ae72770d4aef53caa241cce6a330fb4f67aa3d3005"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "60f15e5c07fbd3f1178f4ac3a264f9a39066a195050db379c9b38ec9f515da06"
+    }
+  },
+  {
+    "arm": "fuse",
+    "status": "complete",
+    "assessment": "no-conflict",
+    "confidence": 0.97,
+    "category": "none",
+    "explanation": "A adds logging, validator tests, and descending createdAt ordering in commentsGetPrisma. B’s latestComment selects the maximum unique comment ID with reduce, so A’s ordering cannot change its result. The helper’s interface and returned data remain compatible. Fuse reported no conflicts but skipped the oversized validator test; its assertions were inspected directly. Tests were not executed.",
+    "involved_symbols": [
+      "commentsGetPrisma",
+      "latestComment",
+      "getComments",
+      "articlesCreateValidator"
+    ],
+    "durationMs": 61902,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 231509,
+      "cached_input_tokens": 193280,
+      "output_tokens": 1378,
+      "reasoning_output_tokens": 42
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 1,
+      "inspectSuccesses": 1,
+      "matchedInspectAttempts": 1,
+      "matchedInspectSuccesses": 1,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 31,
+      "calls": [
+        {
+          "server": "fuse",
+          "tool": "fuse_inspect",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "fuse",
+          "tool": "fuse_review",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [
+        {
+          "path": "src/middleware/articlesValidator/articlesCreateValidator.table.test.ts",
+          "reason": "File exceeds the 100 KB analysis limit."
+        }
+      ],
+      "status": "partial"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "901de03a1be7a7df19541176157b8514ced97e4fa1bfd62e851265ca0665d730",
+    "sourceAfter": "901de03a1be7a7df19541176157b8514ced97e4fa1bfd62e851265ca0665d730",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-053-fuse/events.jsonl",
+      "sha256": "4fe5d5ce444aeb1df722f7ec2e4b4da7b1b2c4e4c8f2c31359c67d6f98058a56",
+      "stderrPath": "[RUN]/traces/rw-053-fuse/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "a01066b98fcfb20e2828038d0556b0221a3b08c6e022c37a0b3dfdfd6a017e86",
+    "costUsd": null,
+    "caseId": "rw-053",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "3a1374ab66885e3e28d4ba5515a0a5daa58cadd1",
+        "b": "e75933296827a4567c1bf4595f7f0246edb62c87"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "447b6e193706182a5a0d3f8cda188928d0d1896c",
+        "b": "b900bc63748c7f4d575bc507178d10907d6d00a0"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "ad5aa192994a48debd298ea3b34bf7e0a07e463d",
+        "b": "bd59461bdb7555d8d4b6c52b30d8f6560142aa97"
+      },
+      "commitMessagesSha256": {
+        "a": "e091d96d4037818082e554d78ff6e470da35714099eb7becf58f319c59f46d6e",
+        "b": "508e8e593dc70374bebe95ae72770d4aef53caa241cce6a330fb4f67aa3d3005"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "60f15e5c07fbd3f1178f4ac3a264f9a39066a195050db379c9b38ec9f515da06"
+    }
+  }
+]

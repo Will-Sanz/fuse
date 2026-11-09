@@ -18,7 +18,7 @@ negatives. Labels reflect this authored benchmark's judgments.
 The initial model is the locally configured `gpt-6-astra`, reasoning `high`, through
 the actual installed Codex CLI. Both arms use fresh ephemeral sessions, identical
 common source tools, the same task (side A's stated intent only), schema and
-180-second deadline. Arm order is counterbalanced deterministically across sorted
+180-second watchdog budget. Arm order is counterbalanced deterministically across sorted
 cases. The manifest records the model, client, harness hash, code commit, schedule,
 dataset provenance and limits. One run per arm/case gives a descriptive baseline;
 it does not establish statistical significance or broad production reliability.
@@ -109,4 +109,17 @@ remain unchanged.
 
 ## Results
 
-Results and the independent audit will be added after the frozen real-agent run.
+[Results and per-case outcomes](evidence/realworld-baseline/RESULTS.md),
+[independent audit](evidence/realworld-baseline/AUDIT.md) and indexed compressed
+native events are published in `docs/evidence/realworld-baseline/`.
+The original run attempted all 53 pairs; 46 completed in both arms. A separately
+recorded frozen seven-pair recovery completed both arms on every remaining pair.
+The primary initial comparison is 41/46 correct without Fuse versus 43/46 with
+Fuse, with higher time/token usage. Initial failures are retained.
+
+Both accepted cohorts used frozen commit `2e8917b82667b77af1a7144fdefe33db2547649a`.
+For an exact historical harness checkout, use that commit; rerunning the current
+branch is a new experiment. A later diagnostics fix improves routing-failure
+classification and phase timing without rewriting the original records. The
+configured watchdog is best-effort: original timeout totals exceeded 180 seconds
+and lacked the phase timestamps needed to attribute the delay.

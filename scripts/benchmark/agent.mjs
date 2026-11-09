@@ -285,6 +285,52 @@ export function validateAssessment(value) {
   return value;
 }
 
+export function classifyRun({
+  timedOut,
+  sourcePreserved,
+  summary,
+  arm,
+  exitCode,
+  spawnError,
+  overflow,
+  parseErrors = [],
+  finalError,
+  events = [],
+}) {
+  const safetyViolation =
+    !sourcePreserved ||
+    summary.forbiddenTools.length ||
+    summary.mcp.sourceMismatches.length ||
+    (arm === 'agent' && summary.mcp.calls.some((item) => item.server === 'fuse'));
+  const failedTurn = events.findLast((event) => event.type === 'turn.failed');
+  const nativeError =
+    failedTurn?.error?.message || events.findLast((event) => event.type === 'error')?.message;
+  const executionError = exitCode !== 0 || spawnError || overflow || failedTurn;
+  const missingInspect = arm === 'fuse' && !summary.mcp.matchedInspectAttempts;
+  const status = timedOut
+    ? 'timeout'
+    : safetyViolation
+      ? 'protocol_error'
+      : executionError
+        ? 'error'
+        : parseErrors.length || finalError
+          ? 'error'
+          : missingInspect
+            ? 'protocol_error'
+            : 'complete';
+  const error = timedOut
+    ? 'Requested agent deadline exceeded; see measured timings.'
+    : safetyViolation
+      ? 'Source preservation or permitted-tool/provenance constraint violated.'
+      : spawnError ||
+        (overflow ? 'Output limit exceeded' : null) ||
+        (executionError ? nativeError || `Agent exited with code ${exitCode}.` : null) ||
+        finalError ||
+        (parseErrors.length ? 'Agent event stream contains invalid JSON.' : null) ||
+        (missingInspect ? 'Agent completed without the required matching Fuse inspection.' : null);
+  return { status, error };
+}
+
 export async function runAgent({
   repo,
   base,
@@ -328,7 +374,11 @@ export async function runAgent({
     stderr = '',
     timedOut = false,
     overflow = false,
-    spawnError;
+    spawnError,
+    watchdogTriggeredAt,
+    sigtermSentAt,
+    sigkillSentAt;
+  const spawnedAt = Date.now();
   const child = spawn(codexBinary, args, {
     env: runtimeEnv(),
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -337,15 +387,19 @@ export async function runAgent({
   const stop = () => {
     try {
       process.kill(-child.pid, 'SIGTERM');
+      sigtermSentAt ??= Date.now();
     } catch {}
   };
+  // shortcut: in-process deadlines are best-effort under host stalls; use an external watchdog for hard limits.
   const timer = setTimeout(() => {
     timedOut = true;
+    watchdogTriggeredAt = Date.now();
     stop();
   }, timeoutMs);
   const hardTimer = setTimeout(() => {
     try {
       process.kill(-child.pid, 'SIGKILL');
+      sigkillSentAt = Date.now();
     } catch {}
   }, timeoutMs + 3000);
   child.stdout.on('data', (b) => {
@@ -369,6 +423,7 @@ export async function runAgent({
     });
     child.once('close', accept);
   });
+  const processEndedAt = Date.now();
   clearTimeout(timer);
   clearTimeout(hardTimer);
   stop();
@@ -390,19 +445,18 @@ export async function runAgent({
     finalError = error.message;
   }
   const sourcePreserved = before === after;
-  const protocolError =
-    !sourcePreserved ||
-    summary.forbiddenTools.length ||
-    summary.mcp.sourceMismatches.length ||
-    (arm === 'fuse' && !summary.mcp.matchedInspectAttempts) ||
-    (arm === 'agent' && summary.mcp.calls.some((i) => i.server === 'fuse'));
-  const status = timedOut
-    ? 'timeout'
-    : protocolError
-      ? 'protocol_error'
-      : exitCode !== 0 || spawnError || overflow || parseErrors.length || finalError
-        ? 'error'
-        : 'complete';
+  const { status, error } = classifyRun({
+    timedOut,
+    sourcePreserved,
+    summary,
+    arm,
+    exitCode,
+    spawnError,
+    overflow,
+    parseErrors,
+    finalError,
+    events,
+  });
   const tracePath = join(outDir, 'events.jsonl'),
     stderrPath = join(outDir, 'stderr.txt');
   writeFileSync(tracePath, stdout);
@@ -418,6 +472,19 @@ export async function runAgent({
     status,
     ...(assessment || {}),
     durationMs: Date.now() - started,
+    timing: {
+      processStartedAt: spawnedAt,
+      watchdogFiredAt: watchdogTriggeredAt ?? null,
+      sigtermSentAt: sigtermSentAt ?? null,
+      sigkillSentAt: sigkillSentAt ?? null,
+      processClosedAt: processEndedAt,
+      agentProcessDurationMs: processEndedAt - spawnedAt,
+      watchdogDelayMs:
+        watchdogTriggeredAt === undefined
+          ? null
+          : Math.max(0, watchdogTriggeredAt - spawnedAt - timeoutMs),
+      postprocessMs: Date.now() - processEndedAt,
+    },
     model,
     effort,
     timeoutMs,
@@ -428,7 +495,8 @@ export async function runAgent({
     sourceAfter: after,
     usageComplete: !timedOut && exitCode === 0 && Boolean(summary.tokens),
     exitCode,
-    error: spawnError || finalError || (overflow ? 'Output limit exceeded' : null),
+    error,
+    finalError: finalError || null,
     parseErrors,
     trace: { path: tracePath, sha256: sha256(stdout), stderrPath, stderrSha256: sha256(stderr) },
     promptSha256: sha256(agentPrompt({ repo, base, a, b, task, arm })),

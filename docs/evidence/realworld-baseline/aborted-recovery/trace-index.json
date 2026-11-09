@@ -1,0 +1,20 @@
+{
+  "redactions": "Local paths and ephemeral thread IDs normalized. Original hashes refer to locally retained unmodified traces; published record hashes cover the normalized JSONL lines. Stderr hashes retained in rows; stderr content is not published.",
+  "gzipSha256": "6c66b86dfdb518fc0eb87bb712c584cd28eb8c1e245608c2d1e4477e95a46de2",
+  "records": [
+    {
+      "caseId": "rw-047",
+      "arm": "agent",
+      "originalTraceSha256": "f0c004b056fab3d505689ce9406457f67b9d1b5a3282784298ff5a7c3e24499b",
+      "publishedRecordSha256": "e4c598ed287192491372f247240ec57b2a945da2a4f9c9553cf3444cc6ca6c4e",
+      "eventCount": 40
+    },
+    {
+      "caseId": "rw-049",
+      "arm": "agent",
+      "originalTraceSha256": "7dd191e6c958e1d69c7e057b16ff1a2845ca230f45f4e71ed56238dc8a804010",
+      "publishedRecordSha256": "bbe8e694a1eeb4104d2d8cf4dda9bc6817c5c9f35042b457f203db7728e74947",
+      "eventCount": 36
+    }
+  ]
+}

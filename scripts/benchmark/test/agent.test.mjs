@@ -15,6 +15,7 @@ import {
   CONTROL_CONFIG,
   buildAgentArgs,
   RESULT_SCHEMA,
+  classifyRun,
 } from '../agent.mjs';
 
 function fixture() {
@@ -93,6 +94,55 @@ test('missing token usage stays unknown; unexpected tools are protocol evidence'
   ).tokens;
   assert.equal(tokens.input_tokens, 5);
   assert.equal(tokens.output_tokens, 2);
+});
+
+test('transport failure precedes missing inspection and preserves the native cause', () => {
+  const events = [
+    { type: 'turn.failed', error: { message: 'workspace routing discovery failed' } },
+  ];
+  const base = {
+    timedOut: false,
+    sourcePreserved: true,
+    summary: summarizeEvents(events, 'fuse'),
+    arm: 'fuse',
+    exitCode: 1,
+    finalError: 'ENOENT: missing final.json',
+    events,
+  };
+  assert.deepEqual(classifyRun(base), {
+    status: 'error',
+    error: 'workspace routing discovery failed',
+  });
+  assert.equal(classifyRun({ ...base, exitCode: 0, finalError: undefined }).status, 'error');
+  assert.equal(
+    classifyRun({ ...base, exitCode: 0, events: [], finalError: undefined }).status,
+    'protocol_error',
+  );
+  assert.equal(classifyRun({ ...base, timedOut: true }).status, 'timeout');
+  assert.equal(classifyRun({ ...base, sourcePreserved: false }).status, 'protocol_error');
+  assert.equal(
+    classifyRun({ ...base, spawnError: 'Executable unavailable', events: [] }).error,
+    'Executable unavailable',
+  );
+  const clean = {
+    ...base,
+    arm: 'agent',
+    exitCode: 0,
+    events: [],
+    finalError: undefined,
+    summary: summarizeEvents([], 'agent'),
+  };
+  assert.deepEqual(classifyRun(clean), { status: 'complete', error: null });
+  assert.deepEqual(
+    classifyRun({
+      ...clean,
+      events: [
+        { type: 'error', message: 'Reconnecting...' },
+        { type: 'turn.completed', usage: { input_tokens: 5, output_tokens: 2 } },
+      ],
+    }),
+    { status: 'complete', error: null },
+  );
 });
 
 test('MCP assistance requires matching requested commits and returned review provenance', () => {
