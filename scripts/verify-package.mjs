@@ -22,6 +22,11 @@ try {
   const files = pack.files.map((f) => f.path);
   for (const required of [
     'dist/index.html',
+    'dist/inline/review.html',
+    'docs/inline-review.md',
+    'src/liquidglass/PROVENANCE.md',
+    'src/liquidglass/vendor/HTML-TO-IMAGE-LICENSE',
+    'src/liquidglass/vendor/upstream-package.json',
     'cli/run.mjs',
     'server/mcp.ts',
     'scripts/meeting.mjs',
@@ -82,8 +87,14 @@ try {
     }),
   );
   try {
-    const names = (await client.listTools()).tools.map((t) => t.name);
-    for (const name of ['fuse_report_issues', 'fuse_submit_proposal', 'fuse_verify'])
+    const tools = (await client.listTools()).tools;
+    const names = tools.map((t) => t.name);
+    for (const name of [
+      'fuse_report_issues',
+      'fuse_submit_proposal',
+      'fuse_verify',
+      'fuse_present_review',
+    ])
       assert.ok(names.includes(name));
     const assessment = await client.callTool({
       name: 'fuse_report_issues',
@@ -99,6 +110,25 @@ try {
       },
     });
     assert.ok(!assessment.isError, JSON.stringify(assessment));
+    const inline = await client.callTool({
+      name: 'fuse_present_review',
+      arguments: { repo: semantic.repo, id: semantic.review.id },
+    });
+    assert.ok(!inline.isError, JSON.stringify(inline));
+    const resourceUri = tools.find((t) => t.name === 'fuse_present_review')._meta.ui.resourceUri;
+    const resource = await client.readResource({ uri: resourceUri });
+    assert.equal(resource.contents[0].mimeType, 'text/html;profile=mcp-app');
+    assert.match(resource.contents[0].text, /^<!doctype html>/i);
+    assert.ok(resource.contents[0].text.includes('Fuse review'));
+    assert.ok(resource.contents[0].text.includes('Permission is hereby granted'));
+    assert.ok(resource.contents[0].text.includes('LiquidGlass @ybouane/liquidglass 1.0.3'));
+    const capability = inline._meta?.fuse?.capability;
+    if (capability) {
+      assert.ok(!JSON.stringify(inline.content).includes(capability));
+      assert.ok(!JSON.stringify(inline.structuredContent).includes(capability));
+      assert.ok(!JSON.stringify(resource).includes(capability));
+    }
+
     const result = await client.callTool({ name: 'fuse_inspect', arguments: { repo: demo.repo } });
     assert.ok(!result.isError);
     const review = JSON.parse(result.content[0].text).data;
@@ -115,7 +145,7 @@ try {
     await client.close();
   }
   console.log(
-    `PASS: production-only package install, real Git conflict, MCP tools, and local review (${pack.size} bytes). No credentials packaged.`,
+    `PASS: production-only package install, real Git conflict, inline MCP resource, new tools, and browser fallback (${pack.size} bytes). No credentials packaged.`,
   );
 } finally {
   rmSync(directory, { recursive: true, force: true });

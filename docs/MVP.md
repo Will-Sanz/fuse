@@ -1,5 +1,11 @@
 # Fuse visual explanation release
 
+The inline-review candidate keeps human decisions in a compact MCP App using the
+requested liquidglass library. Transport, component and privacy tests are distinct
+from native Codex rendering, which is not yet accepted. The current acceptance
+record is [inline review](inline-review.md); no browser or transcript simulation
+counts as native-interface proof.
+
 ## MCP-first behavioral proposals
 
 Fuse now supports **saved issue → human behavior confirmation → host-agent proposal

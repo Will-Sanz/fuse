@@ -23,7 +23,7 @@ The private team connection includes `FUSE_SERVICE_TOKEN` in its environment. No
 
 ### Codex
 
-Use `codex mcp add fuse --env FUSE_SERVICE_TOKEN=TEAM_VALUE -- npx --yes --prefer-online github:Will-Sanz/fuse#main mcp`. Keep the real team value private. In the resulting `[mcp_servers.fuse]` section of `~/.codex/config.toml`, set `startup_timeout_sec = 180` and `tool_timeout_sec = 300`. Start a new Codex session in the repository, run `/mcp` to see the connection, and ask it to use `fuse_explain` with the current project's absolute path. Call `fuse_open_review` to obtain the browser link for the human to choose and create the change.
+Use `codex mcp add fuse --env FUSE_SERVICE_TOKEN=TEAM_VALUE -- npx --yes --prefer-online github:Will-Sanz/fuse#main mcp`. Keep the real team value private. In the resulting `[mcp_servers.fuse]` section of `~/.codex/config.toml`, set `startup_timeout_sec = 180` and `tool_timeout_sec = 300`. Start a new Codex session in the repository, run `/mcp` to see the connection, and ask it to use `fuse_explain` with the current project's absolute path. Call `fuse_present_review` on the saved review for the inline card on a compatible client. Browser fallback through `fuse_open_review` is explicit only. Native rendering acceptance for this candidate is tracked in [inline review](inline-review.md).
 
 The maintainer may instead launch `node /absolute/path/to/fuse/cli/run.mjs mcp` from a development checkout. This loads that installation's `.env`, never the target repository's environment file. A direct `OPENAI_API_KEY` is optional for development; a team token or `FUSE_AI_URL` selects the shared service instead. `--repo /absolute/path/to/project` restricts a connection to one repository. Without it, each tool must receive `repo`.
 
@@ -63,7 +63,7 @@ Successful text content is `{ "schemaVersion": 1, "data": ... }`. `fuse_explain`
 
 `fuse_open_review` accepts `repo` and `id` and returns a loopback URL where the human can select and apply the resolution. The viewer stays available while the MCP connection runs.
 
-There is no MCP application or arbitrary-command tool. `fuse_verify` runs only preconfigured isolated checks for behavioral proposals. Use the local browser or CLI to explicitly apply a preview and run configured checks. Inspection writes a saved record and generation calls a paid API, so these are not marked read-only.
+Model-callable tools cannot confirm behavior or apply code. The component-only `fuse_ui_action` bridge requires a private, review-bound capability on an exact reviewed client version. There is no arbitrary-command tool. `fuse_verify` runs only preconfigured isolated checks for behavioral proposals. Use the local browser or CLI to explicitly apply a preview and run configured checks. Inspection writes a saved record and generation calls a paid API, so these are not marked read-only.
 
 ## CLI and HTTP
 
@@ -118,3 +118,25 @@ against backend behavior IDs. Wire action slots keep the existing hosted service
 compatible; they are mapped and validated before persistence. The agent returns
 to `fuse_review` after each human interaction. The packaged
 `skills/fuse-review/SKILL.md` supplies portable host instructions.
+
+## Inline presentation candidate
+
+`fuse_present_review(repo, id)` reads the existing saved review and attaches the
+static `ui://fuse/review.html` resource. The resource is self-contained HTML with
+`text/html;profile=mcp-app`; its descriptor requests inline presentation. It does
+not inspect again or start another browser. Public review data stays in content
+and structuredContent; private `_meta.fuse` supplies component-only state.
+
+The registered `fuse_ui_action` is app-only. A known tool name alone confers no
+permission. Its private session is scoped to one connection/repository/review and
+computed source version, expires after 15 minutes per capability, and rotates on
+use; rejected recognized capabilities are burned and require re-presentation.
+Current revision, isolated verification and exact preview token are still checked.
+Unknown client versions get a read-only result. Compatibility is deliberately
+narrow, based on the exact installed Codex metadata-projection tests; it is not
+caller authentication. See [the full support/acceptance record](inline-review.md).
+
+The card initializes the standard MCP UI bridge, uses parent-window-only messages,
+negotiates the explicitly supported protocol versions, and becomes read-only on
+unsupported negotiation or failed actions. Only an explicit legacy-browser action
+can open a link. It never automatically resumes the coding agent.
