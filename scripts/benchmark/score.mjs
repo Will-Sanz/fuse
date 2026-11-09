@@ -6,6 +6,10 @@ const ratio = (n, d) => (d ? n / d : null);
 const quantile = (values, q) => {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
+  if (q === 0.5) {
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  }
   return sorted[Math.max(0, Math.ceil(sorted.length * q) - 1)];
 };
 
@@ -226,6 +230,15 @@ export function scoreRuns(cases, rows) {
       accuracyDeltaOnBothDeterminate: ratio(wins.length - losses.length, pairedCases.length),
       officialCompatibilityAccuracyDelta:
         reports.fuse.officialCompatibility.accuracy - reports.agent.officialCompatibility.accuracy,
+      arms: Object.fromEntries(
+        ARMS.map((arm) => [
+          arm,
+          {
+            ...confusion(pairedCases, maps[arm]),
+            ...usage(pairedCases.map((c) => maps[arm].get(c.id))),
+          },
+        ]),
+      ),
     },
     limitations: [
       'Authored cases from one repository; one run per arm does not establish production reliability or statistical significance.',
