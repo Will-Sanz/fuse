@@ -1,0 +1,334 @@
+[
+  {
+    "arm": "agent",
+    "status": "protocol_error",
+    "assessment": "conflict",
+    "confidence": 0.99,
+    "category": "runtime",
+    "explanation": "A changes hashPassword and compareWithHash to trim passwords. B's new userConfirmPassword instead calls bcrypt.compareSync on the untrimmed input (userConfirmPassword.ts:27). After combining them, registering with \" secret \" stores a hash of \"secret\", and login accepts \" secret \", but confirming that same password returns 403 instead of 204. B alone hashes and compares the original password consistently. This is a concrete runtime incompatibility; tests were not executed, and B's added tests use passwords without surrounding whitespace.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "usersRegister",
+      "userLogin",
+      "userConfirmPassword"
+    ],
+    "durationMs": 30520,
+    "timing": {
+      "agentProcessDurationMs": 30441,
+      "watchdogDelayMs": null,
+      "postprocessMs": 78
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 131167,
+      "cached_input_tokens": 106880,
+      "output_tokens": 647,
+      "reasoning_output_tokens": 41
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 17,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": false
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+    "sourceAfter": "f2d6fe8798b2e9034b09fa4a10b9ab719a7a958fd5a57798f3aaab36633a8623",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": "Frozen input violation: Production or harness inputs changed during the frozen run",
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-047-agent/events.jsonl",
+      "sha256": "f0c004b056fab3d505689ce9406457f67b9d1b5a3282784298ff5a7c3e24499b",
+      "stderrPath": "[RUN]/traces/rw-047-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "d65dd10786ac21225d41bba34e1814e0a3779d65a54e7c6251446b8e4644785a",
+    "costUsd": null,
+    "caseId": "rw-047",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "8f305a8cba52a14cc6d3a6dde6cdf8a0d0db9526",
+        "b": "b78a3919c81bd07995579d8072c0ecf2605f4fb3"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "dd8a1b35d0ee20e485811a4440eefa745a4f1883"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "d1458e4fc01d4ca498f0047653752e5a908de391",
+        "b": "c9c56b7478a820900537dc64931f67d60a19e797"
+      },
+      "commitMessagesSha256": {
+        "a": "96f3b4072c392b7556f8dc98d573112c54469917c49ac6e1e2d41c4797b21be0",
+        "b": "438c430375df6eb17cec438308830ee87f281cf44f8d4bb6c5b4347b2ab75017"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "df32747eca0d7c88f4a673cca05fe07df169518c52aef7c773c1ebde120c1901"
+    }
+  },
+  {
+    "arm": "agent",
+    "status": "protocol_error",
+    "assessment": "no-conflict",
+    "confidence": 0.97,
+    "category": "none",
+    "explanation": "B's confirmation handler calls compareWithHash, despite its commit message claiming direct bcrypt use. It therefore inherits A's password trimming consistently with registration and login. The helper interface remains unchanged, and the logging additions do not interfere with B's route or controller. No concrete incompatibility or test regression was identified from source inspection; tests were not executed.",
+    "involved_symbols": [
+      "hashPassword",
+      "compareWithHash",
+      "userConfirmPassword",
+      "usersRegister",
+      "userLogin"
+    ],
+    "durationMs": 31500,
+    "timing": {
+      "agentProcessDurationMs": 31394,
+      "watchdogDelayMs": null,
+      "postprocessMs": 106
+    },
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "clientVersion": "codex-cli 0.166.0-alpha.5.1",
+    "tokens": {
+      "input_tokens": 100778,
+      "cached_input_tokens": 77184,
+      "output_tokens": 591,
+      "reasoning_output_tokens": 66
+    },
+    "usageKnown": true,
+    "forbiddenTools": [],
+    "mcp": {
+      "inspectAttempts": 0,
+      "inspectSuccesses": 0,
+      "matchedInspectAttempts": 0,
+      "matchedInspectSuccesses": 0,
+      "sourceMismatches": [],
+      "inspectErrors": [],
+      "totalCalls": 15,
+      "calls": [
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_log",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_list",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_diff",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        },
+        {
+          "server": "source",
+          "tool": "source_read",
+          "success": true
+        }
+      ],
+      "unsupported": [],
+      "status": "not-enabled"
+    },
+    "sourcePreserved": true,
+    "sourceBefore": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+    "sourceAfter": "1fbaa9fd397f076e3dca8cca1c2bd3a5573618ef21352ef0f6b754246d70f58e",
+    "usageComplete": true,
+    "exitCode": 0,
+    "error": "Frozen input violation: Production or harness inputs changed during the frozen run",
+    "finalError": null,
+    "parseErrors": [],
+    "trace": {
+      "path": "[RUN]/traces/rw-049-agent/events.jsonl",
+      "sha256": "7dd191e6c958e1d69c7e057b16ff1a2845ca230f45f4e71ed56238dc8a804010",
+      "stderrPath": "[RUN]/traces/rw-049-agent/stderr.txt",
+      "stderrSha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+    },
+    "promptSha256": "a0708d73901203d347e82078b1091948721557f8da1a0c6e875f39011ec82d13",
+    "costUsd": null,
+    "caseId": "rw-049",
+    "provenance": {
+      "originalCommits": {
+        "base": "2a68e58e65507036a5653c8a2d200d86ca985092",
+        "a": "2134fb518ad3b9649a6f7bbc504ca65f64fda8f4",
+        "b": "92a8a3a8db8c4077ce7cebba1c5a44f1b48f244c"
+      },
+      "originalTrees": {
+        "base": "c15a161bb1aec25c3a26bda161277694af53cf8a",
+        "a": "97971d7956d0a66cc5196b27f0d8439712ecad82",
+        "b": "65f23954aa1c547d0c39547353c5e902f804b8ca"
+      },
+      "reconstructedCommits": {
+        "base": "8c46877a876e851199f220b773af11531f40d82f",
+        "a": "f279a4649b6d28df5f430971444e9b48ca20db18",
+        "b": "069fb63e9533b509bfc6e99124fcaca282a3bbd6"
+      },
+      "commitMessagesSha256": {
+        "a": "7f4b53ca2b9ffe35f908fb574919644d5532b5e393be5ce222e20f063d4ee3c8",
+        "b": "7978bbe91b6d3ec6695a42931ab147b09318c945636ec0ab94127dcff450a241"
+      },
+      "messageTransformation": "Preserve side commit message content; replace explicit rw-XXX IDs only. Generic base message.",
+      "taskSha256": "f0ac41593aa9c4f72e79a427cd96775f64adcaa652161465727049286725aa92"
+    }
+  }
+]

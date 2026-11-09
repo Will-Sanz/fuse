@@ -1,0 +1,104 @@
+{
+  "redactions": "Local paths and ephemeral thread IDs normalized; original hashes refer to locally retained raw traces.",
+  "gzipSha256": "70137cad9d772b390ad8f7f0a62c99225f320a2d6294a2044b767fde1d6bd6be",
+  "records": [
+    {
+      "caseId": "rw-047",
+      "arm": "agent",
+      "originalTraceSha256": "fb391bc9a38308c2438e1b51410144bf8107a5efe8b587533235216c84232a74",
+      "publishedRecordSha256": "43714c6cc96633fc4f0ee94ffae525965667431e4df6742c6f5c2446daecc59e",
+      "eventCount": 40
+    },
+    {
+      "caseId": "rw-047",
+      "arm": "fuse",
+      "originalTraceSha256": "a811a18d48baa8cb6818600c42546c634b3f14c9115dbdafbf61237a96f84467",
+      "publishedRecordSha256": "6c934b63e60883a572d0a8792432a82da06c90b79151e94de2b90a3df6027d41",
+      "eventCount": 36
+    },
+    {
+      "caseId": "rw-048",
+      "arm": "agent",
+      "originalTraceSha256": "8b3fc39ed494cd625ed36f3f59cbdd7c45815e4fbf9651c9e4d86e4d522fca6c",
+      "publishedRecordSha256": "6756b651230e1da998d40ed839ba25227135b90452c6aad9384184530a90edbd",
+      "eventCount": 40
+    },
+    {
+      "caseId": "rw-048",
+      "arm": "fuse",
+      "originalTraceSha256": "0e3eb359f1a2ef901218036a637ae4c2f6d28df04721be40bb2c62097488a3a9",
+      "publishedRecordSha256": "9d3fcfc575f8502859f1bd43e866c61573e845e8d3cb390e52fca1493ac51473",
+      "eventCount": 40
+    },
+    {
+      "caseId": "rw-049",
+      "arm": "agent",
+      "originalTraceSha256": "8e268e060e72edc6a381db6d5b2b0f4f425f1be8db7f8ec97d390e56d7a2fd6d",
+      "publishedRecordSha256": "1c296ea979a63f9c053816808f6909e1c9938add5a1d163f09f9acef47de1b02",
+      "eventCount": 48
+    },
+    {
+      "caseId": "rw-049",
+      "arm": "fuse",
+      "originalTraceSha256": "c63e9a5e38c965ffc7143d7d399bd1dfa827e4d776ba89564fb04811b4afbc6a",
+      "publishedRecordSha256": "e465e709b4214877f4907017f4122cc069384637e1f861278131763222b430f8",
+      "eventCount": 36
+    },
+    {
+      "caseId": "rw-050",
+      "arm": "agent",
+      "originalTraceSha256": "b44bc10758cab41577cb216d01c2a0ef09089d28ca00195f76ae85b9b8504a65",
+      "publishedRecordSha256": "37fec8461d1fe235c417516eb7ed0f07d997a88cd9e20e51e006558157e8eeaf",
+      "eventCount": 34
+    },
+    {
+      "caseId": "rw-050",
+      "arm": "fuse",
+      "originalTraceSha256": "61d8c0986575f6b3b9d11e44c8059730deaa95ebfc4ac6c5e47370ce2ef1f66c",
+      "publishedRecordSha256": "b1f839821434bce54226f3ba10b134e84de94b0604bfee9aee6426cf2b4ff477",
+      "eventCount": 38
+    },
+    {
+      "caseId": "rw-051",
+      "arm": "agent",
+      "originalTraceSha256": "c6580f59a142daef4299a82174170379ebb96514612ed080513b81f43ed25326",
+      "publishedRecordSha256": "48ac20c84f0817a4dfd84e2033ee410e7434d4634e968a7b02114d8dd66bcaa5",
+      "eventCount": 40
+    },
+    {
+      "caseId": "rw-051",
+      "arm": "fuse",
+      "originalTraceSha256": "cf578fb2dd222d2c91cdcd2d2ad4da76920c4339b229c2568df56630cf537c54",
+      "publishedRecordSha256": "bb4ecc112be773cf21d64b5d37a404c5fed36307bdce7f351b9234d1774daa65",
+      "eventCount": 49
+    },
+    {
+      "caseId": "rw-052",
+      "arm": "agent",
+      "originalTraceSha256": "7d64c3d9a9546ebfafdf3a7f89ce6bf1474a4e07f049397707cd8c1a5c6216ef",
+      "publishedRecordSha256": "0f8c5d1443407f65933b483403d2bedecf2a0021844300f6e5355e8d41fc89c5",
+      "eventCount": 42
+    },
+    {
+      "caseId": "rw-052",
+      "arm": "fuse",
+      "originalTraceSha256": "2dc4b1f3458d664e24c88fd544896d115d9a6a24b241c4b6f1c5209c5de882a1",
+      "publishedRecordSha256": "45f8f677231c14a60538f8aa1ea5961b07eb2cad3d079577eaa700682b5cbf1c",
+      "eventCount": 44
+    },
+    {
+      "caseId": "rw-053",
+      "arm": "agent",
+      "originalTraceSha256": "e3e837ad5041bd69470a8280ebd39d53e0a8e0eb8d58ff3e6613ef0a8523d1ee",
+      "publishedRecordSha256": "935c270995ac0410482b785298c082ff1f487733fe6c84a5522d3d8a938e7b36",
+      "eventCount": 76
+    },
+    {
+      "caseId": "rw-053",
+      "arm": "fuse",
+      "originalTraceSha256": "4fe5d5ce444aeb1df722f7ec2e4b4da7b1b2c4e4c8f2c31359c67d6f98058a56",
+      "publishedRecordSha256": "1ef8b2892387bb338d135c2d2497d681a290ca7c5d1bc24ddafda38c5e748418",
+      "eventCount": 69
+    }
+  ]
+}
