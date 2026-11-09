@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { createReviewApp } from '../server/review-server';
 import { createDemo } from '../server/demo';
+import { LocalStore } from '../server/local-store';
+import { compactReview } from '../server/mcp-review';
 import type { Review } from '../shared/review';
 
 const cleanup: (() => void)[] = [];
@@ -150,6 +152,78 @@ describe('shared review API and MCP transport', () => {
       expect(url).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/\?review=/);
       expect((await fetch(url)).status).toBe(200);
       expect((await client.listTools()).tools.map((t) => t.name)).not.toContain('fuse_apply');
+    } finally {
+      await client.close();
+    }
+  });
+  it('offers smaller exact-source responses without changing full reviews or losing unsupported source', async () => {
+    const d = createDemo(join(temp(), 'demo'));
+    writeFileSync(
+      join(d.sessionA!, 'README.md'),
+      '# Changed contract\nUnique unsupported source.\n',
+    );
+    const client = new Client({ name: 'fuse-compact-test', version: '1' });
+    await client.connect(
+      new StdioClientTransport({
+        command: process.execPath,
+        args: [resolve('cli/run.mjs'), 'mcp', '--repo', d.repo],
+        stderr: 'pipe',
+      }),
+    );
+    try {
+      async function call(name: string, args: Record<string, unknown>) {
+        const result = await client.callTool({ name, arguments: args });
+        expect(result.isError).not.toBe(true);
+        return JSON.parse((result.content as { text: string }[])[0].text).data;
+      }
+      const compact = await call('fuse_inspect', { sessions: true, detail: 'compact' });
+      const full = (await call('fuse_review', { id: compact.id })) as Review;
+      expect(await call('fuse_review', { id: compact.id, detail: 'full' })).toEqual(full);
+      expect(await call('fuse_review', { id: compact.id, detail: 'compact' })).toEqual(compact);
+      expect(full).not.toHaveProperty('detail');
+      expect(compact.detail).toBe('compact');
+      expect(compact.sourceVersion).toBe(full.sourceVersion);
+      expect(compact.baseCommit).toBe(full.baseCommit);
+      expect(compact.sources.a.head).toBe(full.sources.a.head);
+      expect(compact.sources.a.fingerprint).toBe(full.sources.a.fingerprint);
+      expect(compact.sources.a.files['checkout.ts']).not.toHaveProperty('code');
+      expect(compact.sources.a.files['README.md'].code).toBe(
+        '# Changed contract\nUnique unsupported source.\n',
+      );
+      expect(compact.unsupported).toEqual(full.unsupported);
+      expect(compact.files[0].input).toEqual(full.files[0].input);
+      expect(compact.files[0].graphs).toEqual(full.files[0].graphs);
+      expect(compact.files[0].evidence[0]).not.toHaveProperty('code');
+      expect(compact.files[0].evidence[0].function).toBe(full.files[0].evidence[0].function);
+      expect(compact.files[0].analysis.conflicts[0]).not.toHaveProperty('base');
+      expect(compact.files[0].analysis.conflicts[0].id).toBe(
+        full.files[0].analysis.conflicts[0].id,
+      );
+      expect(compact.files[0].recommendations).toEqual(full.files[0].recommendations);
+      expect(JSON.stringify(compact).length).toBeLessThan(JSON.stringify(full).length);
+      const store = new LocalStore(d.repo);
+      const before = readFileSync(join(store.directory, 'reviews', `${full.id}.json`), 'utf8');
+      await call('fuse_review', { id: compact.id, detail: 'compact' });
+      expect(readFileSync(join(store.directory, 'reviews', `${full.id}.json`), 'utf8')).toBe(
+        before,
+      );
+      expect(store.get(full.id)).toEqual(full);
+      const mismatch = structuredClone(full);
+      mismatch.sources.a.files['checkout.ts'].code = 'unique source';
+      expect(compactReview(mismatch).sources.a.files['checkout.ts']).toHaveProperty(
+        'code',
+        'unique source',
+      );
+      mismatch.sources.a.files['checkout.ts'].code = null;
+      expect(compactReview(mismatch).sources.a.files['checkout.ts']).toHaveProperty('code', null);
+      expect(
+        (
+          await client.callTool({
+            name: 'fuse_review',
+            arguments: { id: compact.id, detail: 'short' },
+          })
+        ).isError,
+      ).toBe(true);
     } finally {
       await client.close();
     }

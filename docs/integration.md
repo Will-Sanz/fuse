@@ -53,15 +53,40 @@ Successful text content is `{ "schemaVersion": 1, "data": ... }`. `fuse_explain`
 | ----------------- | -------------------------------------------------- | ---------------------------------------------------------------- |
 | `fuse_explain`    | optional `base`, `a`, `b`, `sessions`              | Inspect and generate a new source-grounded image; persist review |
 | `fuse_visualize`  | `id`, optional `regenerate`                        | Generate/reuse a visual for a saved review                       |
-| `fuse_inspect`    | optional `base`, `a`, `b`, `sessions`              | Read Git and save deterministic analysis without AI              |
+| `fuse_inspect`    | optional `base`, `a`, `b`, `sessions`, `detail`    | Read Git and save deterministic analysis without AI              |
 | `fuse_watch_once` | none                                               | Refresh registered worktrees and return overlap attention        |
-| `fuse_review`     | `id`                                               | Read saved evidence, image specification, decisions, and checks  |
+| `fuse_review`     | `id`, optional `detail`                            | Read saved evidence, image specification, decisions, and checks  |
 | `fuse_history`    | none                                               | List reviews and verified Git references                         |
 | `fuse_intent`     | `id`, `revision`, `intent: {first, rationale}`     | Record developer-stated precedence                               |
 | `fuse_decide`     | `id`, `revision`, `path`, `conflictId`, `decision` | Save a supported proposed choice and rationale                   |
 | `fuse_preview`    | `id`, `revision`                                   | Save exact output, hashes, checks, and approval token            |
 
 `fuse_open_review` accepts `repo` and `id` and returns a loopback URL where the human can select and apply the resolution. The viewer stays available while the MCP connection runs.
+
+### Compact source evidence
+
+For agent source review, pass `detail: "compact"` to `fuse_inspect` or `fuse_review`.
+Omitting `detail` or passing `"full"` returns the unchanged complete `Review`.
+Compact responses keep the same versioned envelope and mark `data.detail` as
+`"compact"`; they are a projection, not a complete `Review` object.
+
+Compact keeps exact complete `files[].input.base`, `agentA`, and `agentB` source,
+all evidence entries in their original order (including locations and observations),
+analysis metadata, per-revision graphs, recommendations, decisions and checks.
+Repository/base/A/B provenance, hashes, sourceVersion, revisions, lifecycle and
+unsupported-file reasons remain present. It omits repeated `evidence[].code` and
+`analysis.conflicts[].base/a/b`; use the corresponding complete file input to trace
+the source. Evidence revision `base`, `a`, or `b` selects input `base`, `agentA`,
+or `agentB`; deletion evidence explicitly refers to the common base in its
+observations. Snapshot `sources.a/b.files[path].code` is omitted only when the
+identical text is already present in that side's file input. Unsupported or other
+unique snapshot source, including `null` for a deleted file, is retained.
+
+Retrieve every original field with `fuse_review({repo, id, detail: "full"})`.
+Compact does not change the saved review, evidence indexes, permissions or approval
+requirements, and does not truncate source. CLI, HTTP, visual and mutation results
+continue returning complete reviews. Smaller serialized payloads alone do not prove
+lower agent token usage or equal detection quality; those require a new real run.
 
 Model-callable tools cannot confirm behavior or apply code. The component-only `fuse_ui_action` bridge requires a private, review-bound capability on an exact reviewed client version. There is no arbitrary-command tool. `fuse_verify` runs only preconfigured isolated checks for behavioral proposals. Use the local browser or CLI to explicitly apply a preview and run configured checks. Inspection writes a saved record and generation calls a paid API, so these are not marked read-only.
 
