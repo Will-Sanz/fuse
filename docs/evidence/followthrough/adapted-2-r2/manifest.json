@@ -1,0 +1,193 @@
+{
+  "createdAt": "2026-11-09T18:45:06.970Z",
+  "configuration": {
+    "schemaVersion": 1,
+    "study": "source-only detection; one fresh real-agent run per arm and case",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timeoutMs": 180000,
+    "concurrency": 4,
+    "seed": "fuse-adapted-epoch2-20261109-r2",
+    "fuseCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+    "fuseSourceSha256": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+    "nodeVersion": "v24.3.0",
+    "harnessSha256": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+    "dataset": {
+      "schemaVersion": 1,
+      "study": "authored adapted source-only interaction probes; not historical production conflicts",
+      "targets": {
+        "click": {
+          "url": "https://github.com/pallets/click",
+          "commit": "874ca2bc1c30d93a4ac6e36a15ed685eafe89097",
+          "tree": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+          "version": "8.1.7",
+          "language": "Python",
+          "license": "BSD-3-Clause",
+          "licensePath": "LICENSE.rst",
+          "baseCommit": "26e048c9f19352a8527351b5c7263522cc21616d",
+          "licenseSha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d"
+        },
+        "ms": {
+          "url": "https://github.com/vercel/ms",
+          "commit": "1c6264b795492e8fdecbc82cb8802fcfbfc08d26",
+          "tree": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+          "version": "2.1.3",
+          "language": "JavaScript",
+          "license": "MIT",
+          "licensePath": "license.md",
+          "baseCommit": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+          "licenseSha256": "1662fae9b5314d11cf51284e2dcd1f006a354f7343f08712a730fcff9a359801"
+        }
+      },
+      "cases": [
+        {
+          "id": "bx-001",
+          "type": "runtime",
+          "label": "conflict",
+          "intent_a": "Rename the private date parser while keeping DateTime conversion behavior.",
+          "target": "click",
+          "scenario": "date-parser",
+          "baseCommit": "26e048c9f19352a8527351b5c7263522cc21616d",
+          "aCommit": "fca74a2994b9d5f90d5cc1d84cbb53f4ea3a81e7",
+          "bCommit": "7cabcc5fe76c83f8096d3dc584c41997440b538b",
+          "baseTree": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+          "aTree": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+          "bTree": "366cfab4bad61815072958367bbad08f28da120c"
+        },
+        {
+          "id": "bx-002",
+          "type": "negative",
+          "label": "no_conflict",
+          "intent_a": "Rename the private date parser while keeping DateTime conversion behavior.",
+          "target": "click",
+          "scenario": "date-parser",
+          "baseCommit": "26e048c9f19352a8527351b5c7263522cc21616d",
+          "aCommit": "fca74a2994b9d5f90d5cc1d84cbb53f4ea3a81e7",
+          "bCommit": "241320a8ec27c448ca11b91536cd71ae57ee098d",
+          "baseTree": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+          "aTree": "e0a094ce734d78e8d51badae18cc0e14bec79a49",
+          "bTree": "5b5b01a16c2eea4c05ca96c067056b23914179ee"
+        },
+        {
+          "id": "bx-003",
+          "type": "runtime",
+          "label": "conflict",
+          "intent_a": "Rename the internal make_str helper and update existing callers without changing command dispatch.",
+          "target": "click",
+          "scenario": "filename-labels",
+          "baseCommit": "26e048c9f19352a8527351b5c7263522cc21616d",
+          "aCommit": "620dc6277560a7c9b70f814a2b062b263faf2b68",
+          "bCommit": "0bf40c1bdb297de742135af87cbb3bdc90848782",
+          "baseTree": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+          "aTree": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+          "bTree": "28ca5420b78b50e18f1b741d58fc842af80973b2"
+        },
+        {
+          "id": "bx-004",
+          "type": "negative",
+          "label": "no_conflict",
+          "intent_a": "Rename the internal make_str helper and update existing callers without changing command dispatch.",
+          "target": "click",
+          "scenario": "filename-labels",
+          "baseCommit": "26e048c9f19352a8527351b5c7263522cc21616d",
+          "aCommit": "620dc6277560a7c9b70f814a2b062b263faf2b68",
+          "bCommit": "0b3c4a73ecc5de2112190dad7ec0c16d30fd8f0f",
+          "baseTree": "2a2e0a47bf878494db3dd5436114080dd2812dcc",
+          "aTree": "0d96ba750f15f7eb9bfe013979d807b282f6f104",
+          "bTree": "388de70ab406e74c5b1bc02ce4d7f09a80e9770c"
+        },
+        {
+          "id": "bx-005",
+          "type": "runtime",
+          "label": "conflict",
+          "intent_a": "Refactor the internal duration parser to return an object while preserving the exported conversion API.",
+          "target": "ms",
+          "scenario": "parse-shape",
+          "baseCommit": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+          "aCommit": "d0fdddbd901271c14d48e46f5e4c94cdc3ec0845",
+          "bCommit": "dd7f553736e1784f1286549f6b7d08ee1fba19ee",
+          "baseTree": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+          "aTree": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+          "bTree": "2335372477ac0038cde76003864d31dd223d21de"
+        },
+        {
+          "id": "bx-006",
+          "type": "negative",
+          "label": "no_conflict",
+          "intent_a": "Refactor the internal duration parser to return an object while preserving the exported conversion API.",
+          "target": "ms",
+          "scenario": "parse-shape",
+          "baseCommit": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+          "aCommit": "d0fdddbd901271c14d48e46f5e4c94cdc3ec0845",
+          "bCommit": "970c5e5361e08cf1b1e5a9bde1d13659cfcdc7f6",
+          "baseTree": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+          "aTree": "80655d29584a51f43c74bd5a21a7f95342c170fc",
+          "bTree": "4e639372bbd37cf0f943d9786c8041e156bddb0f"
+        },
+        {
+          "id": "bx-007",
+          "type": "runtime",
+          "label": "conflict",
+          "intent_a": "Rename the internal long formatter without changing the public duration formatting API.",
+          "target": "ms",
+          "scenario": "verbose-format",
+          "baseCommit": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+          "aCommit": "ea3c927873a30099dfdb82fae30433cbed9bd6f3",
+          "bCommit": "9ea3552b1280cec6f121cf52b6756a3c7d99e34f",
+          "baseTree": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+          "aTree": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+          "bTree": "b4a3414234ad24ef1a98d12e7dfece9866f46ba8"
+        },
+        {
+          "id": "bx-008",
+          "type": "negative",
+          "label": "no_conflict",
+          "intent_a": "Rename the internal long formatter without changing the public duration formatting API.",
+          "target": "ms",
+          "scenario": "verbose-format",
+          "baseCommit": "7b78932df7a384002c2f63757ba6604dc22d80a0",
+          "aCommit": "ea3c927873a30099dfdb82fae30433cbed9bd6f3",
+          "bCommit": "4a401d5e45be52c50295ff53bffb05128480e5b8",
+          "baseTree": "81dabc398c2c19cedbb3cc79152ed73b407ef081",
+          "aTree": "c422dc74a03b04edef3a6279c3531f9c03bf2fd4",
+          "bTree": "56c220e74a15f2e9a224cf625a73c6fa370693a0"
+        }
+      ],
+      "definitionSha256": "10439d2880566b51e3f0f7550b9cea7baf18dc11796d1643c20c616355a0fe1e"
+    },
+    "schedule": [
+      {
+        "caseId": "bx-001",
+        "arms": ["agent", "fuse"]
+      },
+      {
+        "caseId": "bx-002",
+        "arms": ["fuse", "agent"]
+      },
+      {
+        "caseId": "bx-003",
+        "arms": ["agent", "fuse"]
+      },
+      {
+        "caseId": "bx-004",
+        "arms": ["fuse", "agent"]
+      },
+      {
+        "caseId": "bx-005",
+        "arms": ["agent", "fuse"]
+      },
+      {
+        "caseId": "bx-006",
+        "arms": ["fuse", "agent"]
+      },
+      {
+        "caseId": "bx-007",
+        "arms": ["agent", "fuse"]
+      },
+      {
+        "caseId": "bx-008",
+        "arms": ["fuse", "agent"]
+      }
+    ]
+  }
+}

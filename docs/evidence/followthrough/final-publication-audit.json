@@ -1,0 +1,127 @@
+{
+  "date": "2026-11-09",
+  "status": "pass",
+  "artifactVerdict": "Ship scored evidence and final narrative; merge only after final-head CI passes.",
+  "reviewerScope": "Independently audited all350 published native records and exact documented normalization; current source/provenance checks on candidate cohorts; baseline raw-source protocol additionally audited by a separate data reviewer.",
+  "frozenCandidate": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+  "currentProductHash": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+  "currentHarnessHash": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+  "postFreezeTrackedChanges": "README/docs only",
+  "cohorts": [
+    {
+      "cohort": "before-r2",
+      "arms": {
+        "agent": {
+          "n": 53,
+          "correct": 49,
+          "falseAlarms": 0,
+          "tokens": 4414387,
+          "unsupportedCases": 0
+        },
+        "fuse": {
+          "n": 53,
+          "correct": 49,
+          "falseAlarms": 0,
+          "tokens": 6016828,
+          "unsupportedCases": 11
+        }
+      }
+    },
+    {
+      "cohort": "after-1-r2",
+      "arms": {
+        "agent": {
+          "n": 53,
+          "correct": 48,
+          "falseAlarms": 0,
+          "tokens": 4299007,
+          "unsupportedCases": 0
+        },
+        "fuse": {
+          "n": 53,
+          "correct": 49,
+          "falseAlarms": 0,
+          "tokens": 5346812,
+          "unsupportedCases": 11
+        }
+      }
+    },
+    {
+      "cohort": "after-2-r2",
+      "arms": {
+        "agent": {
+          "n": 53,
+          "correct": 48,
+          "falseAlarms": 0,
+          "tokens": 4315226,
+          "unsupportedCases": 0
+        },
+        "fuse": {
+          "n": 53,
+          "correct": 47,
+          "falseAlarms": 0,
+          "tokens": 5391450,
+          "unsupportedCases": 11
+        }
+      }
+    },
+    {
+      "cohort": "adapted-1-r2",
+      "arms": {
+        "agent": {
+          "n": 8,
+          "correct": 8,
+          "falseAlarms": 0,
+          "tokens": 418263,
+          "unsupportedCases": 0
+        },
+        "fuse": {
+          "n": 8,
+          "correct": 8,
+          "falseAlarms": 0,
+          "tokens": 528861,
+          "unsupportedCases": 8
+        }
+      }
+    },
+    {
+      "cohort": "adapted-2-r2",
+      "arms": {
+        "agent": {
+          "n": 8,
+          "correct": 8,
+          "falseAlarms": 0,
+          "tokens": 425728,
+          "unsupportedCases": 0
+        },
+        "fuse": {
+          "n": 8,
+          "correct": 8,
+          "falseAlarms": 0,
+          "tokens": 531108,
+          "unsupportedCases": 8
+        }
+      }
+    }
+  ],
+  "actualMatchedNativeInspections": 207,
+  "unknownUsage": 0,
+  "nonCompleteRows": 0,
+  "candidateRepeatedObservations": {
+    "perArm": 106,
+    "controlCorrect": 96,
+    "fuseCorrect": 96,
+    "fuseAverageTokens": 5369131,
+    "beforeFuseTokens": 6016828,
+    "relativeChangeFromBefore": -0.10764758440826294,
+    "relativeOverheadAgainstConcurrentControl": 0.24657203955360862
+  },
+  "publicationAudits": [
+    "publication-before-r2-audit.json",
+    "publication-after-1-r2-audit.json",
+    "publication-after-2-r2-audit.json",
+    "publication-adapted-1-r2-audit.json",
+    "publication-adapted-2-r2-audit.json"
+  ],
+  "remainingGate": "Native Codex full interaction acceptance remains open; appearance was user-confirmed only. No demonstration work is included."
+}

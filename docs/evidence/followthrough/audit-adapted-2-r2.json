@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "cohort": "adapted-2-r2",
+  "auditedAt": "2026-11-09T18:46:36.793139+00:00",
+  "completeCohort": true,
+  "manifestSha256": "1d3b0084abed4e7e82f76d643a3efac951160437b5ecf81c86f01c24a0ecfa60",
+  "metrics": {
+    "attemptedRows": 16,
+    "expectedCases": 8,
+    "sameCompletedPairs": 8,
+    "pairIds": ["bx-001", "bx-002", "bx-003", "bx-004", "bx-005", "bx-006", "bx-007", "bx-008"],
+    "arms": {
+      "agent": {
+        "states": {
+          "complete": 8
+        },
+        "determinate": 8,
+        "abstentions": 0,
+        "allTokens": {
+          "output_tokens": 3132,
+          "cached_input_tokens": 336256,
+          "reasoning_output_tokens": 32,
+          "input_tokens": 422596
+        },
+        "unknownUsage": 0,
+        "matchedCorrect": 8,
+        "matchedTP": 4,
+        "matchedPositiveDenominator": 4,
+        "matchedFP": 0,
+        "matchedNegativeDenominator": 4,
+        "matchedDurationMs": {
+          "median": 16426.0,
+          "sum": 140767,
+          "n": 8
+        },
+        "matchedTokens": {
+          "output_tokens": 3132,
+          "cached_input_tokens": 336256,
+          "reasoning_output_tokens": 32,
+          "input_tokens": 422596
+        },
+        "matchedUnknownUsage": 0,
+        "inspectAttempts": 0,
+        "inspectSuccesses": 0,
+        "unsupportedCases": []
+      },
+      "fuse": {
+        "states": {
+          "complete": 8
+        },
+        "determinate": 8,
+        "abstentions": 0,
+        "allTokens": {
+          "output_tokens": 4494,
+          "cached_input_tokens": 399104,
+          "reasoning_output_tokens": 21,
+          "input_tokens": 526614
+        },
+        "unknownUsage": 0,
+        "matchedCorrect": 8,
+        "matchedTP": 4,
+        "matchedPositiveDenominator": 4,
+        "matchedFP": 0,
+        "matchedNegativeDenominator": 4,
+        "matchedDurationMs": {
+          "median": 20485.0,
+          "sum": 170431,
+          "n": 8
+        },
+        "matchedTokens": {
+          "output_tokens": 4494,
+          "cached_input_tokens": 399104,
+          "reasoning_output_tokens": 21,
+          "input_tokens": 526614
+        },
+        "matchedUnknownUsage": 0,
+        "inspectAttempts": 8,
+        "inspectSuccesses": 8,
+        "unsupportedCases": [
+          "bx-001",
+          "bx-002",
+          "bx-003",
+          "bx-004",
+          "bx-005",
+          "bx-006",
+          "bx-007",
+          "bx-008"
+        ]
+      }
+    },
+    "wins": [],
+    "losses": []
+  },
+  "rowAudits": [
+    {
+      "key": "bx-001-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-2C33cy",
+        "[STUDY]/runs/adapted-2-r2/work/source-t2ehiv"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-001-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-2C33cy",
+        "[STUDY]/runs/adapted-2-r2/work/source-t2ehiv"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-002-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-5Fg08B",
+        "[STUDY]/runs/adapted-2-r2/work/source-l2FKK4"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-002-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-5Fg08B",
+        "[STUDY]/runs/adapted-2-r2/work/source-l2FKK4"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-003-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-FWkCnM",
+        "[STUDY]/runs/adapted-2-r2/work/source-XddvXT"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-003-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-FWkCnM",
+        "[STUDY]/runs/adapted-2-r2/work/source-XddvXT"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-004-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-TUNtlQ",
+        "[STUDY]/runs/adapted-2-r2/work/source-rRgb30"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-004-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-TUNtlQ",
+        "[STUDY]/runs/adapted-2-r2/work/source-rRgb30"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-005-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-MBbKuv",
+        "[STUDY]/runs/adapted-2-r2/work/source-VZtFpD"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-005-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-MBbKuv",
+        "[STUDY]/runs/adapted-2-r2/work/source-VZtFpD"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-006-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-i5Myz6",
+        "[STUDY]/runs/adapted-2-r2/work/source-isbE3H"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-006-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-i5Myz6",
+        "[STUDY]/runs/adapted-2-r2/work/source-isbE3H"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-007-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-BOOPun",
+        "[STUDY]/runs/adapted-2-r2/work/source-iWbCk3"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-007-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-BOOPun",
+        "[STUDY]/runs/adapted-2-r2/work/source-iWbCk3"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-008-agent",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-1HRHuG",
+        "[STUDY]/runs/adapted-2-r2/work/source-ESSqCt"
+      ],
+      "issues": []
+    },
+    {
+      "key": "bx-008-fuse",
+      "status": "complete",
+      "sourceStores": [
+        "[STUDY]/runs/adapted-2-r2/work/source-1HRHuG",
+        "[STUDY]/runs/adapted-2-r2/work/source-ESSqCt"
+      ],
+      "issues": []
+    }
+  ],
+  "currentSourceStores": 16,
+  "nativeInspectCalls": 8,
+  "clientVersions": {
+    "codex-cli 0.167.0-alpha.3.2": 16
+  },
+  "uniqueAgentThreads": 16,
+  "issues": []
+}

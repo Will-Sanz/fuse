@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-11-09T18:50:03.460400+00:00",
+  "verdict": "Pass for data integrity, actual-MCP protocol and publication; no stable model accuracy advantage established.",
+  "preregistration": {
+    "url": "https://github.com/Will-Sanz/fuse/issues/8#issuecomment-6747441612",
+    "createdAt": "2026-11-09T17:56:27Z",
+    "beforeFirstScoredManifest": "2026-11-09T17:56:37.646Z",
+    "matchedRegisteredCohortSeedsAndSettings": true,
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "clientVersion": "codex-cli 0.167.0-alpha.3.2",
+    "nodeVersion": "v24.3.0",
+    "configuredTimeoutMs": 180000,
+    "pairConcurrency": 4,
+    "freshSessions": true,
+    "sequentialNoncausalComparison": true
+  },
+  "totals": {
+    "observedScoredArmRecords": 350,
+    "completedScoredArmRecords": 350,
+    "uniqueNativeAgentThreads": 350,
+    "actualSuccessfulMatchedFuseInspections": 207,
+    "unknownUsageRecords": 0,
+    "operationalErrorsTimeoutsAbstentions": 0,
+    "protocolProvenancePublicationFindings": 0,
+    "manuallyReviewedExplanations": 104
+  },
+  "cohorts": [
+    {
+      "name": "before-r2",
+      "createdAt": "2026-11-09T17:56:37.646Z",
+      "productCommit": "7ad3058f931a0b284c4968ed0770f7a651fbf871",
+      "sourceSha256": "048d2a1a99b59896cd33fbd98e68f34857dcd65be09b3ac5b472b8cf557b4e84",
+      "harnessSha256": "d0fe34e0c8b4367bd7cf4180faf163085b001f719c8e5caf64e9f62ee957f659",
+      "seed": "fuse-followthrough-before-20261109-r2",
+      "scheduledPairs": 53,
+      "observedArmRecords": 106,
+      "actualMatchedFuseInspections": 66,
+      "arms": {
+        "agent": {
+          "complete": 53,
+          "correct": 49,
+          "denominator": 53,
+          "recallNumerator": 31,
+          "positiveDenominator": 35,
+          "falseAlarms": 0,
+          "negativeDenominator": 18,
+          "medianDurationMs": 24106,
+          "inputPlusOutputTokens": 4414387,
+          "cachedInputTokens": 3511808,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 0
+        },
+        "fuse": {
+          "complete": 53,
+          "correct": 49,
+          "denominator": 53,
+          "recallNumerator": 31,
+          "positiveDenominator": 35,
+          "falseAlarms": 0,
+          "negativeDenominator": 18,
+          "medianDurationMs": 33601,
+          "inputPlusOutputTokens": 6016828,
+          "cachedInputTokens": 4657024,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 11
+        }
+      },
+      "fuseOnlyWins": ["rw-022"],
+      "controlOnlyWins": ["rw-039"],
+      "protocolProvenancePublication": "pass"
+    },
+    {
+      "name": "after-1-r2",
+      "createdAt": "2026-11-09T18:12:58.652Z",
+      "productCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+      "sourceSha256": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+      "harnessSha256": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+      "seed": "fuse-followthrough-after-20261109-1-r2",
+      "scheduledPairs": 53,
+      "observedArmRecords": 106,
+      "actualMatchedFuseInspections": 62,
+      "arms": {
+        "agent": {
+          "complete": 53,
+          "correct": 48,
+          "denominator": 53,
+          "recallNumerator": 30,
+          "positiveDenominator": 35,
+          "falseAlarms": 0,
+          "negativeDenominator": 18,
+          "medianDurationMs": 23774,
+          "inputPlusOutputTokens": 4299007,
+          "cachedInputTokens": 3406464,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 0
+        },
+        "fuse": {
+          "complete": 53,
+          "correct": 49,
+          "denominator": 53,
+          "recallNumerator": 31,
+          "positiveDenominator": 35,
+          "falseAlarms": 0,
+          "negativeDenominator": 18,
+          "medianDurationMs": 31265,
+          "inputPlusOutputTokens": 5346812,
+          "cachedInputTokens": 4153216,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 11
+        }
+      },
+      "fuseOnlyWins": ["rw-015"],
+      "controlOnlyWins": [],
+      "protocolProvenancePublication": "pass"
+    },
+    {
+      "name": "after-2-r2",
+      "createdAt": "2026-11-09T18:28:01.073Z",
+      "productCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+      "sourceSha256": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+      "harnessSha256": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+      "seed": "fuse-followthrough-after-20261109-2-r2",
+      "scheduledPairs": 53,
+      "observedArmRecords": 106,
+      "actualMatchedFuseInspections": 63,
+      "arms": {
+        "agent": {
+          "complete": 53,
+          "correct": 48,
+          "denominator": 53,
+          "recallNumerator": 30,
+          "positiveDenominator": 35,
+          "falseAlarms": 0,
+          "negativeDenominator": 18,
+          "medianDurationMs": 23163,
+          "inputPlusOutputTokens": 4315226,
+          "cachedInputTokens": 3455616,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 0
+        },
+        "fuse": {
+          "complete": 53,
+          "correct": 47,
+          "denominator": 53,
+          "recallNumerator": 29,
+          "positiveDenominator": 35,
+          "falseAlarms": 0,
+          "negativeDenominator": 18,
+          "medianDurationMs": 31319,
+          "inputPlusOutputTokens": 5391450,
+          "cachedInputTokens": 4213760,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 11
+        }
+      },
+      "fuseOnlyWins": [],
+      "controlOnlyWins": ["rw-015"],
+      "protocolProvenancePublication": "pass"
+    },
+    {
+      "name": "adapted-1-r2",
+      "createdAt": "2026-11-09T18:43:38.735Z",
+      "productCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+      "sourceSha256": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+      "harnessSha256": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+      "seed": "fuse-adapted-epoch1-20261109-r2",
+      "scheduledPairs": 8,
+      "observedArmRecords": 16,
+      "actualMatchedFuseInspections": 8,
+      "arms": {
+        "agent": {
+          "complete": 8,
+          "correct": 8,
+          "denominator": 8,
+          "recallNumerator": 4,
+          "positiveDenominator": 4,
+          "falseAlarms": 0,
+          "negativeDenominator": 4,
+          "medianDurationMs": 17375.0,
+          "inputPlusOutputTokens": 418263,
+          "cachedInputTokens": 335232,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 0
+        },
+        "fuse": {
+          "complete": 8,
+          "correct": 8,
+          "denominator": 8,
+          "recallNumerator": 4,
+          "positiveDenominator": 4,
+          "falseAlarms": 0,
+          "negativeDenominator": 4,
+          "medianDurationMs": 21812.5,
+          "inputPlusOutputTokens": 528861,
+          "cachedInputTokens": 389376,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 8
+        }
+      },
+      "fuseOnlyWins": [],
+      "controlOnlyWins": [],
+      "protocolProvenancePublication": "pass"
+    },
+    {
+      "name": "adapted-2-r2",
+      "createdAt": "2026-11-09T18:45:06.970Z",
+      "productCommit": "6c74f6aba64d2ab2638548d9a13864e0fba60ad5",
+      "sourceSha256": "34d74b9daceed1c5a7df9cdb77f8eb290a5504e70a4b2907557855b2648449db",
+      "harnessSha256": "a8fabc53f979e5ee87cfa2cde7795042999900026127b1c74fabf94be33fbdde",
+      "seed": "fuse-adapted-epoch2-20261109-r2",
+      "scheduledPairs": 8,
+      "observedArmRecords": 16,
+      "actualMatchedFuseInspections": 8,
+      "arms": {
+        "agent": {
+          "complete": 8,
+          "correct": 8,
+          "denominator": 8,
+          "recallNumerator": 4,
+          "positiveDenominator": 4,
+          "falseAlarms": 0,
+          "negativeDenominator": 4,
+          "medianDurationMs": 16426.0,
+          "inputPlusOutputTokens": 425728,
+          "cachedInputTokens": 336256,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 0
+        },
+        "fuse": {
+          "complete": 8,
+          "correct": 8,
+          "denominator": 8,
+          "recallNumerator": 4,
+          "positiveDenominator": 4,
+          "falseAlarms": 0,
+          "negativeDenominator": 4,
+          "medianDurationMs": 20485.0,
+          "inputPlusOutputTokens": 531108,
+          "cachedInputTokens": 399104,
+          "unknownUsageRecords": 0,
+          "unsupportedEvidenceCaseCount": 8
+        }
+      },
+      "fuseOnlyWins": [],
+      "controlOnlyWins": [],
+      "protocolProvenancePublication": "pass"
+    }
+  ],
+  "scoring": {
+    "primary": "Same determinate pairs within each epoch; all expected attempts and unresolved outcomes retained. Original binary authored labels unchanged.",
+    "medians": "Conventional median averages middle two values for even sample sizes. Frozen baseline raw summary retains its original nearest-rank implementation; derived comparisons use conventional medians.",
+    "repeatedRealWorld": {
+      "uniqueCases": 53,
+      "repeatedCaseObservationsPerArm": 106,
+      "withoutFuseCorrect": 96,
+      "withFuseCorrect": 96,
+      "falseAlarmsPerArm": 0,
+      "compatibleObservationsPerArm": 36,
+      "conclusion": "Aggregate tie; fresh judgments vary on rw-015/rw-022 and historical rw-039 gain did not persist."
+    },
+    "repeatedAdapted": {
+      "uniqueAuthoredCases": 8,
+      "repeatedCaseObservationsPerArm": 16,
+      "withoutFuseCorrect": 16,
+      "withFuseCorrect": 16,
+      "falseAlarmsPerArm": 0,
+      "compatibleObservationsPerArm": 8,
+      "conclusion": "Ceiling effect on deliberately simple authored support probes; no accuracy gain shown."
+    }
+  },
+  "unsupportedEvidence": {
+    "realWorldCasesPerEpoch": 11,
+    "adaptedCasesPerEpoch": 8,
+    "allAdaptedFuseOutputsAcknowledgeUnsupportedPythonOrJavaScript": true,
+    "policy": "Unsupported analysis remains explicit; agent conclusions use common pinned source tools, never infer safety from unavailable analysis.",
+    "adaptedPythonJavaScriptNativeAnalysisSupportProven": false,
+    "adaptedStandaloneEngineDetectionsProven": false
+  },
+  "manualCausalReview": {
+    "realWorldCasesPerEpoch": 12,
+    "realWorldSampledOutputsAcrossThreeEpochs": 72,
+    "allAdaptedOutputsAcrossTwoEpochs": 32,
+    "wrongReasonPositivesFoundInReviewedOutputs": 0,
+    "fabricatedExecutedChecksFoundInReviewedOutputs": 0,
+    "allOriginalRealWorldExplanationsManuallyProven": false
+  },
+  "historicalAndInterruptedExclusion": {
+    "historicalClient0_166RowsPooledIntoNewScores": false,
+    "preRestartLostAttemptPooledIntoNewScores": false,
+    "preRestartLostAttemptUsage": null,
+    "originalPostgresPrismaOraclesIndependentlyExecuted": false,
+    "chargesUsd": null
+  },
+  "publication": "All350normalizedrecords independently checked against raw hashes/content; only declared path/thread normalization; gzip/index/usage/outcomes/payload bytes match; no checked credential/hostpath leaks.",
+  "watcherStopped": true
+}

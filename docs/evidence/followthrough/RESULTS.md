@@ -1,9 +1,18 @@
 # Fuse follow-through — November 9, 2026
 
-Status: the new baseline, first candidate epoch and deterministic evidence checks
-are complete. The second candidate epoch and two adapted-project epochs remain
-under the [preregistered protocol](../../benchmark-next.md). Their results are
-pending; this file is not a completed-study claim.
+All five [preregistered epochs](../../benchmark-next.md) are complete: **350/350
+real-agent arm runs**, with 207 successful exact-provenance Fuse inspections and
+no errors, timeouts, abstentions, unknown-usage records or source changes. All
+original and published records passed independent integrity/provenance audits.
+
+Compact evidence is 34.50% smaller. Mean reported Fuse token usage across the two
+candidate RealWorld epochs was 10.76% lower than its fresh before epoch, while
+candidate accuracy tied the control at 96/106 repeated observations per arm.
+Neither arm produced a false alarm. Fuse still used more time and tokens than
+the concurrent control; no stable accuracy or causal benefit is established.
+Additional-language probes passed through agent reasoning while remaining
+explicitly unsupported by Fuse's engine. Full native interaction acceptance
+remains open separately.
 
 ## Product change and exact evidence preservation
 
@@ -102,7 +111,92 @@ Actual Fuse reply text across all calls fell from 10,462,203 to 6,587,568 bytes
 (37.04%); repeated calls affect that total. In this candidate epoch Fuse still
 used more time and reported tokens than the same-epoch control. These are
 descriptive sequential observations, not causal savings or proof of an accuracy
-improvement. The second repeat remains pending.
+improvement.
+
+## Second candidate epoch and repeatability
+
+`after-2-r2` also completed all 106 runs, with 53 matched pairs and no operational
+or integrity failures. All 63 inspections and three review calls requested
+compact output; unsupported evidence remained visible in the same 11 cases.
+
+| Same 53 completed pairs | Without Fuse | With candidate Fuse |
+| ----------------------- | -----------: | ------------------: |
+| Correct judgments       |        48/53 |               47/53 |
+| Conflict recall         |        30/35 |               29/35 |
+| False alarms            |         0/18 |                0/18 |
+| Median duration         |     23.163 s |            31.319 s |
+| Input + output tokens   |    4,315,226 |           5,391,450 |
+| Cached input tokens     |    3,455,616 |           4,213,760 |
+
+The control alone was correct on `rw-015`, reversing the first candidate epoch's
+unique win. Both missed `rw-022` and `rw-039` in this epoch. Fuse's official
+correctness fell from 49/53 in the first candidate epoch to 47/53 here; this
+regression is retained, not replaced or rescored. No dataset, model prompt,
+product or harness change occurred between the two candidate epochs.
+
+| Two candidate epochs pooled, repeated observations | Without Fuse | With candidate Fuse |
+| -------------------------------------------------- | -----------: | ------------------: |
+| Correct judgments                                  |       96/106 |              96/106 |
+| Conflict recall                                    |        60/70 |               60/70 |
+| False alarms                                       |         0/36 |                0/36 |
+| Pooled median duration                             |    23.3945 s |            31.292 s |
+| Input + output tokens                              |    8,614,233 |          10,738,262 |
+
+These are two observations of each of 53 authored cases, not 106 independent
+cases. Mean candidate Fuse usage was 5,369,131 input-plus-output tokens per epoch
+versus 6,016,828 before (10.76% lower). Actual Fuse reply text averaged
+6,781,214.5 bytes versus 10,462,203 before (35.18% lower), reflecting both compact
+responses and repeated-call choices. The candidate's 31.292-second pooled median
+was below the before epoch's 33.601 seconds. Relative to its concurrent control,
+candidate Fuse still used 24.66% more reported tokens and had a higher median
+duration. No dollar charges were measured or inferred.
+
+## Additional-language probes
+
+Both adapted epochs completed all 16 arm runs each. Both agents were correct on
+all eight probes in each epoch, with zero false alarms on the four compatible
+cases. Pooled across repeats, each arm scored 16/16, with 8/8 conflict detections
+and 0/8 false alarms. These remain **eight unique authored probes** over two
+pinned projects; near-twins and repeats are correlated and have ceiling effects.
+
+The controller independently executed each branch and combined feature check,
+while the model only read source. All 32 explanations were checked against those
+oracles: private-parser AttributeError, internal-import ImportError, parse-shape
+NaN, formatter ReferenceError, and their compatible public-API twins. No
+wrong-reason positives or invented check executions were found.
+
+All 16 Fuse outputs explicitly acknowledged unsupported Python/JavaScript
+analysis. Correct answers came from the host agent's source reasoning, not new
+native engine or application support. Pooled median duration was 16.966 seconds
+without Fuse versus 21.449 seconds with it; input-plus-output usage was 843,991
+versus 1,059,969 tokens. The additional context produced no accuracy gain on these
+simple probes and added overhead. Do not pool them into the RealWorld headline.
+
+## Release decision and validation
+
+Ship the optional evidence projection with the complete response still available
+and unchanged by default. The measurements support smaller context and lower
+observed candidate usage; they do not support marketing a reliable accuracy
+improvement or expanding language/application claims. The original intent-policy
+misses remain recorded, and both positive and negative repeatability findings
+remain published.
+
+Independent review audited all 350 original and normalized published records,
+350 fresh threads/source stores and 207 matched native inspections. Causal review
+covered 104 outputs: 12 selected RealWorld cases in both arms across three epochs
+(72 outputs), plus every adapted output (32). No wrong-reason positives or invented
+execution claims were found in that sample; this is not manual proof of every
+RealWorld explanation. See [data audit](data-audit-summary.json),
+[causal notes](causal-audit.json) and the per-epoch records.
+
+The frozen production candidate passed [full GitHub CI](https://github.com/Will-Sanz/fuse/actions/runs/42669707841),
+including real Docker verification, browser workflows, CLI acceptance, showcase
+and production-package installation. Later publication changes do not alter the
+production or harness files. Deterministic harness checks, actual-client privacy
+probes and source-boundary canaries also pass. The original target PostgreSQL/
+Prisma/oracle suite was not independently executed; the adapted controller
+oracles and original upstream suites are separate evidence. No repair or human
+comprehension efficacy is measured by this source-only study.
 
 ## Client compatibility and inline acceptance
 
@@ -115,7 +209,8 @@ human decisions, exact preview and isolated verification.
 
 The real connected MCP accepted an inspection, issue report and inline presentation
 on a disposable checkout. The user confirmed that a card appeared and was expanded
-in the actual chat. That is user-reported native appearance, not automated visual
+in the actual chat. The connected installation was not attested against the
+frozen candidate. This is user-reported native appearance, not automated visual
 or interaction acceptance. Native Computer Use still denies access to Codex, and
 the permitted MCP Apps backend exposed no component tab after expansion. No
 alternative OS automation bypass was attempted. Full native interaction acceptance

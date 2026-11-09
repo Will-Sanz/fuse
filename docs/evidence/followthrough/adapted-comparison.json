@@ -1,0 +1,59 @@
+{
+  "sameCompletedCasesAcrossAllCohorts": [
+    "bx-001",
+    "bx-002",
+    "bx-003",
+    "bx-004",
+    "bx-005",
+    "bx-006",
+    "bx-007",
+    "bx-008"
+  ],
+  "cohorts": {
+    "adapted-1-r2": {
+      "agent": {
+        "correct": 8,
+        "denominator": 8,
+        "medianDurationMs": 17375.0,
+        "inputPlusOutputTokens": 418263,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 0,
+        "medianFuseTextBytes": 0.0,
+        "totalCommonSourceTextBytes": 149884
+      },
+      "fuse": {
+        "correct": 8,
+        "denominator": 8,
+        "medianDurationMs": 21812.5,
+        "inputPlusOutputTokens": 528861,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 162297,
+        "medianFuseTextBytes": 16211.0,
+        "totalCommonSourceTextBytes": 112491
+      }
+    },
+    "adapted-2-r2": {
+      "agent": {
+        "correct": 8,
+        "denominator": 8,
+        "medianDurationMs": 16426.0,
+        "inputPlusOutputTokens": 425728,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 0,
+        "medianFuseTextBytes": 0.0,
+        "totalCommonSourceTextBytes": 166293
+      },
+      "fuse": {
+        "correct": 8,
+        "denominator": 8,
+        "medianDurationMs": 20485.0,
+        "inputPlusOutputTokens": 531108,
+        "unknownUsage": 0,
+        "totalFuseTextBytes": 162297,
+        "medianFuseTextBytes": 16211.0,
+        "totalCommonSourceTextBytes": 116785
+      }
+    }
+  },
+  "note": "Conventional median averages the middle two values for even N; context/token counts and text bytes are distinct measurements."
+}
