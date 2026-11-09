@@ -1,5 +1,13 @@
 # Fuse
 
+## Inline MCP review
+
+The inline candidate adds a compact, expandable MCP review card with the actual
+ybouane/liquidglass library. It preserves the two human decisions and isolated
+verification safeguards. Native rendering acceptance remains pending;
+[the support record](docs/inline-review.md) and [issue #3](https://github.com/Will-Sanz/fuse/issues/3)
+distinguish tested client privacy/transport and component behavior from native proof.
+
 ## MCP-first behavioral proposals
 
 Fuse now supports **saved issue → human behavior confirmation → host-agent proposal
@@ -37,7 +45,7 @@ Open a Git repository with a TypeScript edit or merge conflict and ask your codi
 
 > Use Fuse to explain the change in this repository. Show the generated image, ask which behavior I want, and open the visual review.
 
-The assistant calls `fuse_explain` with the project's absolute `repo` path. The MCP reads your local repository, sends bounded source context to the hosted Fuse AI service, and returns a fresh image with meaningful choices. `fuse_open_review` supplies a local browser link. Choose the behavior, inspect the proposed code, and explicitly click **Create this change**. No source is changed by the MCP tools themselves.
+The assistant calls `fuse_explain` with the project's absolute `repo` path. The MCP reads your local repository, sends bounded source context to the hosted Fuse AI service, and returns a fresh image with meaningful choices. `fuse_present_review` presents the saved review inline on a compatible host; `fuse_open_review` supplies an explicitly requested browser fallback. Choose intended behavior, let the coding agent submit and verify a correction, then inspect and approve the exact code. Model-callable tools never write working source; authorized component actions apply only the approved, verified candidate.
 
 One connection works across repositories: pass `repo` on each tool call. An optional `--repo PATH` launch argument restricts a connection to one repository. Inspection without AI is available through `fuse_inspect`.
 
@@ -87,7 +95,7 @@ For direct local development, an installation `.env` may contain `OPENAI_API_KEY
 
 ## Application and checks
 
-Decisions select A, B, supported additive composition in an explicit order, or acknowledgment of a possible dependency interaction. Preview uses deterministic reconciliation, not model-written code. Source freshness, review revision, preview token, output hashes, and configured check arguments are checked before application.
+Decisions select A, B, supported additive composition in an explicit order, or acknowledgment of a possible dependency interaction. Legacy previews use deterministic reconciliation. Behavioral proposals contain exact agent-submitted source and require passing isolated verification before preview/application. Source freshness, review revision, preview token, output hashes, and configured check arguments are checked before application.
 
 Automatic application supports one regular TypeScript file in either a clean checkout at the common base or an active Git merge containing only the reviewed conflict. In the latter case Fuse replaces the pinned conflict contents and stages the resolution. Newer edits, unrelated work, unsupported files, and unsupported compositions are blocked. A dirty ordinary working copy can be explained, but application requires an appropriate clean target.
 

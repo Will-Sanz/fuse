@@ -34,12 +34,22 @@ flowchart TD
 - `server/local-store.ts`: atomic JSON records under the common Git directory's `fuse/` folder and a per-repository mutation lock.
 - `server/visual-ai.ts`: bounded pinned context, OpenAI Responses API request, schema/action validation, one repair attempt, cache/provenance, and freshness checks before saving. `.env` loading belongs to the installation entry point. Errors are explicit; prepared visuals are never a silent AI fallback.
 - `server/visual-renderer.ts`: escaped text and fixed drawing primitives, geometry/text-fit validation, SVG rendering, and resvg PNG output. No arbitrary model HTML or code execution.
-- `server/mcp.ts`: vendor-independent stdio interface. AI tools return text data plus an actual PNG image. Source application and human confirmation are absent from MCP. Behavioral verification executes only configured container checks.
+- `server/mcp.ts`: vendor-independent stdio interface. AI tools return text data plus an actual PNG image. Model-callable tools cannot confirm behavior or apply source. A separate component-only bridge authenticates private review sessions before reusing existing human-action guards. Behavioral verification executes only configured container checks.
 - `cli/`: executable, JSON and exit codes, inspection/watch tools, and the loopback review server. `scripts/meeting.mjs` is the portable live MCP client and disposable-conflict walkthrough.
 - `server/review-server.ts`: repository-bound browser API; retains legacy snapshot/import routes. Mutations enforce local origin and Host restrictions.
-- `src/`: the three-step source/visual/choice review. Standard buttons, dialogs, and loading indicators use the MIT Untitled UI implementation with provenance retained under `src/untitledui/`.
+- `server/inline-review.ts`: static MCP resource, private capability sessions, exact client privacy-compatibility gate and component-only action routing.
+- `src/inline/`: compact expandable review, standard host bridge, executed results and exact code approval; the real liquidglass bundle renders only its own background. `vite.inline.config.ts` emits one self-contained resource.
+- `src/`: the preserved browser source/visual/choice review. Standard buttons, dialogs, and loading indicators use the MIT Untitled UI implementation with provenance retained under `src/untitledui/`.
 
-## Two browser runtimes
+## Inline candidate and browser runtimes
+
+Inline presentation is requested through MCP metadata on supported Codex engines.
+The installed engine has passed actual serialization/privacy probes; native rendering
+remains unverified because native-window automation is denied. Browser bridge tests
+are explicitly simulated hosts. The browser remains an explicit legacy/fallback path.
+See [inline acceptance and scope](inline-review.md).
+
+## Browser runtimes
 
 Local mode uses the real review API and filesystem. Browser examples create controlled Git repositories with prepared visuals. The meeting runner instead creates a true merge conflict and calls the real AI MCP before opening the same UI.
 

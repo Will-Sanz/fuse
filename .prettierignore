@@ -6,3 +6,6 @@ test-results
 package-lock.json
 public/showcase
 .vercel
+
+# Exact upstream distribution; preserve hashes and original formatting.
+src/liquidglass/vendor/
