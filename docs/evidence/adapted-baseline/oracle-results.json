@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "nodeVersion": "v24.3.0",
+  "pythonVersion": "Python 3.13.0",
+  "validations": [
+    {
+      "caseId": "bx-001",
+      "label": "conflict",
+      "cleanMergeTree": "08d62188a23ac31e65eeda8d974b42bc17c27137",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 1,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 2, in <module>\n    assert parse_iso(\"2024-02-29\").day == 29\n           ~~~~~~~~~^^^^^^^^^^^^^^\n  File \"<oracle-root>/src/click/iso_date.py\", line 4, in parse_iso\n    return DateTime()._try_to_convert_date(value, \"%Y-%m-%d\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'DateTime' object has no attribute '_try_to_convert_date'\n"
+        }
+      },
+      "oracleSha256": "ee3bb64b48b95adbd84fa24b1f4d710d325b22c887f1616893bee27e34eb6529"
+    },
+    {
+      "caseId": "bx-002",
+      "label": "no_conflict",
+      "cleanMergeTree": "bb815d07619711cae63ee0c702a6bf9535aa91ee",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "oracleSha256": "ee3bb64b48b95adbd84fa24b1f4d710d325b22c887f1616893bee27e34eb6529"
+    },
+    {
+      "caseId": "bx-003",
+      "label": "conflict",
+      "cleanMergeTree": "748eb4802e12d9ad2872f20f492c18e08ad38f8f",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 1,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from click.filename_labels import filename_labels\n  File \"<oracle-root>/src/click/filename_labels.py\", line 1, in <module>\n    from .utils import make_str\nImportError: cannot import name 'make_str' from 'click.utils' (<oracle-root>/src/click/utils.py)\n"
+        }
+      },
+      "oracleSha256": "3da85cf45747fa4a24815a852103ef219702148189831787dc2f4cab15bb51ac"
+    },
+    {
+      "caseId": "bx-004",
+      "label": "no_conflict",
+      "cleanMergeTree": "439ad594c74fb4860be9fc5f57209d9c69a46cbb",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "oracleSha256": "3da85cf45747fa4a24815a852103ef219702148189831787dc2f4cab15bb51ac"
+    },
+    {
+      "caseId": "bx-005",
+      "label": "conflict",
+      "cleanMergeTree": "d1764ff3b755601e4d7dec75f5842a5165073ef1",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 1,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": "node:assert:95\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nNaN !== 7200\n\n    at [eval]:1:31\n    at runScriptInThisContext (node:internal/vm:218:10)\n    at node:internal/process/execution:451:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:449:60)\n    at evalFunction (node:internal/process/execution:283:30)\n    at evalTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: NaN,\n  expected: 7200,\n  operator: 'strictEqual'\n}\n\nNode.js v24.3.0\n"
+        }
+      },
+      "oracleSha256": "2648f2439f4dd58b9a5342eb5a635a4fcbfa9b70a1bffc6c2e78fcdd0e82d654"
+    },
+    {
+      "caseId": "bx-006",
+      "label": "no_conflict",
+      "cleanMergeTree": "fa9ca9b09408e94b2bfe0e79ad70aecbbae38429",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "oracleSha256": "2648f2439f4dd58b9a5342eb5a635a4fcbfa9b70a1bffc6c2e78fcdd0e82d654"
+    },
+    {
+      "caseId": "bx-007",
+      "label": "conflict",
+      "cleanMergeTree": "ded8b9edac49d8777cbaa1815034fbe875cd4b2b",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 1,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": "<oracle-root>/index.js:164\nmodule.exports.verbose = function(value) { return fmtLong(value); };\n                                           ^\n\nReferenceError: fmtLong is not defined\n    at module.exports.verbose (<oracle-root>/index.js:164:44)\n    at [eval]:1:51\n    at runScriptInThisContext (node:internal/vm:218:10)\n    at node:internal/process/execution:451:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:449:60)\n    at evalFunction (node:internal/process/execution:283:30)\n    at evalTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3\n\nNode.js v24.3.0\n"
+        }
+      },
+      "oracleSha256": "cd08ed609beb4181e4495a2a8b422c2e3f083fff777906ecf9cc6269a931087a"
+    },
+    {
+      "caseId": "bx-008",
+      "label": "no_conflict",
+      "cleanMergeTree": "8b777e94d9e81b5490f6bae9a2a8508231630443",
+      "checks": {
+        "base": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "a": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "b": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "mergedPublic": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        "merged": {
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "oracleSha256": "cd08ed609beb4181e4495a2a8b422c2e3f083fff777906ecf9cc6269a931087a"
+    }
+  ],
+  "publication": {
+    "normalization": "Only temporary oracle/test/tool paths replaced with placeholders; results unchanged.",
+    "rawSha256": "3875991fa8f13f2237fff02e4e330e5ff905bd110e5502d636c45def51a18089"
+  }
+}
