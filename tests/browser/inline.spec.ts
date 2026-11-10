@@ -370,6 +370,97 @@ test('simulated host agent: choice resumes the current workflow, real Docker che
   expect(network).toEqual([]);
 });
 
+test('simulated host: glass edges stay dark across display scales, widths and host backgrounds', async ({
+  browser,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const results = [];
+  for (const scale of [1, 2])
+    for (const width of [320, 760])
+      for (const background of ['light', 'dark']) {
+        const context = await browser.newContext({
+          viewport: { width, height: 700 },
+          deviceScaleFactor: scale,
+        });
+        try {
+          const page = await context.newPage();
+          const frame = await mountResource(page, result, (params) => client.callTool(params));
+          await page.evaluate((background) => {
+            document.body.style.background = background === 'light' ? '#ffffff' : '#0b1017';
+          }, background);
+          await expect(frame.locator('[data-glass-effect]')).toHaveAttribute(
+            'data-glass-effect',
+            'webgl',
+          );
+          const edge = await frame
+            .locator('.fuse-glass-panel > canvas')
+            .evaluate(async (element: HTMLCanvasElement) => {
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+              );
+              const panel = element.parentElement!;
+              const w = panel.offsetWidth,
+                h = panel.offsetHeight;
+              const ratio = element.width / (w + 40);
+              const pixels = element
+                .getContext('2d')!
+                .getImageData(0, 0, element.width, element.height).data;
+              const point = (x: number, y: number) => {
+                const offset = (Math.floor(y * ratio) * element.width + Math.floor(x * ratio)) * 4;
+                return {
+                  white:
+                    pixels[offset] > 200 &&
+                    pixels[offset + 1] > 200 &&
+                    pixels[offset + 2] > 200 &&
+                    pixels[offset + 3] > 220,
+                  opaque: pixels[offset + 3] > 220,
+                };
+              };
+              return ['top', 'left', 'right', 'bottom'].map((side) => {
+                let peak = 0,
+                  minOpaque = 1;
+                for (const depth of [3, 6, 10, 14]) {
+                  let bright = 0,
+                    opaque = 0,
+                    total = 0;
+                  const length = side === 'top' || side === 'bottom' ? w : h;
+                  for (let p = 40; p < length - 40; p += 4) {
+                    const x =
+                      side === 'left' ? 20 + depth : side === 'right' ? 20 + w - 1 - depth : 20 + p;
+                    const y =
+                      side === 'top' ? 20 + depth : side === 'bottom' ? 20 + h - 1 - depth : 20 + p;
+                    const sample = point(x, y);
+                    bright += Number(sample.white);
+                    opaque += Number(sample.opaque);
+                    total++;
+                  }
+                  peak = Math.max(peak, bright / total);
+                  minOpaque = Math.min(minOpaque, opaque / total);
+                }
+                return { side, peakWhiteFraction: peak, minOpaqueFraction: minOpaque };
+              });
+            });
+          results.push({ scale, width, background, edge });
+          await page.screenshot({
+            path: `test-results/glass-edge-${background}-${width}-${scale}x.png`,
+          });
+        } finally {
+          await context.close();
+        }
+      }
+  console.log('Glass edge pixels', JSON.stringify(results));
+  for (const result of results)
+    for (const edge of result.edge) {
+      expect(edge.peakWhiteFraction, JSON.stringify({ ...result, edge })).toBeLessThan(0.05);
+      expect(edge.minOpaqueFraction, JSON.stringify({ ...result, edge })).toBeGreaterThan(0.95);
+    }
+});
+
 test('simulated host: reduced motion and missing capability retain a compact read-only card', async ({
   page,
 }) => {

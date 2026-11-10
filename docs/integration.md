@@ -164,4 +164,7 @@ caller authentication. See [the full support/acceptance record](inline-review.md
 The card initializes the standard MCP UI bridge, uses parent-window-only messages,
 negotiates the explicitly supported protocol versions, and becomes read-only on
 unsupported negotiation or failed actions. Only an explicit legacy-browser action
-can open a link. It never automatically resumes the coding agent.
+can open a link. After a validated human behavior choice, compatible Codex hosts
+receive a continuation request in the same chat. Other hosts or failed/uncertain
+delivery retain the saved choice without an automatic retry; see
+[the continuation contract](inline-review.md#same-chat-continuation-checkpoint).

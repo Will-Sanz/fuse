@@ -46,11 +46,11 @@ summary:focus-visible {
 }
 .fuse-glass-ambient {
   position: absolute;
-  inset: 8px;
+  /* Opaque overscan covers the shader's 20px sample padding. */
+  inset: -24px;
   background:
     radial-gradient(ellipse at 0 0, #62548677, transparent 55%),
     radial-gradient(ellipse at 100% 100%, #31576666, transparent 60%), #111720;
-  border-radius: 16px;
   pointer-events: none;
 }
 .fuse-glass-panel {
