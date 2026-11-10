@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-10",
+  "before_blueprint": [
+    {
+      "name": "shipping",
+      "passed": false,
+      "attempts": 2,
+      "error": "Generated visual was invalid: Visual element 0 (panel at 24,40, width 220, height 127): needs height >= 181 for 1 title lines and 4 detail lines; shorten text or enlarge and reposition the element."
+    },
+    {
+      "name": "validation",
+      "passed": false,
+      "attempts": 2,
+      "error": "Generated visual was invalid: Visual element 0 (panel at 32,38, width 270, height 150): needs height >= 264 for 2 title lines and 6 detail lines; shorten text or enlarge and reposition the element."
+    },
+    {
+      "name": "compatible",
+      "passed": false,
+      "attempts": 2,
+      "error": "Generated visual was invalid: Visual element 1 (panel at 70,190, width 350, height 130): needs height >= 156 for 2 title lines and 2 detail lines; shorten text or enlarge and reposition the element."
+    }
+  ],
+  "blueprint_checks": [
+    {
+      "name": "shipping",
+      "passed": true,
+      "attempts": 1,
+      "id": "7b01cd13-f5b9-4a7f-aeea-d41c5cd8b3af",
+      "revision": 2,
+      "layoutVersion": 2,
+      "responseId": "resp_02d378c61754479e016af3690f17ec87d29d6bb94629fdd5b8"
+    },
+    {
+      "name": "validation",
+      "passed": true,
+      "attempts": 1,
+      "id": "27aaa2e2-25d2-4902-9439-5e836a980160",
+      "revision": 1,
+      "layoutVersion": 2,
+      "responseId": "resp_068be74f3d74f389016af36918566c87d28ef3a7b5186ecd3c"
+    },
+    {
+      "name": "compatible",
+      "passed": true,
+      "attempts": 1,
+      "id": "6be7c2d0-b2ca-40d7-8932-195653d90844",
+      "revision": 2,
+      "layoutVersion": 2,
+      "responseId": "resp_06f2f10cfa5bc5e6016af3691f845887d2a8d32b9f905e4ee5"
+    }
+  ],
+  "final_shipping": {
+    "passed": true,
+    "attempts": 1,
+    "responseId": "resp_0466bc00258e1726016af36976122487d2a8b5bc474852c51d"
+  },
+  "limits": "Authored disposable examples and one sample per case, not a recovery-rate benchmark or native screenshot. Model-selected geometry can still fail bounded validation."
+}
