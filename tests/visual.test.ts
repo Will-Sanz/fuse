@@ -129,6 +129,43 @@ describe('custom visual explanations', () => {
       }),
     ).rejects.toThrow('Review changed');
   });
+  it('repairs undersized text from measured feedback and never saves an invalid final layout', async () => {
+    const d = fixture();
+    const invalid = structuredClone(checkoutVisual);
+    invalid.elements[0] = {
+      type: 'text',
+      x: 24,
+      y: 24,
+      width: 100,
+      height: 20,
+      text: 'A useful heading',
+      detail: 'A short explanation',
+      tone: 'neutral',
+    };
+    const model = vi.fn(async (prompt: string) => {
+      const fixed = structuredClone(invalid);
+      const minimum = prompt.match(
+        /Visual element 0 \(text at 24,24, width 100, height 20\) needs height >= (\d+)/,
+      );
+      if (minimum) fixed.elements[0].height = Number(minimum[1]);
+      return answer(fixed);
+    });
+    const r = await generateVisual(d.repo, d.review.id, {}, model);
+    expect(model).toHaveBeenCalledTimes(2);
+    expect(model.mock.calls[0][0]).toContain('floor(availableWidth / (fontSize * 0.57))');
+    expect(model.mock.calls[1][0]).toContain(
+      'needs height >= 89 for 2 title lines and 2 detail lines',
+    );
+    expect(r.visual?.elements[0].height).toBe(89);
+    expect(() => renderVisual(r.visual!)).not.toThrow();
+    const saved = new LocalStore(d.repo).get(r.id);
+    const rejected = vi.fn().mockResolvedValue(answer(invalid));
+    await expect(generateVisual(d.repo, r.id, { regenerate: true }, rejected)).rejects.toThrow(
+      'Generated visual was invalid: Visual element 0',
+    );
+    expect(rejected).toHaveBeenCalledTimes(2);
+    expect(new LocalStore(d.repo).get(r.id)).toEqual(saved);
+  });
   it('serves the saved image, reports API readiness without secrets, and rejects foreign generation requests', async () => {
     const d = fixture();
     const server = createReviewApp({ repo: d.repo });

@@ -45,7 +45,7 @@ function textBlock(
 /** Only our shapes and escaped text enter SVG. Model output cannot contain markup or URLs. */
 export function renderVisual(spec: VisualSpec) {
   const shapes = spec.elements
-    .map((e) => {
+    .map((e, index) => {
       const [fill, stroke, ink] = colors[e.tone];
       const { x, y, width: w, height: h } = e;
       if (
@@ -59,18 +59,27 @@ export function renderVisual(spec: VisualSpec) {
       if (e.type === 'arrow')
         return `<path d="M${x} ${y} L${x + w} ${y + h}" fill="none" stroke="${ink}" stroke-width="2.5" marker-end="url(#arrow-${e.tone})"/>${textBlock(e.text, (x + x + w) / 2 + 8, (y + y + h) / 2 - 8, 180, 13, ink)}`;
       if (e.type === 'text') {
-        if (lines(e.text, w, 18).length * 25 + lines(e.detail, w, 14).length * 21 > h + 3)
-          throw new InputError('A visual text block is too small for its text.');
+        const titleLines = lines(e.text, w, 18).length,
+          detailLines = lines(e.detail, w, 14).length,
+          requiredHeight = titleLines * 25 + detailLines * 21 - 3;
+        if (requiredHeight > h)
+          throw new InputError(
+            `Visual element ${index} (text at ${x},${y}, width ${w}, height ${h}) needs height >= ${requiredHeight} for ${titleLines} title lines and ${detailLines} detail lines. Shorten its text or enlarge and reposition it within the canvas.`,
+          );
         return (
           textBlock(e.text, x, y + 20, w, 18, ink, 600) +
-          textBlock(e.detail, x, y + 22 + lines(e.text, w, 18).length * 25, w, 14, '#667085')
+          textBlock(e.detail, x, y + 22 + titleLines * 25, w, 14, '#667085')
         );
       }
       if (e.type === 'bar')
         return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="${ink}"/>`;
-      const titleLines = lines(e.text, w - 36, 17).length;
-      if (titleLines * 24 + lines(e.detail, w - 36, 14).length * 21 + 32 > h)
-        throw new InputError('A visual panel is too small for its text.');
+      const titleLines = lines(e.text, w - 36, 17).length,
+        detailLines = lines(e.detail, w - 36, 14).length,
+        requiredHeight = titleLines * 24 + detailLines * 21 + 32;
+      if (requiredHeight > h)
+        throw new InputError(
+          `Visual element ${index} (${e.type} at ${x},${y}, width ${w}, height ${h}) needs height >= ${requiredHeight} for ${titleLines} title lines and ${detailLines} detail lines. Shorten its text or enlarge and reposition it within the canvas.`,
+        );
       return (
         (e.type === 'circle'
           ? `<ellipse cx="${x + w / 2}" cy="${y + h / 2}" rx="${w / 2}" ry="${h / 2}" fill="${fill}" stroke="${stroke}"/>`
