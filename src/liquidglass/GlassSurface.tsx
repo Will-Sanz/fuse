@@ -38,7 +38,7 @@ export function GlassSurface({ children }: { children: ReactNode }) {
           blurAmount: 0.15,
           refraction: 0.24,
           chromAberration: 0.015,
-          cornerRadius: 22,
+          cornerRadius: 16,
           zRadius: 12,
           floating: false,
           shadowOpacity: 0.15,

@@ -220,6 +220,30 @@ Codex model turn. The complete 28-case browser suite passes locally.
 
 ## Remaining native validation and demo
 
+### High-DPI edge correction
+
+The November 10 user click delivered an actual MCP App continuation to this same
+chat. Reading the saved review confirmed `human-panel` intent, and the resumed
+agent submitted the correction, ran real Docker checks and created its exact
+preview. Baseline compilation passed while policy failed; both candidate checks
+passed. Final application remains pending.
+
+The native screenshot also exposed a broad white strip on the top/left glass rim.
+[Issue #13](https://github.com/Will-Sanz/fuse/issues/13) reproduces it in the browser
+host at 2x display scale. The library initializes its sample canvas white; our
+rounded, inset ambient left part of that sample unpainted. Extending the opaque
+ambient beyond the 20 px sampling margin and matching the shader's radius to the
+16 px CSS radius removes the strip without changing vendor code or reducing the
+glass effect. The backdrop remains clipped and separate from live controls.
+
+The pixel regression covers 1x/2x scale, narrow/normal widths, light/dark hosts and
+all four edges. It permits a thin intentional rim but rejects a broad near-white
+strip and checks that sampled pixels are opaque, so an empty canvas cannot pass.
+The explicitly simulated-host [before](evidence/inline-review/simulated-host-edges-before-2x.png)
+and [after](evidence/inline-review/simulated-host-edges-after-2x.png) images show the
+same card at 2x. They are not native screenshots or a recorded demo. Native edge
+acceptance and final application remain open before recording.
+
 This environment's Computer Use tool returns: `Computer Use is not allowed to use
 the app 'com.openai.codex' for safety reasons.` Consequently no native screen
 recording, actual host UI negotiation or automated human-controls proof is claimed. The same
