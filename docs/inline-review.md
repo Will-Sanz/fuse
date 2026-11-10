@@ -2,8 +2,9 @@
 
 ## Product contract
 
-Fuse stays in the developer's coding agent. A compact MCP result card expands into
-an explanation and intended-behavior choices. After the human confirms a behavior,
+Fuse stays in the developer's coding agent. A compact MCP result card shows the
+visual and current action immediately. Supporting evidence and logs expand on demand.
+After the human confirms a behavior,
 the host agent reads the saved review, submits exact code as data, and runs the
 configured isolated checks. The developer can then expand the exact verified code
 and explicitly approve application in the embedded panel. The two decisions remain
@@ -98,7 +99,7 @@ remains open in [issue #5](https://github.com/Will-Sanz/fuse/issues/5).
 1. Ask the coding agent to inspect branches and investigate the pinned evidence.
 2. It reports a suspected issue (or no issue/insufficient evidence), generates a
    visual on that saved review, and calls `fuse_present_review`.
-3. Expand the card and choose intended behavior. Return to the chat and ask the
+3. Choose intended behavior in the card. Return to the chat and ask the
    agent to continue; there is no promised automatic resume.
 4. The agent reads the confirmed choice, submits the whole replacement source as
    data, runs `fuse_verify`, and creates an exact `fuse_preview` after success.
@@ -134,27 +135,70 @@ and [the November 9 client recheck](evidence/inline-review/host-privacy-20261109
 inside the explicitly simulated browser test host. They are not screenshots of
 native Codex and do not establish native rendering.
 
-## Deferred native validation and demo
+## Compact card correction (November 10)
+
+[Issue #10](https://github.com/Will-Sanz/fuse/issues/10) tracks user feedback from
+the native card: competing scrolling, unreliable images and excessive size/text.
+The card now shows the visual and current action first, with the proposed fix
+when available. Evidence, previous choices, full source, check logs and hashes
+remain under **Review details**. Exact-code approval still has its own disclosure
+and explicit apply button. The card is at most 640 px wide and requests at most
+560 px of host height; long content uses the iframe document's ordinary scrolling.
+There is no second scrolling content panel, and repeated height notices are
+coalesced and deduplicated. Hosts retain control over the actual iframe size.
+
+The unchanged pinned liquidglass library now captures a separate decorative tree;
+live controls, diagrams and source stay outside its capture. Its padded canvases
+are clipped to prevent horizontal overflow. The server uses the existing PNG
+renderer for private component image metadata. XML-invalid text is removed before
+SVG/PNG rendering. A failed image shows the visual's text summary while keeping
+the human controls usable. Older SVG metadata remains supported during a running
+connection's resource upgrade; replaced visuals cannot reuse a stale image.
+
+The updated [compact card](evidence/inline-review/simulated-host-compact-20261110.png)
+and [application receipt](evidence/inline-review/simulated-host-applied-20261110.png)
+were visually inspected in the explicitly simulated browser host. They are not
+native Codex screenshots. The correction passed 66 unit/integration tests with a
+real Docker verifier, all 20 browser tests, production-only package installation
+and CLI acceptance.
+The narrow scroll regression passed three repeats with real wheel and keyboard
+input, synchronizing on native `scrollend` before the next gesture.
+
+The native user confirmed an intended behavior on November 10; the saved review
+recorded `origin: human-panel`. Real Docker checks then failed the combined baseline
+and passed the correction. Final native application was not confirmed: the user
+reported these UI defects before that step. This is partial user-reported native
+acceptance, not an automated native capture or a completed demo.
+
+## Remaining native validation and demo
 
 This environment's Computer Use tool returns: `Computer Use is not allowed to use
 the app 'com.openai.codex' for safety reasons.` Consequently no native screen
-recording, actual host UI negotiation or human-controls proof is claimed. The same
+recording, actual host UI negotiation or automated human-controls proof is claimed. The same
 component passing a browser bridge harness is not a substitute.
 
-The user deferred demo work on 2026-11-08 so implementation delivery can proceed.
-Native rendering remains an explicit unverified limitation tracked in
-[issue #5](https://github.com/Will-Sanz/fuse/issues/5). For future validation,
+The user resumed demo work on November 10, after correcting the card feedback.
+Full native interaction and recording remain open in
+[issue #5](https://github.com/Will-Sanz/fuse/issues/5). For validation,
 a permitted operator should connect this candidate build in
 their normal Codex client, ask Fuse to inspect a disposable checkout and present its
-saved review with `fuse_present_review`, then check compact/expanded rendering,
+saved review with `fuse_present_review`, then check the visual/current action,
 behavior confirmation, agent continuation, executed results and final exact-code
 approval. Confirm that no external app opens by default. Record the actual Codex
 interface and its host/version. No native acceptance is claimed by the automated
 tests; no additional backend bypass or global setting change is needed.
 
-## Candidate verification
+For a native recording, a permitted operator should record only the current Codex
+conversation/card region with the system recorder. Rehearse on a disposable
+checkout first: show the interaction visual, choose the original-subtotal policy,
+let the agent submit and verify the correction, inspect the exact source, then
+explicitly approve application. Include the real baseline failure, candidate pass
+and local application receipt. Do not use a browser harness recording as the native
+demo or capture unrelated chats. Codex need not be quit or restarted for recording.
 
-The local release checks passed: production build, 61 tests with a real prepared
+## Original inline implementation verification
+
+The original inline release checks passed: production build, 61 tests with a real prepared
 Docker image, 16 browser tests, 2 showcase tests, CLI acceptance, production-only
 package installation and formatting. Both installed-client privacy probes passed.
 An independent code review found no remaining material defects after lifecycle and

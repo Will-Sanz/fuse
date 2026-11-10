@@ -10,10 +10,13 @@ const colors = {
   success: ['#eaf8f0', '#a8ddbf', '#067647'],
 };
 const escape = (text: string) =>
-  text.replace(
-    /[<>&"']/g,
-    (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]!,
-  );
+  text
+    // JSON strings can contain characters that are illegal in XML.
+    .replace(/[^\t\n\r\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu, '')
+    .replace(
+      /[<>&"']/g,
+      (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]!,
+    );
 function lines(text: string, width: number, size: number) {
   const rows: string[] = [];
   const limit = Math.max(8, Math.floor(width / (size * 0.57)));

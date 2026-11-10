@@ -20,6 +20,7 @@ import { configureCheck } from '../server/local';
 import { LocalStore } from '../server/local-store';
 import { INLINE_REVIEW_URI } from '../shared/inline';
 import type { Review } from '../shared/review';
+import { exampleVisual } from '../shared/demo-visuals';
 
 const directories: string[] = [];
 function fixture() {
@@ -60,6 +61,21 @@ function input(r: Review, capability: string, action: 'refresh' | 'confirm' | 'p
 }
 
 describe('inline review authority', () => {
+  it('keeps raster visuals private and preserves human controls if a saved visual cannot render', () => {
+    const d = fixture(),
+      inline = createInlineReview();
+    d.review.visual = structuredClone(exampleVisual('shipping', 'checkout.ts'));
+    const result = inline.present(d.store, d.review, true);
+    const image = result._meta.fuse.visualPng!;
+    expect(Buffer.from(image, 'base64').subarray(1, 4).toString()).toBe('PNG');
+    expect(JSON.stringify(result.content)).not.toContain(image);
+    expect(JSON.stringify(result.structuredContent)).not.toContain(image);
+    d.review.visual.elements[0].width = 2000;
+    const broken = inline.present(d.store, d.review, true);
+    expect(broken._meta.fuse.visualPng).toBeUndefined();
+    expect(broken.structuredContent.data.behavioral!.issue).toEqual(d.review.behavioral!.issue);
+    expect(broken._meta.fuse.capability).toMatch(/^[a-f0-9]{64}$/);
+  });
   it.each([
     ['unknown-client', '1', false],
     ['unknown-client', '1', true],

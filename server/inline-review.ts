@@ -9,7 +9,7 @@ import { InputError } from './engine';
 import { LocalStore } from './local-store';
 import { applyReview, assertFresh, preview } from './local';
 import { confirmBehavior, sourceVersion } from './proposals';
-import { renderVisual } from './visual-renderer';
+import { visualPng } from './visual-renderer';
 
 const lifetimeMs = 15 * 60 * 1000;
 const sessionError = () =>
@@ -36,6 +36,14 @@ export function createInlineReview() {
   >();
   function present(store: LocalStore, review: Review, allowActions = false): InlineReviewResult {
     assertFresh(review);
+    let image: string | undefined;
+    if (review.visual) {
+      try {
+        image = visualPng(review.visual).toString('base64');
+      } catch {
+        // A broken saved visual must not hide the review or its human controls.
+      }
+    }
     for (const [key, value] of sessions) if (value.expires <= Date.now()) sessions.delete(key);
     if (sessions.size >= 100) sessions.delete(sessions.keys().next().value!);
     const capability =
@@ -54,7 +62,7 @@ export function createInlineReview() {
         fuse: {
           reviewId: review.id,
           ...(capability ? { capability } : {}),
-          ...(review.visual ? { visualSvg: renderVisual(review.visual) } : {}),
+          ...(image ? { visualPng: image } : {}),
         },
       },
     };

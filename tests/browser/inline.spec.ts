@@ -15,6 +15,8 @@ import {
 } from '../../server/proposals';
 import { LocalStore } from '../../server/local-store';
 import type { Review } from '../../shared/review';
+import { exampleVisual } from '../../shared/demo-visuals';
+import { renderVisual } from '../../server/visual-renderer';
 
 let directory: string, lifecycleScript: string;
 const cleanup: (() => void | Promise<void>)[] = [];
@@ -49,15 +51,16 @@ async function mountResource(
   result: object,
   invoke: (params: { name: string; arguments: Record<string, unknown> }) => Promise<unknown>,
   negotiatedVersion = '2026-01-26',
+  maxHeight = 560,
 ) {
   await page.exposeFunction('invokeFuse', invoke);
   await page.setContent(
-    '<body style="margin:0;background:#0b1017"><iframe title="Simulated MCP App host" style="width:100%;height:1800px;border:0"></iframe></body>',
+    '<body style="margin:0;background:#0b1017"><iframe title="Simulated MCP App host" style="display:block;width:min(100%,640px);height:340px;border:0"></iframe></body>',
   );
   await page.evaluate(
-    ({ html, result, negotiatedVersion }) => {
+    ({ html, result, negotiatedVersion, maxHeight }) => {
       const iframe = document.querySelector('iframe')!;
-      Object.assign(window, { appCalls: [] as string[] });
+      Object.assign(window, { appCalls: [] as string[], sizeNotices: [] as number[] });
       window.addEventListener('message', async (event) => {
         if (event.source !== iframe.contentWindow) return;
         const m = event.data;
@@ -104,14 +107,20 @@ async function mountResource(
           } catch (error) {
             reply({ isError: true, content: [{ type: 'text', text: (error as Error).message }] });
           }
+        } else if (m.method === 'ui/notifications/size-changed') {
+          (window as unknown as { sizeNotices: number[] }).sizeNotices.push(m.params.height);
+          iframe.style.height = `${Math.min(maxHeight, m.params.height)}px`;
         } else if (m.method === 'ui/open-link') {
           (window as unknown as { appCalls: string[] }).appCalls.push('open-link');
           reply({});
         }
       });
-      iframe.srcdoc = html;
+      iframe.srcdoc = html.replace(
+        '<head>',
+        `<head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'">`,
+      );
     },
-    { html: readFileSync('dist/inline/review.html', 'utf8'), result, negotiatedVersion },
+    { html: readFileSync('dist/inline/review.html', 'utf8'), result, negotiatedVersion, maxHeight },
   );
   return page.frameLocator('iframe');
 }
@@ -136,6 +145,8 @@ function fixture() {
       ],
     },
   });
+  r.visual = exampleVisual('shipping', 'checkout.ts');
+  new LocalStore(d.repo).save(r);
   return { ...d, review: r };
 }
 async function clientFor(repo: string) {
@@ -171,15 +182,20 @@ test('simulated host: real resource, WebGL card, human intent, real Docker check
   const before = readFileSync(join(d.repo, 'checkout.ts'));
   const frame = await mountResource(page, result, (params) => client.callTool(params));
   await expect(frame.locator('[data-glass-effect]')).toHaveAttribute('data-glass-effect', 'webgl');
-  await expect(frame.getByRole('button', { name: 'Review interaction' })).toHaveAttribute(
+  await expect(frame.getByRole('button', { name: 'Review details' })).toHaveAttribute(
     'aria-expanded',
     'false',
   );
   expect(await frame.locator('.fuse-glass-root').evaluate((el) => el.clientHeight)).toBeLessThan(
-    340,
+    640,
   );
   await page.screenshot({ path: 'test-results/inline-compact.png' });
-  await frame.getByRole('button', { name: 'Review interaction' }).click();
+  await expect(frame.locator('.fuse-inline-visual img')).toBeVisible();
+  expect(
+    await frame
+      .locator('.fuse-inline-visual img')
+      .evaluate((img: HTMLImageElement) => img.naturalWidth),
+  ).toBe(1600);
   await frame.getByRole('button', { name: 'Refresh', exact: true }).click();
   await page.evaluate(
     (result) =>
@@ -220,8 +236,11 @@ test('simulated host: real resource, WebGL card, human intent, real Docker check
   ).not.toBe(true);
   r = new LocalStore(d.repo).get(r.id);
   expect((await call('fuse_verify', { id: r.id, revision: r.revision })).isError).not.toBe(true);
-  await frame.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(frame.getByRole('heading', { name: 'Candidate checks passed' })).toBeVisible();
+  await expect(frame.getByRole('button', { name: 'Review details' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
   await frame.getByRole('button', { name: 'Preview verified code' }).click();
   await expect(frame.getByRole('button', { name: 'Approve and apply verified code' })).toBeHidden();
   await frame.locator('summary', { hasText: 'Review exact code and approve' }).click();
@@ -260,11 +279,11 @@ test('simulated host: reduced motion and missing capability retain a compact rea
   const frame = await mountResource(page, result, async () => {
     throw new Error('No mutation allowed.');
   });
-  await expect(frame.getByRole('button', { name: 'Review interaction' })).toBeVisible();
+  await expect(frame.getByRole('button', { name: 'Review details' })).toBeVisible();
   expect(await frame.locator('.fuse-glass-root').evaluate((el) => el.clientHeight)).toBeLessThan(
-    370,
+    740,
   );
-  await frame.getByRole('button', { name: 'Review interaction' }).click();
+  await frame.getByRole('button', { name: 'Review details' }).click();
   await expect(frame.locator('[data-glass-effect]')).toHaveAttribute('data-glass-effect', 'static');
   await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeDisabled();
   await expect(frame.getByRole('alert')).toContainText('private review session');
@@ -291,9 +310,9 @@ test('simulated host: reduced motion and missing capability retain a compact rea
     );
   await expect(frame.getByRole('heading', { name: 'Forged self notification' })).toHaveCount(0);
 
-  await frame.getByRole('button', { name: 'Collapse review' }).focus();
+  await frame.getByRole('button', { name: 'Hide details' }).focus();
   await page.keyboard.press('Escape');
-  await expect(frame.getByRole('button', { name: 'Review interaction' })).toBeFocused();
+  await expect(frame.getByRole('button', { name: 'Review details' })).toBeFocused();
   expect(await page.evaluate('appCalls')).toEqual([]);
 });
 
@@ -309,6 +328,173 @@ test('simulated host: unsupported protocol negotiation stays read-only', async (
   await expect(frame.getByRole('alert')).toContainText('unsupported MCP App protocol');
   expect(await page.evaluate('appCalls')).toEqual([]);
 });
+
+test('simulated host: narrow capped viewport scrolls one document and settles after content changes', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const review = (result.structuredContent as unknown as { data: Review }).data;
+  review.behavioral!.explanation = 'Long evidence remains available on demand. '.repeat(300);
+  const frame = await mountResource(
+    page,
+    result,
+    (params) => client.callTool(params),
+    '2026-01-26',
+    300,
+  );
+  await expect(frame.locator('[data-glass-effect]')).toHaveAttribute('data-glass-effect', 'webgl');
+  await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeVisible();
+  await frame.getByRole('button', { name: 'Review details' }).click();
+  const layout = await frame.locator('body').evaluate(() => ({
+    overflow: getComputedStyle(document.querySelector('.fuse-inline-content')!).overflowY,
+    width: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    cardInCapture: document.querySelector('.fuse-glass-backdrop .fuse-inline-card') !== null,
+    pointerEvents: getComputedStyle(document.querySelector('.fuse-glass-backdrop')!).pointerEvents,
+  }));
+  expect(layout.overflow).toBe('visible');
+  expect(layout.scrollWidth).toBe(layout.width);
+  expect(layout.cardInCapture).toBe(false);
+  expect(layout.pointerEvents).toBe('none');
+  const scrollBody = async (input: () => Promise<void>) => {
+    await frame.locator('body').evaluate(() => {
+      document.body.dataset.scrollState = 'pending';
+      document.addEventListener(
+        'scrollend',
+        () => {
+          document.body.dataset.scrollState = 'idle';
+        },
+        { once: true },
+      );
+    });
+    await input();
+    await expect(frame.locator('body')).toHaveAttribute('data-scroll-state', 'idle');
+  };
+  await page.mouse.move(160, 150);
+  await scrollBody(() => page.mouse.wheel(0, 800));
+  await expect
+    .poll(() => frame.locator('body').evaluate(() => window.scrollY))
+    .toBeGreaterThan(100);
+  await page.mouse.click(160, 150);
+  const scrolled = await frame.locator('body').evaluate(() => window.scrollY);
+  await scrollBody(() => page.keyboard.press('PageDown'));
+  await expect
+    .poll(() => frame.locator('body').evaluate(() => window.scrollY))
+    .toBeGreaterThan(scrolled);
+  await scrollBody(() => page.mouse.wheel(0, 100000));
+  await expect(frame.locator('.fuse-inline-content > .fuse-inline-hash')).toBeInViewport();
+  const notices = (await page.evaluate('sizeNotices')) as number[];
+  expect(notices.every((height) => height <= 560)).toBe(true);
+  expect(notices.every((height, i) => i === 0 || height !== notices[i - 1])).toBe(true);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate('sizeNotices')).toEqual(notices);
+  await frame.getByRole('button', { name: 'Hide details' }).focus();
+  await page.keyboard.press('Escape');
+  await expect(frame.getByRole('button', { name: 'Review details' })).toBeFocused();
+  await page.screenshot({ path: 'test-results/inline-narrow.png' });
+});
+
+test('simulated host: broken image falls back to explanation without hiding behavior choices', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  (result._meta as { fuse: { visualPng: string } }).fuse.visualPng = 'invalid-image';
+  const frame = await mountResource(page, result, (params) => client.callTool(params));
+  await expect(frame.getByText(/Visual unavailable/)).toContainText(d.review.visual!.summary);
+  await expect(frame.locator('.fuse-inline-visual img')).toHaveCount(0);
+  await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
+  await expect(frame.getByText(/Ask Codex to draft and verify/)).toBeVisible();
+});
+
+test('simulated host: existing SVG metadata still displays after a resource upgrade', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const meta = result._meta as { fuse: { visualPng?: string; visualSvg?: string } };
+  delete meta.fuse.visualPng;
+  meta.fuse.visualSvg = renderVisual(d.review.visual!);
+  const frame = await mountResource(page, result, (params) => client.callTool(params));
+  await expect
+    .poll(() =>
+      frame
+        .locator('.fuse-inline-visual img')
+        .evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBe(1000);
+  await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeEnabled();
+});
+
+test('simulated host: replaced or malformed visuals recover without showing stale images', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const frame = await mountResource(page, result, (params) => client.callTool(params));
+  await expect
+    .poll(() =>
+      frame
+        .locator('.fuse-inline-visual img')
+        .evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBe(1600);
+  const notify = async (value: unknown) =>
+    page.evaluate(
+      (value) =>
+        document
+          .querySelector('iframe')!
+          .contentWindow!.postMessage(
+            { jsonrpc: '2.0', method: 'ui/notifications/tool-result', params: value },
+            '*',
+          ),
+      value,
+    );
+  const replacement = structuredClone(result);
+  const review = (replacement.structuredContent as unknown as { data: Review }).data;
+  review.revision++;
+  review.visual!.generationId = 'broken-replacement';
+  const meta = replacement._meta as { fuse: { visualPng?: string; visualSvg?: string } };
+  delete meta.fuse.visualPng;
+  meta.fuse.visualSvg = '<svg xmlns="http://www.w3.org/2000/svg"><title>\ud800</title></svg>';
+  await notify(replacement);
+  await expect(frame.getByText(/Visual unavailable/)).toBeVisible();
+  await expect(frame.locator('.fuse-inline-visual img')).toHaveCount(0);
+  await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeEnabled();
+  review.revision++;
+  delete meta.fuse.visualSvg;
+  await notify(replacement);
+  await expect(frame.getByText(/Visual unavailable/)).toBeVisible();
+  const recovered = structuredClone(result);
+  (recovered.structuredContent as unknown as { data: Review }).data.revision = review.revision + 1;
+  await notify(recovered);
+  await expect
+    .poll(() =>
+      frame
+        .locator('.fuse-inline-visual img')
+        .evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBe(1600);
+  await expect(frame.getByText(/Visual unavailable/)).toHaveCount(0);
+});
 test('simulated host: rejected human action disables stale controls until a new presentation', async ({
   page,
 }) => {
@@ -322,7 +508,6 @@ test('simulated host: rejected human action disables stale controls until a new 
     isError: true,
     content: [{ type: 'text', text: 'Inline review session expired or unavailable.' }],
   }));
-  await frame.getByRole('button', { name: 'Review interaction' }).click();
   await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
   await expect(frame.getByRole('alert')).toContainText('Ask Codex to present');
   await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeDisabled();
@@ -332,7 +517,7 @@ test('simulated host: rejected human action disables stale controls until a new 
 
 async function mountLifecycle(page: Page, noWebGL = false) {
   await page.setContent(
-    '<style>body{margin:0}.fuse-glass-root{width:400px;position:relative}.fuse-glass-panel{position:relative;z-index:0;min-height:120px}.fuse-glass-ambient{position:absolute;inset:0;background:linear-gradient(45deg,#9070a0,#183443)}</style><div id="root"></div>',
+    '<style>body{margin:0}.fuse-glass-root{width:400px;position:relative;min-height:120px}.fuse-glass-backdrop{position:absolute;inset:0;pointer-events:none}.fuse-glass-panel{position:absolute;inset:0;z-index:0}.fuse-glass-ambient{position:absolute;inset:0;background:linear-gradient(45deg,#9070a0,#183443)}</style><div id="root"></div>',
   );
   if (noWebGL)
     await page.evaluate(() => {

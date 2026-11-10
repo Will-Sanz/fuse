@@ -44,6 +44,16 @@ describe('custom visual explanations', () => {
     injected.elements[0].width = 1000;
     expect(() => renderVisual(injected)).toThrow('fit inside');
   });
+  it('removes XML-invalid characters from model text while preserving Unicode and safe markup', () => {
+    const spec = structuredClone(checkoutVisual);
+    spec.title = 'Coupon\u0001\ud800\ufffe & shipping 🚚';
+    spec.elements[0].text = 'Safe\u0000 <text>';
+    const svg = renderVisual(spec);
+    expect(svg).toContain('Coupon &amp; shipping 🚚');
+    expect(svg).toContain('Safe &lt;text&gt;');
+    expect(svg).not.toMatch(/[\u0000\u0001\ud800\ufffe]/);
+    expect(visualPng(spec).subarray(1, 4).toString()).toBe('PNG');
+  });
   it('sends the selected model and strict schema to the API and handles provider failures', async () => {
     vi.stubEnv('OPENAI_API_KEY', 'test-key');
     vi.stubEnv('FUSE_AI_MODEL', 'gpt-6-luna');

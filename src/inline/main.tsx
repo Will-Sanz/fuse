@@ -7,19 +7,21 @@ import './inline.css';
 type Result = {
   structuredContent?: { data?: Review };
   content?: { type: string; text?: string }[];
-  _meta?: { fuse?: { reviewId?: string; capability?: string; visualSvg?: string } };
+  _meta?: {
+    fuse?: { reviewId?: string; capability?: string; visualPng?: string; visualSvg?: string };
+  };
   isError?: boolean;
 };
 
 function App() {
   const [state, setState] = useState<{
     review?: Review;
+    visualPng?: string;
     visualSvg?: string;
     error?: string;
     pending: boolean;
     readOnly: boolean;
   }>({ pending: false, readOnly: true });
-  const [expanded, setExpanded] = useState(false);
   const privateSession = useRef<{ id: string; capability: string } | undefined>(undefined);
   const current = useRef<Review | undefined>(undefined);
   const requests = useRef(
@@ -91,7 +93,21 @@ function App() {
           ? previous.review
           : review,
       visualSvg:
-        meta?.visualSvg ?? (previous.review?.id === review.id ? previous.visualSvg : undefined),
+        meta?.reviewId === review.id
+          ? meta.visualSvg
+          : previous.review?.id === review.id &&
+              review.visual &&
+              previous.review.visual?.generationId === review.visual.generationId
+            ? previous.visualSvg
+            : undefined,
+      visualPng:
+        meta?.reviewId === review.id
+          ? meta.visualPng
+          : previous.review?.id === review.id &&
+              review.visual &&
+              previous.review.visual?.generationId === review.visual.generationId
+            ? previous.visualPng
+            : undefined,
       pending: false,
       readOnly: !privateSession.current,
       error:
@@ -201,7 +217,6 @@ function App() {
   );
   useEffect(() => {
     if (
-      !expanded ||
       state.pending ||
       state.readOnly ||
       !state.review?.behavioral?.intent ||
@@ -213,24 +228,37 @@ function App() {
       if (document.visibilityState === 'visible') void act('refresh');
     }, 2500);
     return () => clearTimeout(timer);
-  }, [expanded, state.pending, state.readOnly, state.review, act]);
+  }, [state.pending, state.readOnly, state.review, act]);
   useEffect(() => {
-    const update = () =>
+    let frame = 0,
+      lastHeight = 0;
+    const update = () => {
+      frame = 0;
+      const height = Math.min(
+        560,
+        Math.ceil(document.getElementById('root')!.getBoundingClientRect().height),
+      );
+      if (height === lastHeight) return;
+      lastHeight = height;
       window.parent.postMessage(
         {
           jsonrpc: '2.0',
           method: 'ui/notifications/size-changed',
-          params: {
-            height: Math.ceil(document.getElementById('root')!.getBoundingClientRect().height),
-            width: document.documentElement.clientWidth,
-          },
+          params: { height },
         },
         '*',
       );
-    const observer = new ResizeObserver(update);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const observer = new ResizeObserver(schedule);
     observer.observe(document.getElementById('root')!);
-    update();
-    return () => observer.disconnect();
+    schedule();
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
   }, []);
   async function openLegacy() {
     const review = current.current;
@@ -261,6 +289,7 @@ function App() {
   return (
     <ReviewCard
       review={state.review}
+      visualPng={state.visualPng}
       visualSvg={state.visualSvg}
       error={state.error}
       pending={state.pending}
@@ -270,7 +299,6 @@ function App() {
       onApply={(token) => void act('apply', { token })}
       onRefresh={() => void act('refresh')}
       onOpenLegacy={() => void openLegacy()}
-      onExpandedChange={setExpanded}
     />
   );
 }
