@@ -6,13 +6,15 @@ import request from 'supertest';
 import { createDemo } from '../server/demo';
 import { generateVisual, visualContext } from '../server/visual-ai';
 import { runOpenAiVisual as runVisualModel } from '../server/visual-provider';
-import { renderVisual, visualPng } from '../server/visual-renderer';
+import { renderVisual, validateVisualLayout, visualPng } from '../server/visual-renderer';
 import { checkoutVisual, shippingVisual } from '../shared/demo-visuals';
 import { actionDecision } from '../shared/visual';
 import { applyReview, decide, inspect, preview } from '../server/local';
 import { git } from '../server/git';
 import { LocalStore } from '../server/local-store';
 import { createReviewApp } from '../server/review-server';
+import type { VisualSpec } from '../shared/visual';
+import { Resvg } from '@resvg/resvg-js';
 const dirs: string[] = [];
 function fixture(scenario: 'checkout' | 'shipping' = 'checkout', merge = false) {
   const dir = mkdtempSync(join(tmpdir(), 'fuse-visual-test-'));
@@ -24,12 +26,196 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
 });
-const answer = (spec = checkoutVisual) => ({
+const generatedVisual = (spec: VisualSpec): VisualSpec => ({
+  ...spec,
+  elements: [
+    {
+      type: 'panel',
+      x: 40,
+      y: 40,
+      width: 400,
+      height: 160,
+      text: 'Changed function',
+      detail: 'Input → output',
+      tone: 'a',
+    },
+    {
+      type: 'panel',
+      x: 550,
+      y: 40,
+      width: 400,
+      height: 160,
+      text: 'Caller',
+      detail: 'Review the shared value',
+      tone: 'b',
+    },
+  ],
+});
+const answer = (spec = generatedVisual(checkoutVisual)) => ({
   spec,
   model: 'test-model',
   responseId: 'test-response',
 });
 describe('custom visual explanations', () => {
+  it('keeps legacy rendering and rejects the short combined-arrow label instead of crossing a box', () => {
+    const spec = generatedVisual(checkoutVisual);
+    spec.elements = [
+      { type: 'panel', x: 40, y: 100, width: 400, height: 160, text: 'A', detail: '', tone: 'a' },
+      { type: 'panel', x: 480, y: 100, width: 400, height: 160, text: 'B', detail: '', tone: 'b' },
+      {
+        type: 'arrow',
+        x: 440,
+        y: 180,
+        width: 40,
+        height: 0,
+        text: 'combined',
+        detail: '',
+        tone: 'neutral',
+      },
+    ];
+    const legacy = renderVisual(spec);
+    expect(legacy).toContain('<text x="468" y="172" font-size="13"');
+    expect(() => validateVisualLayout(spec)).toThrow('connector needs width >= 103');
+    expect(renderVisual(spec)).toBe(legacy);
+    spec.elements[2].text = '';
+    expect(() => validateVisualLayout(spec)).not.toThrow();
+    spec.elements[1].x = 600;
+    spec.elements[2].width = 160;
+    spec.elements[2].text = 'combined';
+    const svg = renderVisual({ ...spec, layoutVersion: 2 });
+    expect(svg).toContain('x="476.8" y="163" font-size="18"');
+    spec.elements.push({
+      type: 'panel',
+      x: 480,
+      y: 170,
+      width: 60,
+      height: 60,
+      text: '',
+      detail: '',
+      tone: 'neutral',
+    });
+    expect(() => validateVisualLayout(spec)).toThrow('arrow crosses element 3');
+    spec.elements = [
+      {
+        type: 'circle',
+        x: 40,
+        y: 40,
+        width: 400,
+        height: 160,
+        text: 'shippingFee',
+        detail: 'subtotalCents',
+        tone: 'b',
+      },
+    ];
+    expect(renderVisual(spec)).toContain('<ellipse');
+    expect(() => validateVisualLayout(spec)).toThrow('use a panel for labeled technical nodes');
+  });
+  it('preserves code line breaks and renders long identifiers inside their declared pixel bounds', () => {
+    const spec = generatedVisual(checkoutVisual);
+    spec.elements = [
+      {
+        type: 'text',
+        x: 40,
+        y: 40,
+        width: 300,
+        height: 120,
+        text: 'shippingFee',
+        detail: 'subtotalCents\ncouponCents',
+        tone: 'neutral',
+      },
+    ];
+    const svg = renderVisual({ ...spec, layoutVersion: 2 });
+    expect(svg).toContain('y="99" font-size="20"');
+    expect(svg).toContain('y="126" font-size="20"');
+    expect(svg).toContain('>subtotalCents</text>');
+    expect(svg).toContain('>couponCents</text>');
+    expect(renderVisual(spec)).toContain('subtotalCents couponCents');
+    spec.elements = [
+      {
+        type: 'text',
+        x: 40,
+        y: 40,
+        width: 144,
+        height: 200,
+        text: 'merchandiseTotal(cart)',
+        detail: 'originalSubtotal\ncouponCents',
+        tone: 'neutral',
+      },
+    ];
+    const image = new Resvg(renderVisual({ ...spec, layoutVersion: 2 })).render();
+    const pixels = image.pixels;
+    let ink = 0,
+      minimumX = image.width,
+      minimumY = image.height,
+      maximumX = 0,
+      maximumY = 0;
+    for (let y = 0; y < image.height; y++)
+      for (let x = 0; x < image.width; x++) {
+        const pixel = (y * image.width + x) * 4;
+        if (pixels[pixel] < 220 && pixels[pixel + 1] < 220 && pixels[pixel + 2] < 220) {
+          ink++;
+          minimumX = Math.min(minimumX, x);
+          maximumX = Math.max(maximumX, x);
+          minimumY = Math.min(minimumY, y);
+          maximumY = Math.max(maximumY, y);
+        }
+      }
+    expect(ink).toBeGreaterThan(200);
+    expect(minimumX).toBeGreaterThanOrEqual(40);
+    expect(maximumX).toBeLessThanOrEqual(184);
+    expect(minimumY).toBeGreaterThanOrEqual(40);
+    expect(maximumY).toBeLessThanOrEqual(240);
+    expect(image.asPng().subarray(1, 4).toString()).toBe('PNG');
+  });
+  it('rasterizes technical arrowheads in all four connector directions', () => {
+    const spec = generatedVisual(checkoutVisual);
+    spec.elements = [
+      { type: 'arrow', x: 50, y: 50, width: 0, height: 120, text: '', detail: '', tone: 'neutral' },
+      {
+        type: 'arrow',
+        x: 400,
+        y: 300,
+        width: -120,
+        height: 0,
+        text: '',
+        detail: '',
+        tone: 'neutral',
+      },
+      {
+        type: 'arrow',
+        x: 600,
+        y: 50,
+        width: 120,
+        height: 0,
+        text: '',
+        detail: '',
+        tone: 'neutral',
+      },
+      {
+        type: 'arrow',
+        x: 900,
+        y: 300,
+        width: 0,
+        height: -120,
+        text: '',
+        detail: '',
+        tone: 'neutral',
+      },
+    ];
+    const image = new Resvg(renderVisual({ ...spec, layoutVersion: 2 })).render(),
+      pixels = image.pixels;
+    const red = (x: number, y: number) => pixels[(y * image.width + x) * 4];
+    for (const [baseX, baseY, tipSideX, tipSideY] of [
+      [45, 157, 45, 170],
+      [292, 295, 280, 295],
+      [707, 45, 720, 45],
+      [895, 192, 895, 180],
+    ]) {
+      expect(red(baseX, baseY)).toBeLessThan(100);
+      expect(red(tipSideX, tipSideY)).toBe(255);
+    }
+    expect(renderVisual(spec)).toContain('orient="auto-start-reverse"');
+  });
   it('renders distinct path and threshold diagrams as safe SVG and real PNG', () => {
     for (const spec of [checkoutVisual, shippingVisual]) {
       expect(renderVisual(spec)).toContain(spec.elements[0].text.replaceAll('&', '&amp;'));
@@ -105,15 +291,15 @@ describe('custom visual explanations', () => {
   });
   it('repairs invalid layout once, refuses unsupported choices and concurrent review changes', async () => {
     const d = fixture('shipping');
-    const model = vi.fn().mockResolvedValue(answer(checkoutVisual));
+    const model = vi.fn().mockResolvedValue(answer(generatedVisual(checkoutVisual)));
     await expect(generateVisual(d.repo, d.review.id, {}, model)).rejects.toThrow(
       'supported action',
     );
     expect(model).toHaveBeenCalledTimes(2);
     const repair = vi
       .fn()
-      .mockResolvedValueOnce(answer(checkoutVisual))
-      .mockResolvedValueOnce(answer(shippingVisual));
+      .mockResolvedValueOnce(answer(generatedVisual(checkoutVisual)))
+      .mockResolvedValueOnce(answer(generatedVisual(shippingVisual)));
     await expect(generateVisual(d.repo, d.review.id, {}, repair)).resolves.toHaveProperty(
       'visual.metaphor',
       shippingVisual.metaphor,
@@ -125,18 +311,18 @@ describe('custom visual explanations', () => {
           choice: 'a',
           note: 'Use net basket value.',
         });
-        return answer(shippingVisual);
+        return answer(generatedVisual(shippingVisual));
       }),
     ).rejects.toThrow('Review changed');
   });
   it('repairs undersized text from measured feedback and never saves an invalid final layout', async () => {
     const d = fixture();
-    const invalid = structuredClone(checkoutVisual);
+    const invalid = generatedVisual(checkoutVisual);
     invalid.elements[0] = {
       type: 'text',
       x: 24,
       y: 24,
-      width: 100,
+      width: 240,
       height: 20,
       text: 'A useful heading',
       detail: 'A short explanation',
@@ -145,18 +331,18 @@ describe('custom visual explanations', () => {
     const model = vi.fn(async (prompt: string) => {
       const fixed = structuredClone(invalid);
       const minimum = prompt.match(
-        /Visual element 0 \(text at 24,24, width 100, height 20\) needs height >= (\d+)/,
+        /Visual element 0 \(text at 24,24, width 240, height 20\): needs height >= (\d+)/,
       );
       if (minimum) fixed.elements[0].height = Number(minimum[1]);
       return answer(fixed);
     });
     const r = await generateVisual(d.repo, d.review.id, {}, model);
     expect(model).toHaveBeenCalledTimes(2);
-    expect(model.mock.calls[0][0]).toContain('floor(availableWidth / (fontSize * 0.57))');
+    expect(model.mock.calls[0][0]).toContain('0.6');
     expect(model.mock.calls[1][0]).toContain(
-      'needs height >= 89 for 2 title lines and 2 detail lines',
+      'needs height >= 66 for 1 title lines and 1 detail lines',
     );
-    expect(r.visual?.elements[0].height).toBe(89);
+    expect(r.visual?.elements[0].height).toBe(66);
     expect(() => renderVisual(r.visual!)).not.toThrow();
     const saved = new LocalStore(d.repo).get(r.id);
     const rejected = vi.fn().mockResolvedValue(answer(invalid));

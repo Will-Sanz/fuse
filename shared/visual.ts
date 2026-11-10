@@ -38,6 +38,7 @@ export const visualSchema = z
   .strict();
 export type VisualSpec = z.infer<typeof visualSchema>;
 export type Visual = VisualSpec & {
+  layoutVersion?: 2;
   path: string;
   conflictId?: string;
   origin: 'ai' | 'example';

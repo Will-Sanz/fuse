@@ -37,7 +37,14 @@ The runner requires Node, Git, and shared service access (or a direct key for de
 
 `fuse_explain` inspects current working changes, an active merge, selected revisions, or registered worktrees. The generator reads pinned before/A/B source, static observations, intent if provided, a bounded tree listing, and up to ten README/package/test/direct-import context files from the pinned target commit. Common secret/config paths, vendor folders, and oversized source are excluded. Context selection is bounded and is not whole-repository semantic analysis.
 
-The model chooses a visual metaphor, coordinates, labels, and behavior descriptions in a strict scene schema. It can draw panels, text, arrows, bars, and circles on a 1000×500 canvas. Raw HTML/SVG, scripts, URLs, tools, and arbitrary executable code are not accepted. Text is escaped; geometry and text fit are checked. A malformed design gets one repair attempt, then a visible error. Legal action IDs come from the deterministic reconciler; invented actions are rejected.
+The model designs a technical box-and-arrow diagram with source-supported identifiers,
+values and dependencies in a strict scene schema. It can draw panels, text, arrows,
+bars, and circles on a 1000×500 canvas. New locally versioned layouts use larger
+monospace labels, preserve line breaks and wrap long identifiers. Text, canvas bounds
+and label/node collisions are validated before persistence; legacy saved scenes keep
+their original renderer. Raw HTML/SVG, scripts, URLs, tools, and executable code are
+not accepted. A malformed design gets one repair attempt, then a visible error.
+Legal action IDs come from the deterministic reconciler; invented actions are rejected.
 
 Fuse renders the validated scene to SVG and PNG with resvg. This is AI-designed vector imagery, not a separate raster-image-model call. Responses include model name, actual response ID, generation time, context file names, and a source fingerprint. Only matching AI results can be reused from cache; `regenerate: true` makes a fresh request. Source changes during generation prevent the result from being saved as current. Provider failure never becomes a prepared-image success.
 

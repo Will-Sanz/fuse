@@ -167,10 +167,24 @@ The narrow scroll regression passed three repeats with real wheel and keyboard
 input, synchronizing on native `scrollend` before the next gesture.
 
 The native user confirmed an intended behavior on November 10; the saved review
-recorded `origin: human-panel`. Real Docker checks then failed the combined baseline
-and passed the correction. Final native application was not confirmed: the user
-reported these UI defects before that step. This is partial user-reported native
-acceptance, not an automated native capture or a completed demo.
+recorded `origin: human-panel`, and the card resumed the same Codex chat. Real Docker
+checks failed the combined baseline and passed the correction. Separate native human
+approval applied the exact verified preview in both acceptance and recording runs;
+direct file assertions confirmed the bytes and that only the reviewed file changed.
+Rendering evidence is operator confirmation, not automated native capture. The user
+recorded the native flow and plans to crop it; the recording file has not been inspected.
+
+### Technical diagram rendering
+
+New visuals use larger monospace labels and short code/value annotations in box-and-arrow
+diagrams. They show source-supported changes, shared dependencies, resulting behavior,
+and a proposed correction when warranted. Examples remain illustrative until separately
+verified. Version 2 preserves explicit line breaks, wraps long identifiers, and validates
+text and connector-label placement before saving. The existing single repair attempt
+and visible generation failure remain; no clipped or prepared image replaces a failure.
+Local `layoutVersion` metadata selects the new renderer without changing the hosted
+scene schema. Older saved visuals retain their original renderer. The visual may use up
+to 280 px of height within the existing card and document-scrolling limits.
 
 ## Same-chat continuation checkpoint
 

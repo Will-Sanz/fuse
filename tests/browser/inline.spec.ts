@@ -17,6 +17,7 @@ import { LocalStore } from '../../server/local-store';
 import type { Review } from '../../shared/review';
 import { exampleVisual } from '../../shared/demo-visuals';
 import { renderVisual } from '../../server/visual-renderer';
+import { technicalVisual } from '../fixtures/technical-visual';
 
 let directory: string, lifecycleScript: string;
 type ContinuationMessage = {
@@ -936,4 +937,37 @@ test('glass lifecycle: an old rejected init cannot remove the newer active rende
   await expect(page.locator('.fuse-glass-panel > canvas')).toHaveCount(1);
   await page.evaluate('hideGlass()');
   await expect(page.locator('body > canvas')).toHaveCount(0);
+});
+
+test('simulated host: technical visual uses the card width without hiding choice controls', async ({
+  page,
+}) => {
+  const d = fixture();
+  d.review.visual = { ...d.review.visual!, ...technicalVisual, layoutVersion: 2 };
+  new LocalStore(d.repo).save(d.review);
+  const client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const frame = await mountResource(page, result, (params) => client.callTool(params));
+  const img = frame.locator('.fuse-inline-visual img');
+  await expect(img).toBeVisible();
+  await expect
+    .poll(() => img.evaluate((element: HTMLImageElement) => element.naturalWidth))
+    .toBe(1600);
+  const bounds = await img.boundingBox();
+  expect(bounds!.height).toBeGreaterThan(250);
+  expect(bounds!.height).toBeLessThanOrEqual(280);
+  await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeInViewport(
+    { ratio: 1 },
+  );
+  await expect(frame.getByRole('button', { name: /Discounted eligibility/ })).toBeInViewport({
+    ratio: 1,
+  });
+  await expect(frame.getByRole('button', { name: 'Review details' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
+  await page.screenshot({ path: 'test-results/inline-technical-visual.png' });
 });
