@@ -85,7 +85,9 @@ function App() {
       current.current &&
       (current.current.id !== review.id ||
         current.current.revision > review.revision ||
-        (notification && current.current.revision === review.revision))
+        (notification &&
+          current.current.revision === review.revision &&
+          (privateSession.current || actionPending.current)))
     )
       return;
     const meta = result._meta?.fuse;

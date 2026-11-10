@@ -880,6 +880,81 @@ test('simulated host: rejected human action disables stale controls until a new 
   expect(await page.evaluate('uiMessages.length')).toBe(0);
 });
 
+test('simulated host: equal-revision notifications cannot overwrite a rotated private session', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const initial = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const frame = await mountResource(page, initial, (params) => client.callTool(params));
+  await frame.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled();
+  await page.evaluate(
+    (params) =>
+      document
+        .querySelector('iframe')!
+        .contentWindow!.postMessage(
+          { jsonrpc: '2.0', method: 'ui/notifications/tool-result', params },
+          '*',
+        ),
+    initial,
+  );
+  await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
+  await expect(frame.getByText(/Sent to this chat/)).toBeVisible();
+  expect(new LocalStore(d.repo).get(d.review.id).behavioral!.intent!.origin).toBe('human-panel');
+  expect(await page.evaluate('uiMessages.length')).toBe(1);
+});
+
+test('simulated host: fresh presentation recovers a rejected session in the same iframe', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const present = () =>
+    client.callTool({
+      name: 'fuse_present_review',
+      arguments: { repo: d.repo, id: d.review.id },
+    });
+  let rejectFirst = true;
+  const frame = await mountResource(page, await present(), async (params) => {
+    if (rejectFirst) {
+      rejectFirst = false;
+      return {
+        isError: true,
+        content: [{ type: 'text', text: 'Inline review session expired or unavailable.' }],
+      };
+    }
+    return client.callTool(params);
+  });
+  const choice = frame.getByRole('button', { name: /Original subtotal eligibility/ });
+  await choice.click();
+  await expect(frame.getByRole('alert')).toContainText('Ask Codex to present');
+  await expect(choice).toBeDisabled();
+  const fresh = await present();
+  expect((fresh.structuredContent as unknown as { data: Review }).data.revision).toBe(
+    d.review.revision,
+  );
+  await page.evaluate(
+    (params) =>
+      document
+        .querySelector('iframe')!
+        .contentWindow!.postMessage(
+          { jsonrpc: '2.0', method: 'ui/notifications/tool-result', params },
+          '*',
+        ),
+    fresh,
+  );
+  await expect(choice).toBeEnabled();
+  await expect(frame.getByRole('alert')).toHaveCount(0);
+  await choice.click();
+  await expect(frame.getByText(/Sent to this chat/)).toBeVisible();
+  expect(new LocalStore(d.repo).get(d.review.id).behavioral!.intent!.origin).toBe('human-panel');
+  expect(await page.evaluate('uiMessages.length')).toBe(1);
+});
+
 async function mountLifecycle(page: Page, noWebGL = false) {
   await page.setContent(
     '<style>body{margin:0}.fuse-glass-root{width:400px;position:relative;min-height:120px}.fuse-glass-backdrop{position:absolute;inset:0;pointer-events:none}.fuse-glass-panel{position:absolute;inset:0;z-index:0}.fuse-glass-ambient{position:absolute;inset:0;background:linear-gradient(45deg,#9070a0,#183443)}</style><div id="root"></div>',
