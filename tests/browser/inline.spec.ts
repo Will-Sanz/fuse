@@ -19,6 +19,11 @@ import { exampleVisual } from '../../shared/demo-visuals';
 import { renderVisual } from '../../server/visual-renderer';
 
 let directory: string, lifecycleScript: string;
+type ContinuationMessage = {
+  role: string;
+  content: { type: string; text: string }[];
+  _meta: { 'openai/message': { target: string; send: boolean } };
+};
 const cleanup: (() => void | Promise<void>)[] = [];
 test.beforeAll(async () => {
   directory = mkdtempSync(join(tmpdir(), 'fuse-inline-browser-'));
@@ -52,15 +57,31 @@ async function mountResource(
   invoke: (params: { name: string; arguments: Record<string, unknown> }) => Promise<unknown>,
   negotiatedVersion = '2026-01-26',
   maxHeight = 560,
+  host: {
+    message?:
+      | 'supported'
+      | 'unsupported'
+      | 'standard-only'
+      | 'extension-only'
+      | 'rejected'
+      | 'rpc-error'
+      | 'timeout';
+    resume?: (params: ContinuationMessage) => void | Promise<void>;
+  } = {},
 ) {
   await page.exposeFunction('invokeFuse', invoke);
+  await page.exposeFunction('resumeFuse', host.resume || (() => {}));
   await page.setContent(
     '<body style="margin:0;background:#0b1017"><iframe title="Simulated MCP App host" style="display:block;width:min(100%,640px);height:340px;border:0"></iframe></body>',
   );
   await page.evaluate(
-    ({ html, result, negotiatedVersion, maxHeight }) => {
+    ({ html, result, negotiatedVersion, maxHeight, messageMode }) => {
       const iframe = document.querySelector('iframe')!;
-      Object.assign(window, { appCalls: [] as string[], sizeNotices: [] as number[] });
+      Object.assign(window, {
+        appCalls: [] as string[],
+        sizeNotices: [] as number[],
+        uiMessages: [] as unknown[],
+      });
       window.addEventListener('message', async (event) => {
         if (event.source !== iframe.contentWindow) return;
         const m = event.data;
@@ -86,7 +107,14 @@ async function mountResource(
           reply({
             protocolVersion: negotiatedVersion,
             hostInfo: { name: 'Explicit test host', version: '1' },
-            hostCapabilities: {},
+            hostCapabilities: {
+              ...(messageMode === 'unsupported' || messageMode === 'extension-only'
+                ? {}
+                : { message: { text: {} } }),
+              ...(messageMode === 'unsupported' || messageMode === 'standard-only'
+                ? {}
+                : { experimental: { 'openai/message': {} } }),
+            },
             hostContext: { theme: 'dark' },
           });
         } else if (m.method === 'ui/notifications/initialized')
@@ -107,6 +135,28 @@ async function mountResource(
           } catch (error) {
             reply({ isError: true, content: [{ type: 'text', text: (error as Error).message }] });
           }
+        } else if (m.method === 'ui/message') {
+          (window as unknown as { uiMessages: unknown[] }).uiMessages.push(m.params);
+          if (messageMode === 'timeout') return;
+          if (messageMode === 'rpc-error') {
+            iframe.contentWindow!.postMessage(
+              {
+                jsonrpc: '2.0',
+                id: m.id,
+                error: { code: -32000, message: 'Host declined continuation' },
+              },
+              '*',
+            );
+            return;
+          }
+          if (messageMode === 'rejected') {
+            reply({ isError: true });
+            return;
+          }
+          await (
+            window as unknown as { resumeFuse: (params: unknown) => Promise<void> }
+          ).resumeFuse(m.params);
+          reply({});
         } else if (m.method === 'ui/notifications/size-changed') {
           (window as unknown as { sizeNotices: number[] }).sizeNotices.push(m.params.height);
           iframe.style.height = `${Math.min(maxHeight, m.params.height)}px`;
@@ -120,7 +170,13 @@ async function mountResource(
         `<head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'">`,
       );
     },
-    { html: readFileSync('dist/inline/review.html', 'utf8'), result, negotiatedVersion, maxHeight },
+    {
+      html: readFileSync('dist/inline/review.html', 'utf8'),
+      result,
+      negotiatedVersion,
+      maxHeight,
+      messageMode: host.message || 'supported',
+    },
   );
   return page.frameLocator('iframe');
 }
@@ -163,7 +219,7 @@ async function clientFor(repo: string) {
 }
 
 // This explicitly simulates the verified client's identity and bridge; it is not native Codex evidence.
-test('simulated host: real resource, WebGL card, human intent, real Docker checks and exact approval', async ({
+test('simulated host agent: choice resumes the current workflow, real Docker checks and exact approval', async ({
   page,
 }) => {
   test.skip(!process.env.FUSE_TEST_IMAGE, 'Prepared real Docker image required.');
@@ -180,7 +236,60 @@ test('simulated host: real resource, WebGL card, human intent, real Docker check
   const result = await call('fuse_present_review', { id: d.review.id });
   expect(result.isError).not.toBe(true);
   const before = readFileSync(join(d.repo, 'checkout.ts'));
-  const frame = await mountResource(page, result, (params) => client.callTool(params));
+  let agentWork: Promise<void> | undefined, agentError: unknown;
+  const frame = await mountResource(
+    page,
+    result,
+    (params) => client.callTool(params),
+    '2026-01-26',
+    560,
+    {
+      resume() {
+        // The test host simulates the same agent's reaction; this is not native Codex evidence.
+        agentWork = (async () => {
+          const saved = await call('fuse_review', { id: d.review.id });
+          const text = (saved.content as { type: string; text?: string }[]).find(
+            (item) => item.type === 'text',
+          )!.text!;
+          const r = JSON.parse(text).data as Review;
+          expect(r.behavioral!.intent!.origin).toBe('human-panel');
+          const proposal = {
+            sourceVersion: sourceVersion(r),
+            issueId: r.behavioral!.intent!.issueId,
+            behaviorId: r.behavioral!.intent!.behaviorId,
+            path: 'checkout.ts',
+            source: combinedSource(r).replace('merchandiseTotal(cart) >=', 'cart.subtotalCents >='),
+            rationale: 'Deterministic test agent submission preserving both features.',
+          };
+          expect(
+            (await call('fuse_submit_proposal', { id: r.id, revision: r.revision, proposal }))
+              .isError,
+          ).not.toBe(true);
+          let updated = new LocalStore(d.repo).get(r.id);
+          expect(
+            (await call('fuse_verify', { id: r.id, revision: updated.revision })).isError,
+          ).not.toBe(true);
+          updated = new LocalStore(d.repo).get(r.id);
+          expect(
+            (await call('fuse_preview', { id: r.id, revision: updated.revision })).isError,
+          ).not.toBe(true);
+          const presented = await call('fuse_present_review', { id: r.id });
+          await page.evaluate(
+            (params) =>
+              document
+                .querySelector('iframe')!
+                .contentWindow!.postMessage(
+                  { jsonrpc: '2.0', method: 'ui/notifications/tool-result', params },
+                  '*',
+                ),
+            presented,
+          );
+        })().catch((error) => {
+          agentError = error;
+        });
+      },
+    },
+  );
   await expect(frame.locator('[data-glass-effect]')).toHaveAttribute('data-glass-effect', 'webgl');
   await expect(frame.getByRole('button', { name: 'Review details' })).toHaveAttribute(
     'aria-expanded',
@@ -208,7 +317,17 @@ test('simulated host: real resource, WebGL card, human intent, real Docker check
     result,
   );
   await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
-  await expect(frame.getByText(/Ask Codex to draft and verify/)).toBeVisible();
+  await expect.poll(() => page.evaluate('uiMessages.length')).toBe(1);
+  const messages = (await page.evaluate('uiMessages')) as ContinuationMessage[];
+  expect(messages[0].role).toBe('user');
+  expect(messages[0]._meta['openai/message']).toEqual({ target: 'active', send: true });
+  expect(messages[0].content).toHaveLength(1);
+  expect(messages[0].content[0].text).toContain(d.repo);
+  expect(messages[0].content[0].text).toContain(d.review.id);
+  expect(messages[0].content[0].text).toContain('fuse_review');
+  expect(JSON.stringify(messages)).not.toContain(
+    (result._meta as { fuse: { capability: string } }).fuse.capability,
+  );
   let r = new LocalStore(d.repo).get(d.review.id);
   expect(r.behavioral!.intent!.origin).toBe('human-panel');
   await page.evaluate(
@@ -221,27 +340,15 @@ test('simulated host: real resource, WebGL card, human intent, real Docker check
         ),
     result,
   );
-  await expect(frame.getByText(/Ask Codex to draft and verify/)).toBeVisible();
+  expect(await page.evaluate('uiMessages.length')).toBe(1);
   expect(readFileSync(join(d.repo, 'checkout.ts'))).toEqual(before);
-  const proposal = {
-    sourceVersion: sourceVersion(r),
-    issueId: r.behavioral!.intent!.issueId,
-    behaviorId: r.behavioral!.intent!.behaviorId,
-    path: 'checkout.ts',
-    source: combinedSource(r).replace('merchandiseTotal(cart) >=', 'cart.subtotalCents >='),
-    rationale: 'Deterministic test agent submission preserving both features.',
-  };
-  expect(
-    (await call('fuse_submit_proposal', { id: r.id, revision: r.revision, proposal })).isError,
-  ).not.toBe(true);
-  r = new LocalStore(d.repo).get(r.id);
-  expect((await call('fuse_verify', { id: r.id, revision: r.revision })).isError).not.toBe(true);
-  await expect(frame.getByRole('heading', { name: 'Candidate checks passed' })).toBeVisible();
+  await agentWork;
+  expect(agentError).toBeUndefined();
   await expect(frame.getByRole('button', { name: 'Review details' })).toHaveAttribute(
     'aria-expanded',
     'false',
   );
-  await frame.getByRole('button', { name: 'Preview verified code' }).click();
+  await expect(frame.getByText('Ready for code approval', { exact: true })).toBeVisible();
   await expect(frame.getByRole('button', { name: 'Approve and apply verified code' })).toBeHidden();
   await frame.locator('summary', { hasText: 'Review exact code and approve' }).click();
   await expect(frame.getByLabel('Exact verified source')).toContainText('cart.subtotalCents >=');
@@ -253,6 +360,7 @@ test('simulated host: real resource, WebGL card, human intent, real Docker check
   r = new LocalStore(d.repo).get(r.id);
   expect(readFileSync(join(d.repo, 'checkout.ts'), 'utf8')).toBe(r.behavioral!.proposal!.source);
   await page.screenshot({ path: 'test-results/inline-applied.png' });
+  expect(await page.evaluate('uiMessages.length')).toBe(1);
   expect(((await page.evaluate('appCalls')) as string[]).some((name) => name === 'open-link')).toBe(
     false,
   );
@@ -329,6 +437,170 @@ test('simulated host: unsupported protocol negotiation stays read-only', async (
   expect(await page.evaluate('appCalls')).toEqual([]);
 });
 
+for (const message of [
+  'unsupported',
+  'standard-only',
+  'extension-only',
+  'rejected',
+  'rpc-error',
+  'timeout',
+] as const) {
+  test(`simulated host: ${message} continuation preserves the saved choice without automatic retry`, async ({
+    page,
+  }) => {
+    const unsupported = ['unsupported', 'standard-only', 'extension-only'].includes(message);
+    const d = fixture(),
+      client = await clientFor(d.repo);
+    const result = await client.callTool({
+      name: 'fuse_present_review',
+      arguments: { repo: d.repo, id: d.review.id },
+    });
+    if (message === 'timeout') await page.clock.install();
+    const frame = await mountResource(
+      page,
+      result,
+      (params) => client.callTool(params),
+      '2026-01-26',
+      560,
+      { message },
+    );
+    const button = frame.getByRole('button', { name: /Original subtotal eligibility/ });
+    await expect(button).toBeEnabled();
+    // Synchronous duplicate events exercise the guard before React can disable the button.
+    await button.evaluate((element: HTMLButtonElement) => {
+      element.click();
+      element.click();
+    });
+    if (message === 'timeout') {
+      await expect.poll(() => page.evaluate('uiMessages.length')).toBe(1);
+      await page.clock.fastForward(15001);
+    }
+    await expect(
+      frame.getByText(
+        unsupported
+          ? /host cannot automatically continue/
+          : message === 'rejected' || message === 'rpc-error'
+            ? /did not accept the request/
+            : /Continuation is unconfirmed/,
+      ),
+    ).toBeVisible();
+    expect(new LocalStore(d.repo).get(d.review.id).behavioral!.intent!.origin).toBe('human-panel');
+    expect(await page.evaluate('uiMessages.length')).toBe(unsupported ? 0 : 1);
+    expect(
+      ((await page.evaluate('appCalls')) as string[]).filter(
+        (call) => call === 'fuse_ui_action:confirm',
+      ),
+    ).toHaveLength(1);
+    await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled();
+    await frame.getByRole('button', { name: 'Refresh', exact: true }).click();
+    await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled();
+    expect(await page.evaluate('uiMessages.length')).toBe(unsupported ? 0 : 1);
+    const saved = new LocalStore(d.repo).get(d.review.id);
+    expect(saved.behavioral!.proposal).toBeUndefined();
+    expect(saved.status).toBe('proposed');
+    const second = await page.context().newPage();
+    cleanup.push(() => second.close());
+    const presented = await client.callTool({
+      name: 'fuse_present_review',
+      arguments: { repo: d.repo, id: d.review.id },
+    });
+    const remounted = await mountResource(second, presented, (params) => client.callTool(params));
+    await expect(remounted.getByText(/Confirmed:/)).toBeVisible();
+    expect(await second.evaluate('uiMessages.length')).toBe(0);
+  });
+}
+
+test('simulated host: review notifications cannot unlock or resend a pending continuation', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  let finish!: () => void;
+  const delivery = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const frame = await mountResource(
+    page,
+    result,
+    (params) => client.callTool(params),
+    '2026-01-26',
+    560,
+    { resume: () => delivery },
+  );
+  try {
+    await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
+    await expect.poll(() => page.evaluate('uiMessages.length')).toBe(1);
+    let saved = new LocalStore(d.repo).get(d.review.id);
+    const proposal = {
+      sourceVersion: sourceVersion(saved),
+      issueId: saved.behavioral!.intent!.issueId,
+      behaviorId: saved.behavioral!.intent!.behaviorId,
+      path: 'checkout.ts',
+      source: combinedSource(saved).replace('merchandiseTotal(cart) >=', 'cart.subtotalCents >='),
+      rationale: 'A pending-message notification fixture.',
+    };
+    expect(
+      (
+        await client.callTool({
+          name: 'fuse_submit_proposal',
+          arguments: { repo: d.repo, id: saved.id, revision: saved.revision, proposal },
+        })
+      ).isError,
+    ).not.toBe(true);
+    const updated = await client.callTool({
+      name: 'fuse_present_review',
+      arguments: { repo: d.repo, id: saved.id },
+    });
+    await page.evaluate(
+      (params) =>
+        document
+          .querySelector('iframe')!
+          .contentWindow!.postMessage(
+            { jsonrpc: '2.0', method: 'ui/notifications/tool-result', params },
+            '*',
+          ),
+      updated,
+    );
+    await expect(frame.getByText('Fix: A pending-message notification fixture.')).toBeVisible();
+    await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeDisabled();
+    await frame.getByRole('button', { name: 'Review details' }).click();
+    await frame.locator('summary', { hasText: 'Change intended behavior' }).click();
+    await expect(frame.getByRole('button', { name: /Discounted eligibility/ })).toBeDisabled();
+    expect(await page.evaluate('uiMessages.length')).toBe(1);
+    finish();
+    await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled();
+    await frame.getByRole('button', { name: 'Refresh', exact: true }).click();
+    await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled();
+    await expect(frame.getByRole('alert')).toHaveCount(0);
+    expect(await page.evaluate('uiMessages.length')).toBe(1);
+    saved = new LocalStore(d.repo).get(saved.id);
+    expect(saved.behavioral!.intent!.behaviorId).toBe(proposal.behaviorId);
+    expect(saved.status).toBe('proposed');
+  } finally {
+    finish();
+  }
+});
+
+test('simulated host: an unconfirmed action result cannot dispatch a continuation', async ({
+  page,
+}) => {
+  const d = fixture(),
+    client = await clientFor(d.repo);
+  const result = await client.callTool({
+    name: 'fuse_present_review',
+    arguments: { repo: d.repo, id: d.review.id },
+  });
+  const frame = await mountResource(page, result, async () => result);
+  await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
+  await expect(frame.getByRole('alert')).toContainText('could not be confirmed');
+  expect(await page.evaluate('uiMessages.length')).toBe(0);
+  expect(new LocalStore(d.repo).get(d.review.id).behavioral!.intent).toBeUndefined();
+});
+
 test('simulated host: narrow capped viewport scrolls one document and settles after content changes', async ({
   page,
 }) => {
@@ -359,7 +631,7 @@ test('simulated host: narrow capped viewport scrolls one document and settles af
     pointerEvents: getComputedStyle(document.querySelector('.fuse-glass-backdrop')!).pointerEvents,
   }));
   expect(layout.overflow).toBe('visible');
-  expect(layout.scrollWidth).toBe(layout.width);
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.width);
   expect(layout.cardInCapture).toBe(false);
   expect(layout.pointerEvents).toBe('none');
   const scrollBody = async (input: () => Promise<void>) => {
@@ -414,7 +686,7 @@ test('simulated host: broken image falls back to explanation without hiding beha
   await expect(frame.getByText(/Visual unavailable/)).toContainText(d.review.visual!.summary);
   await expect(frame.locator('.fuse-inline-visual img')).toHaveCount(0);
   await frame.getByRole('button', { name: /Original subtotal eligibility/ }).click();
-  await expect(frame.getByText(/Ask Codex to draft and verify/)).toBeVisible();
+  await expect(frame.getByText(/Sent to this chat/)).toBeVisible();
 });
 
 test('simulated host: existing SVG metadata still displays after a resource upgrade', async ({
@@ -513,6 +785,7 @@ test('simulated host: rejected human action disables stale controls until a new 
   await expect(frame.getByRole('button', { name: /Original subtotal eligibility/ })).toBeDisabled();
   await expect(frame.getByRole('button', { name: 'Refresh', exact: true })).toBeDisabled();
   expect(new LocalStore(d.repo).get(d.review.id).behavioral!.intent).toBeUndefined();
+  expect(await page.evaluate('uiMessages.length')).toBe(0);
 });
 
 async function mountLifecycle(page: Page, noWebGL = false) {

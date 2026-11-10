@@ -99,8 +99,10 @@ remains open in [issue #5](https://github.com/Will-Sanz/fuse/issues/5).
 1. Ask the coding agent to inspect branches and investigate the pinned evidence.
 2. It reports a suspected issue (or no issue/insufficient evidence), generates a
    visual on that saved review, and calls `fuse_present_review`.
-3. Choose intended behavior in the card. Return to the chat and ask the
-   agent to continue; there is no promised automatic resume.
+3. Choose intended behavior in the card. Once the backend confirms the human choice,
+   a supported Codex host receives a continuation in this same chat. The presenting
+   agent should end its turn while awaiting that click. A busy chat may queue the
+   continuation; accepted delivery does not mean the correction has finished.
 4. The agent reads the confirmed choice, submits the whole replacement source as
    data, runs `fuse_verify`, and creates an exact `fuse_preview` after success.
 5. Expand exact code in the same card and approve it. Application remains local
@@ -159,7 +161,7 @@ The updated [compact card](evidence/inline-review/simulated-host-compact-2026111
 and [application receipt](evidence/inline-review/simulated-host-applied-20261110.png)
 were visually inspected in the explicitly simulated browser host. They are not
 native Codex screenshots. The correction passed 66 unit/integration tests with a
-real Docker verifier, all 20 browser tests, production-only package installation
+real Docker verifier, all 28 browser tests, production-only package installation
 and CLI acceptance.
 The narrow scroll regression passed three repeats with real wheel and keyboard
 input, synchronizing on native `scrollend` before the next gesture.
@@ -169,6 +171,52 @@ recorded `origin: human-panel`. Real Docker checks then failed the combined base
 and passed the correction. Final native application was not confirmed: the user
 reported these UI defects before that step. This is partial user-reported native
 acceptance, not an automated native capture or a completed demo.
+
+## Same-chat continuation checkpoint
+
+[Issue #12](https://github.com/Will-Sanz/fuse/issues/12) scopes this release to
+explicit Fuse requests in Codex. The successful behavior-click handler checks the
+returned repository, review, advanced revision and matching `human-panel` intent
+before sending a single `ui/message`. The fixed message contains only the public
+repository/review/revision reference and instructions to read the saved choice,
+submit and verify a correction, then present its exact preview for final approval.
+It contains no private capability, preview token, source or test logs.
+
+The host must advertise both `message.text` and `experimental["openai/message"]`.
+The request uses `role: "user"` and
+`_meta["openai/message"]: { target: "active", send: true }` per the
+[OpenAI MCP message contract](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#uimessage-extensions).
+Read-only installed renderer inspection confirms this routes to the card's chat
+recipient and queues when its composer is busy. This inspection is not native
+execution proof. No new chat or second coding agent is created.
+
+Refreshing, receiving a tool-result notification, and reopening a saved card do not
+dispatch continuation. A synchronous action guard prevents duplicate clicks while
+confirmation or message delivery is pending; the selected choice cannot be clicked
+again as an implicit retry. Rejection, unsupported hosts and uncertain timeouts keep
+the confirmed choice and its rotated private session. Uncertain delivery is never
+retried automatically, because the host might already have queued the request.
+Final exact-code application remains an independent explicit human approval.
+
+The connected native Fuse server was confirmed to serve the old **Review interaction**
+resource after local implementation: this installation launches GitHub `main` using
+`npx`. A running process retains its installed copy. The PR must merge and the Fuse
+connection must refresh before new native acceptance; presenting a saved review
+alone does not update an installed server. Check the actual connected resource for
+the new **Review details** layout before recording. Do not quit Codex or interrupt
+other chats to perform this check.
+
+Background monitoring, unsolicited activation, automatic multi-agent integration
+and other coding agents are outside this checkpoint. Same-chat continuation still
+requires a native operator check on the updated installed build.
+
+The browser harness exercises one click through the real MCP transport, then a
+deterministic simulated agent reads the confirmed review, submits a correction,
+runs actual Docker checks and creates/presents the preview. Additional cases cover
+missing message capabilities, host rejection (result and JSON-RPC), uncertain
+timeout, duplicate clicks, refresh/reopening and notifications during pending
+delivery. These are explicitly simulated host/agent tests, not proof of a native
+Codex model turn. The complete 28-case browser suite passes locally.
 
 ## Remaining native validation and demo
 

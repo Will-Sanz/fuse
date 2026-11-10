@@ -13,12 +13,15 @@ Use the configured Fuse MCP server. Pass the absolute target repository as `repo
    reviewed path and evidence indexes. Describe intended-behavior alternatives;
    do not assert test execution or supply verification records.
 3. Call `fuse_visualize` on that SAVED review, then `fuse_present_review`. The
-   supported Codex client displays a compact inline card. Ask the developer to
-   expand it and choose intended behavior, then return to chat. Do not open a
+   supported Codex client displays the visual and behavior buttons immediately.
+   Ask the developer to choose intended behavior, then end your turn. After the
+   saved choice, the card requests continuation in this same chat. Do not open a
    browser by default or call `fuse_explain` again and replace the active review.
    If the host cannot render the card, report that limitation. Use
    `fuse_open_review` only when the developer explicitly requests browser fallback.
-4. Stop dependent work until the developer returns. Read `fuse_review` and verify
+4. Stop dependent work until the card's continuation arrives (or the developer
+   follows up). Do not poll to keep the agent turn running while waiting for a click.
+   Read `fuse_review` and verify
    it contains `behavioral.intent` with origin `human-panel` (inline or browser). Model-submitted
    preferences and prose are not confirmation. Do not click the panel yourself,
    call its confirmation/apply endpoints, invoke component-only `fuse_ui_action`,
@@ -38,8 +41,12 @@ Use the configured Fuse MCP server. Pass the absolute target repository as `repo
 
 Concurrent edits invalidate reviews. Fuse guarantees apply only to work routed
 through Fuse; it cannot constrain an unrestricted coding agent or other local
-process. The inline MCP card is the preferred UI on supported Codex clients. There is no
-automatic chat resume. Legacy resolution/application can use an explicitly requested
+process. This checkpoint requires an explicit request to use Fuse in Codex; background
+activation and multi-agent automation are deferred. Compatible Codex hosts receive
+one automatic continuation request after a successful human choice. Host acceptance
+may queue the message; it is not proof the agent has finished. If continuation is
+rejected, unsupported or uncertain, report that limitation without resending automatically.
+Legacy resolution/application can use an explicitly requested
 browser fallback. Other clients are not presumed to provide a private component
 channel merely because they accept presentation metadata. Legacy A/B previews remain a separate workflow; never use them
 as a workaround for blocked behavioral verification.

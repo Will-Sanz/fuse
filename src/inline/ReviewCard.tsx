@@ -9,6 +9,7 @@ export interface ReviewCardProps {
   visualSvg?: string;
   pending?: boolean;
   error?: string;
+  continuation?: string;
   readOnly?: boolean;
   onOpenLegacy?: () => void;
   onConfirmBehavior: (id: string) => void;
@@ -23,6 +24,7 @@ export function ReviewCard({
   visualSvg,
   pending = false,
   error,
+  continuation,
   readOnly = false,
   onOpenLegacy,
   onConfirmBehavior,
@@ -80,7 +82,7 @@ export function ReviewCard({
           key={option.id}
           className="fuse-inline-option"
           type="button"
-          disabled={pending || readOnly}
+          disabled={pending || readOnly || selected?.id === option.id}
           aria-pressed={selected?.id === option.id}
           onClick={() => onConfirmBehavior(option.id)}
         >
@@ -163,8 +165,7 @@ export function ReviewCard({
           {selected && !applied && !review.preview && (
             <p className="fuse-inline-confirmation">
               Confirmed: <strong>{selected.label}</strong>.
-              {!b?.proposal &&
-                ' Ask Codex to draft and verify a correction using this saved choice.'}
+              {!b?.proposal && continuation && <span role="status"> {continuation}</span>}
             </p>
           )}
           {b?.proposal && !applied && (

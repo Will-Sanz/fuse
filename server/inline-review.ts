@@ -150,7 +150,7 @@ export function registerInlineReview(
               preferredDisplayMode: 'inline',
             },
             'openai/widgetShowCodexWidgetInline': true,
-            'openai/widgetHeightHint': 340,
+            'openai/widgetHeightHint': 560,
           },
         },
       ],
