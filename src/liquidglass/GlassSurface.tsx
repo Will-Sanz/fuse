@@ -97,11 +97,13 @@ export function GlassSurface({ children }: { children: ReactNode }) {
     };
   }, []);
   return (
-    <div ref={root} className="fuse-glass-root" data-glass-effect={effect}>
-      <div className="fuse-glass-ambient" aria-hidden="true" />
-      <div ref={panel} className="fuse-glass-panel">
-        {children}
+    <div className="fuse-glass-root" data-glass-effect={effect}>
+      {/* Keep source, images and controls outside the library's capture tree. */}
+      <div ref={root} className="fuse-glass-backdrop" aria-hidden="true">
+        <div className="fuse-glass-ambient" />
+        <div ref={panel} className="fuse-glass-panel" />
       </div>
+      {children}
     </div>
   );
 }

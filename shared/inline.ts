@@ -6,7 +6,7 @@ export const INLINE_REVIEW_MIME = 'text/html;profile=mcp-app';
 export interface InlineReviewMetadata {
   reviewId: string;
   capability?: string;
-  visualSvg?: string;
+  visualPng?: string;
 }
 export interface InlineReviewResult {
   content: { type: 'text'; text: string }[];

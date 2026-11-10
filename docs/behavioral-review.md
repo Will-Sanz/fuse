@@ -14,7 +14,9 @@ in containers, and applies only the human-approved exact verified candidate.
 2. `fuse_visualize` explains that saved issue. The panel shows evidence from both
    affected functions. The visual is illustrative; executed results are separate.
 3. `fuse_present_review` presents the saved review inline in a compatible host.
-   The developer confirms a registered behavior in the component and returns to chat.
+   Its visual and behavior buttons are visible without expansion. The developer
+   confirms a registered behavior; supported Codex hosts then receive a continuation
+   in the same chat. The agent ends its presenting turn so that follow-up can run.
    An explicitly requested browser fallback uses `fuse_open_review`. This records `human-panel` intent; a model
    statement or legacy `fuse_intent` call cannot substitute for it.
 4. The agent reads `fuse_review`, drafts a correction, and calls
@@ -39,8 +41,9 @@ identity or a security boundary against the user's other tools. Follow the porta
 [host skill](../skills/fuse-review/SKILL.md). Install/copy it only in a client scope
 chosen by the developer; this release does not change global client settings.
 The inline MCP App is a candidate integration; its exact client support and remaining
-native rendering acceptance are tracked in [inline review](inline-review.md). There is
-no automatic chat resume or standalone agent platform.
+native acceptance are tracked in [inline review](inline-review.md). Continuation is
+Codex-specific and follows an explicit Fuse request and human choice. Background
+monitoring, multi-agent activation and other coding-agent integrations are deferred.
 
 ## Prepare the verifier
 

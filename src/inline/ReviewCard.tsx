@@ -5,12 +5,13 @@ import { GlassSurface } from '../liquidglass/GlassSurface';
 
 export interface ReviewCardProps {
   review: Review;
+  visualPng?: string;
   visualSvg?: string;
   pending?: boolean;
   error?: string;
+  continuation?: string;
   readOnly?: boolean;
   onOpenLegacy?: () => void;
-  onExpandedChange?: (expanded: boolean) => void;
   onConfirmBehavior: (id: string) => void;
   onPreview: () => void;
   onApply: (token: string) => void;
@@ -19,18 +20,20 @@ export interface ReviewCardProps {
 
 export function ReviewCard({
   review,
+  visualPng,
   visualSvg,
   pending = false,
   error,
+  continuation,
   readOnly = false,
   onOpenLegacy,
-  onExpandedChange,
   onConfirmBehavior,
   onPreview,
   onApply,
   onRefresh,
 }: ReviewCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [failedVisual, setFailedVisual] = useState<string>();
   const contentId = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const b = review.behavioral,
@@ -56,17 +59,42 @@ export function ReviewCard({
   const summary =
     b?.explanation || review.visual?.summary || 'Review the pinned source and intended behavior.';
   const selected = issue?.options.find((o) => o.id === b?.intent?.behaviorId);
-  const code = review.preview?.outputs[review.files[0]?.path];
-  const visual = useMemo(
-    () =>
-      visualSvg ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(visualSvg)}` : undefined,
-    [visualSvg],
-  );
+  const file = review.files.find((file) => file.path === issue?.path) || review.files[0];
+  const code = review.preview?.outputs[b?.proposal?.path || file?.path];
+  const visual = useMemo(() => {
+    if (visualPng) return `data:image/png;base64,${visualPng}`;
+    if (visualSvg) {
+      try {
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(visualSvg)}`;
+      } catch {
+        // An older server may send malformed Unicode; keep the controls usable.
+      }
+    }
+  }, [visualPng, visualSvg]);
   const collapse = () => {
     setExpanded(false);
-    onExpandedChange?.(false);
     trigger.current?.focus();
   };
+  const behaviorChoices = issue && (
+    <div className="fuse-inline-options">
+      {issue.options.map((option) => (
+        <button
+          key={option.id}
+          className="fuse-inline-option"
+          type="button"
+          disabled={pending || readOnly || selected?.id === option.id}
+          aria-pressed={selected?.id === option.id}
+          onClick={() => onConfirmBehavior(option.id)}
+        >
+          <strong>{option.label}</strong>
+          <span>{option.description}</span>
+          <span className="fuse-inline-option-state">
+            {selected?.id === option.id ? 'Confirmed' : 'Choose behavior'}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
   return (
     <GlassSurface>
       <article
@@ -89,54 +117,135 @@ export function ReviewCard({
             </span>
           </div>
           <h1>{title}</h1>
-          <p>{summary}</p>
-          <button
-            ref={trigger}
-            className="fuse-inline-trigger"
-            type="button"
-            aria-expanded={expanded}
-            aria-controls={contentId}
-            onClick={() => {
-              setExpanded(!expanded);
-              onExpandedChange?.(!expanded);
-            }}
-          >
-            {expanded ? 'Collapse review' : issue ? 'Review interaction' : 'View explanation'}
-            <span aria-hidden="true">{expanded ? '−' : '+'}</span>
-          </button>
+          {!visual && !review.visual && <p>{summary}</p>}
         </header>
         {error && (
           <p className="fuse-inline-error" role="alert">
             {error}
           </p>
         )}
+        <div className="fuse-inline-main">
+          {visual && failedVisual !== visual ? (
+            <figure className="fuse-inline-visual">
+              <img
+                src={visual}
+                width={1600}
+                height={800}
+                onError={() => setFailedVisual(visual)}
+                alt={
+                  review.visual
+                    ? `${review.visual.title}. ${review.visual.summary}`
+                    : 'Source-grounded explanation'
+                }
+              />
+              <figcaption>Illustration · verification is separate</figcaption>
+            </figure>
+          ) : review.visual ? (
+            <p className="fuse-inline-visual-fallback" role="status">
+              Visual unavailable. {review.visual.summary}
+            </p>
+          ) : null}
+          {!b && (
+            <section className="fuse-inline-stage">
+              <p>Code choices for this saved review are available in the legacy review.</p>
+              {onOpenLegacy && (
+                <Button size="sm" color="secondary" isDisabled={pending} onClick={onOpenLegacy}>
+                  Open legacy browser review
+                </Button>
+              )}
+            </section>
+          )}
+          {issue && !selected && !applied && (
+            <section className="fuse-inline-stage" aria-label="Intended behavior">
+              <h2>What should happen?</h2>
+              <p>Choose behavior first. This does not change code.</p>
+              {behaviorChoices}
+            </section>
+          )}
+          {selected && !applied && !review.preview && (
+            <p className="fuse-inline-confirmation">
+              Confirmed: <strong>{selected.label}</strong>.
+              {!b?.proposal && continuation && <span role="status"> {continuation}</span>}
+            </p>
+          )}
+          {b?.proposal && !applied && (
+            <p className="fuse-inline-fix">Fix: {b.proposal.rationale}</p>
+          )}
+          {!applied && verification && !review.preview && (
+            <section className="fuse-inline-stage" aria-label="Executed checks">
+              <h2>
+                {verification.status === 'passed'
+                  ? 'Candidate checks passed'
+                  : verification.status === 'running'
+                    ? 'Checks are running'
+                    : 'Verification needs attention'}
+              </h2>
+              {verification.error && <p className="fuse-inline-error">{verification.error}</p>}
+              {verification.status === 'passed' && (
+                <Button size="sm" isDisabled={pending || readOnly} onClick={onPreview}>
+                  Preview verified code
+                </Button>
+              )}
+            </section>
+          )}
+          {!applied && review.preview && (
+            <details className="fuse-inline-details fuse-inline-approval">
+              <summary>Review exact code and approve</summary>
+              <h2>Apply these verified bytes?</h2>
+              <p>
+                This is separate from choosing intended behavior. Fuse writes the exact preview
+                after your approval.
+              </p>
+              <pre aria-label="Exact verified source">{code ?? '// File deletion'}</pre>
+              <Button
+                size="sm"
+                isDisabled={pending || readOnly}
+                onClick={() => onApply(review.preview!.token)}
+              >
+                Approve and apply verified code
+              </Button>
+            </details>
+          )}
+          {applied && b?.proposal && (
+            <section className="fuse-inline-receipt" role="status">
+              <h2>Applied to your local checkout</h2>
+              <p>
+                The applied source matches the verified candidate. The saved review keeps your
+                choices and executed checks.
+              </p>
+            </section>
+          )}
+          <footer className="fuse-inline-footer">
+            <button
+              ref={trigger}
+              className="fuse-inline-trigger"
+              type="button"
+              aria-expanded={expanded}
+              aria-controls={contentId}
+              onClick={() => {
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? 'Hide details' : 'Review details'}
+              <span aria-hidden="true">{expanded ? '−' : '+'}</span>
+            </button>
+            <Button size="sm" color="tertiary" isDisabled={pending || readOnly} onClick={onRefresh}>
+              Refresh
+            </Button>
+          </footer>
+        </div>
         {expanded && (
           <div className="fuse-inline-content" id={contentId}>
-            {visual && (
-              <figure className="fuse-inline-visual">
-                <img
-                  src={visual}
-                  alt={
-                    review.visual
-                      ? `${review.visual.title}. ${review.visual.summary}`
-                      : 'Source-grounded explanation'
-                  }
-                />
-                <figcaption>
-                  Illustrative explanation · executed checks appear separately below
-                </figcaption>
-              </figure>
-            )}
-            {!b && (
-              <section className="fuse-inline-stage">
-                <p>
-                  This review uses the legacy resolution workflow. Its explanation stays here;
-                  legacy code choices and application are available in the browser review.
-                </p>
-                {onOpenLegacy && (
-                  <Button size="sm" color="secondary" isDisabled={pending} onClick={onOpenLegacy}>
-                    Open legacy browser review
-                  </Button>
+            <p>{summary}</p>
+            {selected && (
+              <section className="fuse-inline-stage" aria-label="Confirmed behavior">
+                <h2>Confirmed behavior: {selected.label}</h2>
+                {!applied && (
+                  <details className="fuse-inline-details">
+                    <summary>Change intended behavior</summary>
+                    <p>A new choice requires a new proposal and verification.</p>
+                    {behaviorChoices}
+                  </details>
                 )}
               </section>
             )}
@@ -144,7 +253,7 @@ export function ReviewCard({
               <details className="fuse-inline-details">
                 <summary>Pinned source evidence</summary>
                 {issue.evidence.map((index) => {
-                  const evidence = review.files[0].evidence[index];
+                  const evidence = file?.evidence[index];
                   return evidence ? (
                     <section key={index}>
                       <h3>
@@ -157,53 +266,9 @@ export function ReviewCard({
                 })}
               </details>
             )}
-            {issue && !applied && (
-              <section className="fuse-inline-stage" aria-label="Intended behavior">
-                <div className="fuse-inline-step">01 · Intended behavior</div>
-                <h2>What should happen?</h2>
-                <p>
-                  Your choice tells the coding agent what to preserve. It does not change a source
-                  file.
-                </p>
-                <div className="fuse-inline-options">
-                  {issue.options.map((option) => (
-                    <button
-                      key={option.id}
-                      className="fuse-inline-option"
-                      type="button"
-                      disabled={pending || readOnly}
-                      aria-pressed={selected?.id === option.id}
-                      onClick={() => onConfirmBehavior(option.id)}
-                    >
-                      <strong>{option.label}</strong>
-                      <span>{option.description}</span>
-                      <span className="fuse-inline-option-state">
-                        {selected?.id === option.id ? 'Confirmed' : 'Choose behavior'}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-            {selected && (
-              <p className="fuse-inline-confirmation">
-                Confirmed: <strong>{selected.label}</strong>.{' '}
-                {b?.proposal
-                  ? 'The agent has submitted a proposal.'
-                  : 'Ask Codex to draft and verify a correction using this saved choice.'}
-              </p>
-            )}
             {verification && (
-              <section className="fuse-inline-stage" aria-label="Executed checks">
-                <div className="fuse-inline-step">02 · Isolated verification</div>
-                <h2>
-                  {verification.status === 'passed'
-                    ? 'Candidate checks passed'
-                    : verification.status === 'running'
-                      ? 'Checks are running'
-                      : 'Verification needs attention'}
-                </h2>
-                {verification.error && <p className="fuse-inline-error">{verification.error}</p>}
+              <details className="fuse-inline-details">
+                <summary>Executed checks · {verification.status}</summary>
                 {(['baseline', 'candidate'] as const).map((side) => (
                   <div className="fuse-inline-results" key={side}>
                     <h3>
@@ -226,11 +291,12 @@ export function ReviewCard({
                     ))}
                   </div>
                 ))}
+                {verification.error && <p className="fuse-inline-error">{verification.error}</p>}
                 <p>
-                  Results come from configured checks executed by Fuse. Passing checks do not prove
-                  every possible behavior.
+                  These configured checks ran in isolation. Passing checks do not prove every
+                  possible behavior.
                 </p>
-              </section>
+              </details>
             )}
             {b?.proposal && (
               <details className="fuse-inline-details">
@@ -240,59 +306,9 @@ export function ReviewCard({
                 <p className="fuse-inline-hash">SHA-256 {b.proposal.hash}</p>
               </details>
             )}
-            {!applied && verification?.status === 'passed' && !review.preview && (
-              <Button size="sm" isDisabled={pending || readOnly} onClick={onPreview}>
-                Preview verified code
-              </Button>
-            )}
-            {!applied && review.preview && (
-              <details className="fuse-inline-details fuse-inline-approval">
-                <summary>Review exact code and approve</summary>
-                <div className="fuse-inline-step">03 · Final code approval</div>
-                <h2>Apply these verified bytes?</h2>
-                <p>
-                  This is separate from choosing intended behavior. Fuse writes the exact preview
-                  after your approval.
-                </p>
-                <pre aria-label="Exact verified source">{code ?? '// File deletion'}</pre>
-                <p className="fuse-inline-hash">Preview {review.preview.token}</p>
-                <Button
-                  size="sm"
-                  isDisabled={pending || readOnly}
-                  onClick={() => onApply(review.preview!.token)}
-                >
-                  Approve and apply verified code
-                </Button>
-              </details>
-            )}
-            {applied && b?.proposal && (
-              <section className="fuse-inline-receipt" role="status">
-                <h2>Applied to your local checkout</h2>
-                <p>
-                  The applied source matches the verified candidate. Your decisions and executed
-                  checks remain in the saved review.
-                </p>
-                <p className="fuse-inline-hash">{b?.proposal?.hash}</p>
-              </section>
-            )}
-            <footer className="fuse-inline-footer">
-              <span>
-                {review.files[0]?.path} · revision {review.revision}
-              </span>
-              <div>
-                <Button
-                  size="sm"
-                  color="tertiary"
-                  isDisabled={pending || readOnly}
-                  onClick={onRefresh}
-                >
-                  Refresh
-                </Button>
-                <button type="button" className="fuse-inline-close" onClick={collapse}>
-                  Collapse
-                </button>
-              </div>
-            </footer>
+            <p className="fuse-inline-hash">
+              {file?.path} · revision {review.revision}
+            </p>
           </div>
         )}
       </article>
