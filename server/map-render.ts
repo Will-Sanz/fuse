@@ -130,7 +130,7 @@ export function renderMap(map: RepoMap, highlight: MapHighlight = {}, title = ''
       const { x, y } = pos.get(n.id)!;
       const [fill, stroke, ink] = tones[tone(n.id)];
       const name = n.id === '(root)' ? 'repository root' : n.id;
-      return `<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/><text x="${x + 14}" y="${y + 25}" font-size="16" font-weight="600" fill="${ink}">${escape(clip(name, 24))}/</text><text x="${x + 14}" y="${y + 47}" font-size="13" fill="#667085">${n.files} file${n.files === 1 ? '' : 's'} · ${escape(clip(n.top.split('/').at(-1)!, 20))}</text>`;
+      return `<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/><text x="${x + 14}" y="${y + 25}" font-size="16" font-weight="600" fill="${ink}">${escape(clip(name, 24))}/</text><text x="${x + 14}" y="${y + 47}" font-size="13" fill="#667085">${n.files} file${n.files === 1 ? '' : 's'}</text>`;
     })
     .join('');
   const used = new Set(graph.nodes.map((n) => tone(n.id)));
@@ -148,7 +148,7 @@ export function renderMap(map: RepoMap, highlight: MapHighlight = {}, title = ''
       return `<rect x="${left + i * 190}" y="${height - 38}" width="14" height="14" rx="3" fill="${fill}" stroke="${stroke}"/><text x="${left + i * 190 + 22}" y="${height - 26}" font-size="13" fill="#475467">${label}</text>`;
     })
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#98a2b3"/></marker><marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f79009"/></marker></defs><rect width="100%" height="100%" fill="#fbfbfd"/>${title ? `<text x="${left}" y="44" font-size="22" font-weight="600" fill="#182230">${escape(title)}</text>` : ''}<text x="${left}" y="${title ? 70 : 30}" font-size="13" fill="#667085">${map.files.length} files · ${map.edges.length} imports · commit ${map.commit.slice(0, 7)} · arrows point to what is imported</text>${edges}${boxes}${legend}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#98a2b3"/></marker><marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f79009"/></marker></defs><rect width="100%" height="100%" fill="#fbfbfd"/>${title ? `<text x="${left}" y="44" font-size="22" font-weight="600" fill="#182230">${escape(title)}</text>` : ''}<text x="${left}" y="${title ? 70 : 30}" font-size="13" fill="#667085">Arrows point from a folder to the folders it imports.</text>${edges}${boxes}${legend}</svg>`;
 }
 
 export const mapPng = (svg: string) =>

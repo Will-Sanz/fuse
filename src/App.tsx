@@ -312,24 +312,17 @@ export default function App() {
                   .
                 </p>
               )}
-            </section>
-            {!isShowcase && (
-              <section className="step-section" aria-labelledby="repo-heading">
-                <div className="section-heading">
-                  <span className="step-number map-step" aria-hidden="true">
-                    <Dataflow03 />
-                  </span>
-                  <div>
-                    <h2 id="repo-heading">Where this sits in the repository</h2>
-                    <p>
-                      Files that depend on both sides are where Git-clean changes can still
-                      interact. Built from imports, not AI.
-                    </p>
-                  </div>
+              {!isShowcase && (
+                <div className="review-map-block" aria-labelledby="repo-heading">
+                  <h3 id="repo-heading">Where the changes meet</h3>
+                  <p>
+                    Files that import code changed on both sides. Git can merge these changes
+                    cleanly while the combined behavior still breaks.
+                  </p>
+                  <ReviewMap reviewId={review.id} />
                 </div>
-                <ReviewMap reviewId={review.id} />
-              </section>
-            )}
+              )}
+            </section>
             <section className="step-section" aria-labelledby="visual-heading">
               <div className="section-heading">
                 <span className="step-number">02</span>
