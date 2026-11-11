@@ -23,6 +23,9 @@ import { InputError } from './engine';
 import { commonDir } from './git';
 import { generateVisual } from './visual-ai';
 import { renderVisual, visualPng } from './visual-renderer';
+import { cachedMap, firstMeetings, mapSummary, mapView, reviewOverlay } from './map-service';
+import { renderMap } from './map-render';
+import { cachedLabels, labelMap } from './map-labels';
 
 export function createReviewApp(options: { repo?: string; dataDir?: string } = {}) {
   const directory = resolve(options.dataDir || 'data/demos');
@@ -153,6 +156,60 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
         .parse(req.body),
       { store } = find(req.params.id);
     res.json(linkCommit(store.repo, req.params.id, b.revision, b.commit));
+  });
+  const svgHeaders = { 'Content-Security-Policy': "default-src 'none'; style-src 'none'; sandbox" };
+  const mapQuery = z
+    .object({ ref: z.string().max(300).optional(), focus: z.string().max(500).optional() })
+    .strict();
+  const mapRepo = () => {
+    if (!options.repo)
+      throw new InputError('The repository map is available from a repository review server.');
+    return options.repo;
+  };
+  router.get('/map', async (req, res) => {
+    const q = mapQuery.parse(req.query);
+    const view = await mapView({ repo: mapRepo(), ...q });
+    const map = cachedMap(mapRepo(), q.ref || 'HEAD');
+    res.json({ ...(view.data as object), files: map.files, edges: map.edges });
+  });
+  router.get('/map.svg', async (req, res) => {
+    const view = await mapView({ repo: mapRepo(), ...mapQuery.parse(req.query) });
+    res.type('image/svg+xml').set(svgHeaders).send(view.svg);
+  });
+  router.post('/map/labels', async (req, res) => {
+    const b = z
+      .object({
+        ref: z.string().max(300).optional(),
+        paths: z.array(z.string().max(500)).max(60).optional(),
+        regenerate: z.boolean().optional(),
+      })
+      .strict()
+      .parse(req.body);
+    res.json(await labelMap(mapRepo(), cachedMap(mapRepo(), b.ref || 'HEAD'), b));
+  });
+  router.get('/reviews/:id/map', (req, res) => {
+    const { review } = find(req.params.id);
+    const { maps, ...overlay } = reviewOverlay(review);
+    res.json({
+      ...overlay,
+      summary: mapSummary(maps.base),
+      labels: cachedLabels(review.repository, maps.base),
+    });
+  });
+  router.get('/reviews/:id/map.svg', (req, res) => {
+    const { review } = find(req.params.id);
+    const overlay = reviewOverlay(review);
+    res
+      .type('image/svg+xml')
+      .set(svgHeaders)
+      .send(
+        renderMap(overlay.maps.base, {
+          a: overlay.changedA,
+          b: overlay.changedB,
+          meet: firstMeetings(overlay.interactions).map((i) => i.file),
+          labels: { meet: 'where both changes meet' },
+        }),
+      );
   });
   router.get('/reviews/:id/audit', (req, res) => {
     res.attachment('fuse-decision.json').json(find(req.params.id).review);
