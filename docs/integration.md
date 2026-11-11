@@ -134,6 +134,25 @@ The local server binds to loopback and the launch-selected repository. Demo mode
 
 These endpoints are local-only. The Vercel website has a browser adapter for prepared examples and downloadable engine outputs. Its `/api/visual` backend is separate from local review endpoints: it authorizes the team token, bounds the request, calls the fixed server-side model, and returns the scene and provider provenance. It cannot read or change a local repository. The shared OpenAI key remains a Vercel secret; team access is not a spending cap.
 
+## Repository map
+
+`fuse_map` and `fuse map` describe how a TypeScript repository fits together, for code a person did not write or an agent generated. The map is built **without AI**: Fuse reads files from a pinned commit through Git (never the working tree), parses them in memory with the TypeScript compiler, and returns import edges, statically resolvable cross-file calls, fan-in and fan-out, a PageRank ordering of files to read first, import cycles, entry points, external packages, and every file it skipped with the reason. Nothing in the repository is executed, configuration files are parsed rather than run, and the same commit always produces the same map. Maps are cached under the common Git directory's `fuse/maps/` by commit and analyzer version.
+
+| Tool              | Arguments                                           | Effect                                                                                              |
+| ----------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `fuse_map`        | optional `ref`, `focus`, `a`, `b`, `base`, `detail` | Bounded map summary plus a folder-level PNG. `focus` = one file; `a`/`b` = where two branches meet. |
+| `fuse_map_labels` | optional `ref`, `paths` (max 60), `regenerate`      | Opt-in AI descriptions for map files. Sends bounded, sanitized source through the shared service.   |
+
+With `a` and `b`, Fuse maps the merge base (or `base`) and both sides, then reports each side's changed files and every file that transitively depends on something **both** sides changed, with one shortest import path per side as evidence. This is where Git-clean changes can still interact. It is a review candidate, not proof of a behavioral conflict. New dependencies that cross top-level folders are reported separately. The browser review shows the same overlay under "Where this sits in the repository"; worktree sessions use their committed HEAD and say so.
+
+Limits: 2,000 files, 100 KB per file, 20 MB total and a 30-second analysis budget. `node_modules`, build output, vendor folders, declaration and minified files are ignored; symlinks, submodules and oversized files are listed as skipped. Only the root `tsconfig.json` (and in-repository `extends`) is read, for `baseUrl`, `paths` and `allowJs`. Callbacks, dynamic dispatch and runtime configuration are not modeled.
+
+**AI labels are optional and constrained.** The model receives one folder batch at a time (at most 20 files, 6,000 characters of source each) and may only return a summary of at most 90 characters per file it was sent, citing one to three names that file declares. A response naming any other file is rejected after one repair attempt. A label whose citations are not real declarations, or that contains links, markup or line breaks, is dropped. Files whose path looks like a credential or whose content matches a known token pattern are never sent; invisible and bidirectional Unicode is stripped before sending and flagged on the map. Labels are cached per file version and marked as AI-written wherever they appear. The model cannot add, remove or change any part of the map.
+
+The hosted labels endpoint is `api/map-labels`, separate from `api/visual`, with its own output schema and a 160 KB request ceiling. Team access is still not a spending cap.
+
+CLI: `fuse map [--ref REF] [--focus PATH] [--a REF --b REF [--base REF]] [--svg FILE] [--full] [--json]` and `fuse map-labels [--file PATH] [--regenerate] [--json]`. HTTP (local only): `GET /api/map` (`ref`, `focus`), `GET /api/map.svg`, `POST /api/map/labels`, `GET /api/reviews/:id/map`, `GET /api/reviews/:id/map.svg`. The browser map is at `/?view=map`.
+
 ## Behavioral tool additions
 
 - `fuse_report_issues`: `id`, `revision`, `report` with `sourceVersion`, assessment,

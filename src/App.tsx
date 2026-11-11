@@ -1,9 +1,17 @@
 import { BehaviorReview } from './components/BehaviorReview';
 import { useEffect, useState } from 'react';
-import { ArrowRight, CheckCircle, Code02, RefreshCw01, Terminal } from '@untitledui/icons';
+import {
+  ArrowRight,
+  CheckCircle,
+  Code02,
+  Dataflow03,
+  RefreshCw01,
+  Terminal,
+} from '@untitledui/icons';
 import { Button } from './untitledui/components/base/buttons/button';
 import { LoadingIndicator } from './untitledui/components/application/loading-indicator/loading-indicator';
 import { MeetingSetup, type Connection } from './components/MeetingSetup';
+import { RepoMapView, ReviewMap } from './components/RepoMap';
 import type { Review } from '../shared/review';
 import { actionDecision, type VisualSpec } from '../shared/visual';
 import { api, isShowcase } from './api';
@@ -53,6 +61,7 @@ function Code({
     </pre>
   );
 }
+const mapPage = new URLSearchParams(location.search).get('view') === 'map';
 export default function App() {
   const [review, setReview] = useState<Review>();
   const [connection, setConnection] = useState<Connection>();
@@ -73,6 +82,7 @@ export default function App() {
         const mode = await api<Connection>('/mode');
         if (!active) return;
         setConnection(mode);
+        if (mapPage) return;
         const id = new URLSearchParams(location.search).get('review');
         const r = id
           ? await api<Review>(`/reviews/${id}`)
@@ -158,14 +168,26 @@ export default function App() {
         <a href="/" className="wordmark" aria-label="Fuse home">
           <span className="fuse-symbol">f</span>fuse
         </a>
-        <Button
-          size="sm"
-          color="secondary"
-          iconLeading={Terminal}
-          onClick={() => setSetupOpen(true)}
-        >
-          Run live MCP
-        </Button>
+        <div className="topbar-actions">
+          {connection?.mode === 'local' && !isShowcase && (
+            <Button
+              size="sm"
+              color={mapPage ? 'primary' : 'secondary'}
+              iconLeading={Dataflow03}
+              href="/?view=map"
+            >
+              Repository map
+            </Button>
+          )}
+          <Button
+            size="sm"
+            color="secondary"
+            iconLeading={Terminal}
+            onClick={() => setSetupOpen(true)}
+          >
+            Run live MCP
+          </Button>
+        </div>
       </header>
       <main>
         {error && (
@@ -180,7 +202,9 @@ export default function App() {
             </Button>
           </div>
         )}
-        {loading ? (
+        {mapPage && !loading && !isShowcase ? (
+          <RepoMapView />
+        ) : loading ? (
           <div className="loading-state">
             <LoadingIndicator label="Opening the change…" />
           </div>
@@ -289,6 +313,23 @@ export default function App() {
                 </p>
               )}
             </section>
+            {!isShowcase && (
+              <section className="step-section" aria-labelledby="repo-heading">
+                <div className="section-heading">
+                  <span className="step-number map-step" aria-hidden="true">
+                    <Dataflow03 />
+                  </span>
+                  <div>
+                    <h2 id="repo-heading">Where this sits in the repository</h2>
+                    <p>
+                      Files that depend on both sides are where Git-clean changes can still
+                      interact. Built from imports, not AI.
+                    </p>
+                  </div>
+                </div>
+                <ReviewMap reviewId={review.id} />
+              </section>
+            )}
             <section className="step-section" aria-labelledby="visual-heading">
               <div className="section-heading">
                 <span className="step-number">02</span>
