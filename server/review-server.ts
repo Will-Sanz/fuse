@@ -23,7 +23,7 @@ import { InputError } from './engine';
 import { commonDir } from './git';
 import { generateVisual } from './visual-ai';
 import { renderVisual, visualPng } from './visual-renderer';
-import { cachedMap, firstMeetings, mapSummary, mapView, reviewOverlay } from './map-service';
+import { cachedMap, mapSummary, mapView, meetingFiles, reviewOverlay } from './map-service';
 import { renderMap } from './map-render';
 import { cachedLabels, labelMap } from './map-labels';
 
@@ -216,7 +216,7 @@ export function createReviewApp(options: { repo?: string; dataDir?: string } = {
         renderMap(overlay.maps.base, {
           a: overlay.changedA,
           b: overlay.changedB,
-          meet: firstMeetings(overlay.interactions).map((i) => i.file),
+          meet: meetingFiles(overlay),
         }),
       );
   });

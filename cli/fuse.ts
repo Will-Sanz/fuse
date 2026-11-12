@@ -63,6 +63,7 @@ export function describeMap(data: Record<string, unknown>) {
     startHere?: { path: string; fanIn: number }[];
     cycles?: string[][];
     interactions?: { file: string; viaA: string[]; viaB: string[] }[];
+    functionInteractions?: { function: string; viaA: string[]; viaB: string[] }[];
     changedA?: string[];
     changedB?: string[];
     file?: { path: string };
@@ -70,17 +71,40 @@ export function describeMap(data: Record<string, unknown>) {
     imports?: { to: string }[];
     impact?: { dependents: number };
   };
-  if (d.interactions)
-    return [
+  if (d.interactions) {
+    const fn = (id: string) => {
+      const at = id.lastIndexOf('#');
+      return `${id.slice(at + 1)}() in ${id.slice(0, at)}`;
+    };
+    const nearest = <T extends { viaA: string[]; viaB: string[] }>(list: T[]) => {
+      const best = Math.min(...list.map((i) => i.viaA.length + i.viaB.length));
+      return list.filter((i) => i.viaA.length + i.viaB.length === best);
+    };
+    const fns = d.functionInteractions ?? [];
+    const lines = [
       `A changed: ${d.changedA?.join(', ') || 'nothing'}`,
       `B changed: ${d.changedB?.join(', ') || 'nothing'}`,
-      d.interactions.length
-        ? 'Possible interactions (review candidates, not proof):'
-        : 'No file depends on changes from both sides.',
-      ...d.interactions.map(
-        (i) => `  ${i.file}\n    A: ${i.viaA.join(' -> ')}\n    B: ${i.viaB.join(' -> ')}`,
-      ),
-    ].join('\n');
+      '',
+    ];
+    if (fns.length) {
+      const first = nearest(fns);
+      lines.push('Both changes meet in:');
+      for (const i of first)
+        lines.push(
+          `  ${fn(i.function)}`,
+          `    A: calls ${i.viaA.length > 1 ? fn(i.viaA[i.viaA.length - 1]) : 'nothing; A changed it'}`,
+          `    B: calls ${i.viaB.length > 1 ? fn(i.viaB[i.viaB.length - 1]) : 'nothing; B changed it'}`,
+        );
+      if (fns.length > first.length)
+        lines.push(`  ${fns.length - first.length} more functions reach both through these.`);
+    } else if (d.interactions.length) {
+      lines.push('Files that import both changes:');
+      for (const i of nearest(d.interactions))
+        lines.push(`  ${i.file}`, `    A: ${i.viaA.join(' -> ')}`, `    B: ${i.viaB.join(' -> ')}`);
+    } else lines.push('No function or file reaches code changed on both sides.');
+    lines.push('', 'Static call and import paths: where to look, not proof of a conflict.');
+    return lines.join('\n');
+  }
   if (d.file)
     return [
       d.file.path,

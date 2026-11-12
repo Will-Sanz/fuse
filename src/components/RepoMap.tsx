@@ -44,12 +44,18 @@ interface Interaction {
   viaA: string[];
   viaB: string[];
 }
+interface FunctionInteraction {
+  function: string;
+  viaA: string[];
+  viaB: string[];
+}
 type Overlay =
   | { unavailable: string }
   | {
       changedA: string[];
       changedB: string[];
       interactions: Interaction[];
+      functionInteractions: FunctionInteraction[];
       notes: string[];
       summary: { folderEdges: FolderEdge[] };
       diffA: { crossFolderAdded: FolderEdge[] };
@@ -373,6 +379,35 @@ export function RepoMapView({ aiConfigured }: { aiConfigured: boolean }) {
   );
 }
 
+/** `path#name` call ids: the function name to show, and the file it lives in. */
+const fnParts = (id: string) => {
+  const at = id.lastIndexOf('#');
+  return { file: id.slice(0, at), name: id.slice(at + 1) };
+};
+const Fn = ({ id, withFile = true }: { id: string; withFile?: boolean }) => {
+  const { file, name } = fnParts(id);
+  return (
+    <>
+      <code className="map-path">{name}()</code>
+      {withFile && (
+        <span className="map-fn-file">
+          {' '}
+          in <Path value={file} />
+        </span>
+      )}
+    </>
+  );
+};
+/** Nearest meetings only: everything at the shortest combined distance. */
+function nearestOf<T extends { viaA: string[]; viaB: string[] }>(list: T[]) {
+  if (!list.length) return { first: [] as T[], rest: [] as T[] };
+  const best = Math.min(...list.map((i) => i.viaA.length + i.viaB.length));
+  return {
+    first: list.filter((i) => i.viaA.length + i.viaB.length === best),
+    rest: list.filter((i) => i.viaA.length + i.viaB.length !== best),
+  };
+}
+
 /** Where a reviewed change sits in the repository, and where both sides' changes meet. */
 export function ReviewMap({
   reviewId,
@@ -404,6 +439,7 @@ export function ReviewMap({
     : 0;
   const first = overlay.interactions.filter((i) => i.viaA.length + i.viaB.length === nearest);
   const further = overlay.interactions.filter((i) => !first.includes(i));
+  const fnMeet = nearestOf(overlay.functionInteractions ?? []);
   /** How the meeting file reaches a side's change, in import order. */
   const route = (via: string[]) =>
     via.length === 1 ? (
@@ -441,7 +477,60 @@ export function ReviewMap({
           {first.length ? ` The changes meet in ${first.map((i) => i.file).join(', ')}.` : ''}
         </figcaption>
       </figure>
-      {first.length ? (
+      {fnMeet.first.length > 0 && (
+        <div className="meet-list">
+          {fnMeet.first.slice(0, 4).map((i) => (
+            <div className="meet" key={i.function}>
+              <p className="meet-file">
+                <Fn id={i.function} />
+              </p>
+              {(['a', 'b'] as const).map((k) => {
+                const via = k === 'a' ? i.viaA : i.viaB;
+                return (
+                  <p className="map-via" key={k}>
+                    <span className="side-tag" data-side={k} title={sides[k]} aria-hidden="true">
+                      {k.toUpperCase()}
+                    </span>
+                    <span>
+                      <span className="sr-only">
+                        Change {k.toUpperCase()} ({sides[k]}):{' '}
+                      </span>
+                      {via.length === 1 ? (
+                        'changed this function'
+                      ) : (
+                        <>
+                          calls <Fn id={via[via.length - 1]} />
+                          {via.length > 2 && (
+                            <>
+                              {' '}
+                              through{' '}
+                              {via.slice(1, -1).map((f, n) => (
+                                <Fragment key={f}>
+                                  {n > 0 && ', '}
+                                  <Fn id={f} withFile={false} />
+                                </Fragment>
+                              ))}
+                            </>
+                          )}
+                          , which {k.toUpperCase()} changed
+                        </>
+                      )}
+                    </span>
+                  </p>
+                );
+              })}
+            </div>
+          ))}
+          <More shown={Math.min(4, fnMeet.first.length)} total={fnMeet.first.length} />
+          {fnMeet.rest.length > 0 && (
+            <p className="map-hint">
+              {plural(fnMeet.rest.length, 'more function')} further up the call chain also reach
+              both changes.
+            </p>
+          )}
+        </div>
+      )}
+      {fnMeet.first.length > 0 ? null : first.length ? (
         <div className="meet-list">
           {first.slice(0, 6).map((i) => (
             <div className="meet" key={i.file}>

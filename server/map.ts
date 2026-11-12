@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { dirname, posix } from 'node:path';
 import { Node, Project, SyntaxKind, ts, type SourceFile } from 'ts-morph';
@@ -13,7 +14,7 @@ import { commit, git, root } from './git';
  * always produces the same map. AI labels, if any, are layered on later and never add edges.
  */
 
-export const MAP_VERSION = 1;
+export const MAP_VERSION = 2;
 export const mapLimits = {
   files: 2000,
   fileBytes: 100_000,
@@ -29,6 +30,8 @@ export interface MapFile {
   test: boolean;
   exports: string[];
   functions: string[];
+  /** A short hash of each top-level function's source, to tell which functions a change touched. */
+  functionHashes: Record<string, string>;
   /** Every top-level declared name: functions, classes, interfaces, types, enums and variables. */
   declarations: string[];
   /** Invisible or bidirectional Unicode outside a leading BOM. A finding in its own right. */
@@ -278,6 +281,21 @@ function topLevelDeclarations(sf: SourceFile) {
       names.add(s.getName()!);
   }
   return [...names].sort(byString);
+}
+function functionHashes(sf: SourceFile) {
+  const out: Record<string, string> = {};
+  const hash = (text: string) => createHash('sha256').update(text).digest('hex').slice(0, 16);
+  for (const statement of sf.getStatements()) {
+    if (Node.isFunctionDeclaration(statement) && statement.getName())
+      out[statement.getName()!] = hash(statement.getText());
+    if (Node.isVariableStatement(statement))
+      for (const d of statement.getDeclarations()) {
+        const init = d.getInitializer();
+        if (init && (Node.isArrowFunction(init) || Node.isFunctionExpression(init)))
+          out[d.getName()] = hash(d.getText());
+      }
+  }
+  return Object.fromEntries(Object.entries(out).sort(([x], [y]) => byString(x, y)));
 }
 function topLevelFunctions(sf: SourceFile) {
   const names: string[] = [];
@@ -535,6 +553,7 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
       test: isTest(path),
       exports: [...sf.getExportedDeclarations().keys()].sort(byString),
       functions: topLevelFunctions(sf),
+      functionHashes: functionHashes(sf),
       declarations: topLevelDeclarations(sf),
       hiddenUnicode: HIDDEN.test(body.replace(/^\uFEFF/, '')),
       ...(SECRET_PATH.test(path)
@@ -803,9 +822,46 @@ export function impactCone(map: RepoMap, changed: string[]) {
  * other side's change, or imports a file the other side deleted, is caught. Each result is a
  * review candidate with its import paths as evidence, not proof of a behavioral conflict.
  */
+/**
+ * Top-level functions a side added, removed or edited, as `path#name`. Uses per-function source
+ * hashes, so a change elsewhere in the same file doesn't count against an untouched function.
+ */
+export function changedFunctions(base: RepoMap, head: RepoMap) {
+  const before = new Map(base.files.map((f) => [f.path, f.functionHashes ?? {}]));
+  const after = new Map(head.files.map((f) => [f.path, f.functionHashes ?? {}]));
+  const out: string[] = [];
+  for (const path of changedFiles(base, head)) {
+    const x = before.get(path) ?? {},
+      y = after.get(path) ?? {};
+    for (const name of new Set([...Object.keys(x), ...Object.keys(y)]))
+      if (x[name] !== y[name]) out.push(`${path}#${name}`);
+  }
+  return out.sort(byString);
+}
+
 export function possibleInteractions(base: RepoMap, a: RepoMap, b: RepoMap) {
   const changedA = changedFiles(base, a),
     changedB = changedFiles(base, b);
+  // Function level first: callers that reach a function each side changed. Sharper than files,
+  // and the union of all three call graphs catches a side that starts calling the other's change.
+  const fnA = changedFunctions(base, a),
+    fnB = changedFunctions(base, b);
+  const calls = [...base.calls, ...a.calls, ...b.calls];
+  const callConeA = coneOver(calls, fnA),
+    callConeB = coneOver(calls, fnB);
+  const live = new Set(
+    [...a.files, ...b.files].flatMap((f) =>
+      Object.keys(f.functionHashes ?? {}).map((n) => `${f.path}#${n}`),
+    ),
+  );
+  const functionInteractions = [...callConeA.keys()]
+    .filter((fn) => callConeB.has(fn) && live.has(fn))
+    .map((fn) => ({ function: fn, viaA: callConeA.get(fn)!, viaB: callConeB.get(fn)! }))
+    .sort(
+      (x, y) =>
+        x.viaA.length + x.viaB.length - (y.viaA.length + y.viaB.length) ||
+        byString(x.function, y.function),
+    );
   const union = [...base.edges, ...a.edges, ...b.edges];
   const coneA = coneOver(union, changedA),
     coneB = coneOver(union, changedB);
@@ -813,6 +869,9 @@ export function possibleInteractions(base: RepoMap, a: RepoMap, b: RepoMap) {
   return {
     changedA,
     changedB,
+    changedFunctionsA: fnA,
+    changedFunctionsB: fnB,
+    functionInteractions,
     interactions: [...coneA.keys()]
       .filter((p) => coneB.has(p) && exists.has(p))
       .map((file) => ({ file, viaA: coneA.get(file)!, viaB: coneB.get(file)! }))

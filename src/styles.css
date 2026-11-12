@@ -822,6 +822,15 @@ main {
 .meet-file .map-path {
   font-weight: 600;
 }
+.meet-file .map-fn-file .map-path,
+.map-fn-file .map-path {
+  font-weight: 400;
+  color: #475467;
+}
+.map-fn-file {
+  font-size: 13px;
+  color: #475467;
+}
 .map-via {
   display: flex;
   align-items: baseline;

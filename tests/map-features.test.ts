@@ -154,7 +154,7 @@ describe('map service and rendering', () => {
     expect(data.interactions.map((i) => i.file)).toEqual(['src/checkout/total.ts', 'src/app.ts']);
     expect(view.svg).toContain('where both changes meet');
     expect(describeMap(view.data as Record<string, unknown>)).toMatch(
-      /src\/checkout\/total\.ts\n {4}A: src\/checkout\/total\.ts -> src\/pricing\/discount\.ts/,
+      /Both changes meet in:\n {2}total\(\) in src\/checkout\/total\.ts\n {4}A: calls discount\(\) in src\/pricing\/discount\.ts/,
     );
   });
 });
@@ -469,5 +469,84 @@ describe('interfaces after review', () => {
       }),
     );
     expect(map.files[0].hiddenUnicode).toBe(false);
+  });
+});
+
+describe('function-level meetings', () => {
+  const pricing = {
+    'src/pricing.ts':
+      'export function discount(t: number) { return t > 100 ? 10 : 0; }\nexport function label(t: number) { return `$${t}`; }\n',
+    'src/shipping.ts': 'export function shipping(t: number) { return t > 50 ? 0 : 5; }\n',
+    'src/total.ts':
+      "import { discount, label } from './pricing';\nimport { shipping } from './shipping';\nexport function total(t: number) { return t - discount(t) + shipping(t); }\nexport function receipt(t: number) { return label(total(t)); }\n",
+    'src/report.ts':
+      "import { label } from './pricing';\nexport function report(t: number) { return label(t); }\n",
+  };
+
+  it('names the function that calls both changes and what each side changed', async () => {
+    const repo = repoWith(pricing);
+    branch(repo, 'agent-a', {
+      'src/pricing.ts': pricing['src/pricing.ts'].replace('t > 100 ? 10 : 0', 't * 0.1'),
+    });
+    branch(repo, 'agent-b', {
+      'src/shipping.ts': 'export function shipping(t: number) { return t > 80 ? 0 : 5; }\n',
+    });
+    const data = (await mapView({ repo, a: 'agent-a', b: 'agent-b' })).data as {
+      changedFunctionsA: string[];
+      functionInteractions: { function: string; viaA: string[]; viaB: string[] }[];
+    };
+    expect(data.changedFunctionsA).toEqual(['src/pricing.ts#discount']);
+    expect(data.functionInteractions[0]).toEqual({
+      function: 'src/total.ts#total',
+      viaA: ['src/total.ts#total', 'src/pricing.ts#discount'],
+      viaB: ['src/total.ts#total', 'src/shipping.ts#shipping'],
+    });
+    // receipt() reaches both only through total(), so it ranks after the nearest meeting.
+    expect(data.functionInteractions.map((i) => i.function)).toEqual([
+      'src/total.ts#total',
+      'src/total.ts#receipt',
+    ]);
+  });
+
+  it('ignores an edit to a different function in a file the other side depends on', async () => {
+    const repo = repoWith(pricing);
+    branch(repo, 'agent-a', {
+      'src/pricing.ts': pricing['src/pricing.ts'].replace('`$${t}`', '`USD ${t}`'),
+    });
+    branch(repo, 'agent-b', {
+      'src/shipping.ts': 'export function shipping(t: number) { return t > 80 ? 0 : 5; }\n',
+    });
+    const data = (await mapView({ repo, a: 'agent-a', b: 'agent-b' })).data as {
+      changedFunctionsA: string[];
+      functionInteractions: { function: string }[];
+      interactions: { file: string }[];
+    };
+    expect(data.changedFunctionsA).toEqual(['src/pricing.ts#label']);
+    // Files alone would flag total.ts; at function level only receipt() calls both label() and total().
+    expect(data.interactions.map((i) => i.file)).toContain('src/total.ts');
+    expect(data.functionInteractions.map((i) => i.function)).toEqual(['src/total.ts#receipt']);
+  });
+
+  it('returns whereChangesMeet from fuse_inspect for revision reviews', async () => {
+    const repo = repoWith(pricing);
+    branch(repo, 'agent-a', {
+      'src/pricing.ts': pricing['src/pricing.ts'].replace('t > 100 ? 10 : 0', 't * 0.1'),
+    });
+    branch(repo, 'agent-b', {
+      'src/shipping.ts': 'export function shipping(t: number) { return t > 80 ? 0 : 5; }\n',
+    });
+    const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
+    const server = createMcp();
+    await server.connect(serverSide);
+    const client = new Client({ name: 'meet-test', version: '1' });
+    await client.connect(clientSide);
+    closers.push(() => void client.close());
+    const result = (await client.callTool({
+      name: 'fuse_inspect',
+      arguments: { repo, a: 'agent-a', b: 'agent-b', detail: 'compact' },
+    })) as { content: { text?: string }[] };
+    const meet = JSON.parse(result.content.at(-1)!.text!).whereChangesMeet;
+    expect(meet.functions[0].function).toBe('src/total.ts#total');
+    expect(meet.note).toMatch(/not proof/);
   });
 });

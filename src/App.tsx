@@ -321,8 +321,8 @@ export default function App() {
                 <section className="review-map-block" aria-labelledby="repo-heading">
                   <h3 id="repo-heading">Where the changes meet</h3>
                   <p>
-                    Files that import code changed on both sides. Git can merge both changes cleanly
-                    and the combined behavior can still break.
+                    Functions and files that reach code changed on both sides. Git can merge both
+                    changes cleanly and the combined behavior can still break.
                   </p>
                   <ReviewMap
                     reviewId={review.id}

@@ -204,6 +204,19 @@ export function mapFocus(map: RepoMap, path: string) {
   };
 }
 
+/** Files to outline as the meeting point: the nearest function meetings, else the nearest files. */
+export function meetingFiles(overlay: {
+  functionInteractions: { function: string; viaA: string[]; viaB: string[] }[];
+  interactions: { file: string; viaA: string[]; viaB: string[] }[];
+}) {
+  return overlay.functionInteractions.length
+    ? firstMeetings(overlay.functionInteractions).map((i) =>
+        i.function.slice(0, i.function.lastIndexOf('#')),
+      )
+    : overlay.interactions.length
+      ? firstMeetings(overlay.interactions).map((i) => i.file)
+      : [];
+}
 /** The interactions nearest the changes: where the two sides first come together. */
 export function firstMeetings<T extends { viaA: string[]; viaB: string[] }>(interactions: T[]) {
   const best = Math.min(...interactions.map((i) => i.viaA.length + i.viaB.length));
@@ -297,7 +310,7 @@ export async function mapView(request: MapRequest) {
     const svg = renderMap(maps.base, {
       a: overlay.changedA,
       b: overlay.changedB,
-      meet: firstMeetings(overlay.interactions).map((i) => i.file),
+      meet: meetingFiles(overlay),
       labels: { meet: 'where both changes meet' },
     });
     return {
@@ -332,4 +345,29 @@ export async function mapView(request: MapRequest) {
         : { ...mapSummary(map), labels, ...labelNote },
     svg: renderMap(map),
   };
+}
+
+/**
+ * A short, bounded answer to "where do these two changes meet?" for agents: the nearest functions
+ * that call into both sides' changes, then the nearest files that import both. Never throws;
+ * a review it can't map says why.
+ */
+export function whereChangesMeet(review: Review) {
+  try {
+    const overlay = reviewOverlay(review);
+    if ('unavailable' in overlay) return { unavailable: overlay.unavailable };
+    const fns = overlay.functionInteractions.length
+      ? firstMeetings(overlay.functionInteractions)
+      : [];
+    const files = overlay.interactions.length ? firstMeetings(overlay.interactions) : [];
+    return {
+      functions: fns.slice(0, 5),
+      otherFunctions: overlay.functionInteractions.length - Math.min(fns.length, 5),
+      files: files.slice(0, 5),
+      otherFiles: overlay.interactions.length - Math.min(files.length, 5),
+      note: 'Static call and import paths at the reviewed commits: where to look, not proof of a conflict. Each path starts at the meeting point and ends at the changed code.',
+    };
+  } catch (error) {
+    return { unavailable: `The repository map couldn’t be built: ${(error as Error).message}` };
+  }
 }
