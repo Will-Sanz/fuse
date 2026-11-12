@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { AlertTriangle } from '@untitledui/icons';
 import { Button } from '../untitledui/components/base/buttons/button';
 import { LoadingIndicator } from '../untitledui/components/application/loading-indicator/loading-indicator';
@@ -12,29 +12,28 @@ interface Label {
 interface Ranked {
   path: string;
   fanIn: number;
-  fanOut: number;
-  rank: number;
-  exports: string[];
+}
+interface FolderEdge {
+  from: string;
+  to: string;
 }
 interface Summary {
   commit: string;
   counts: Record<string, number>;
   startHere: Ranked[];
+  folderEdges: FolderEdge[];
   entryPoints: string[];
   cycles: string[][];
-  externals: string[];
   hiddenUnicode: string[];
   unresolved: { from: string; specifier: string }[];
   skipped: { path: string; reason: string }[];
-  warnings: string[];
+  totals: Record<string, number>;
   labels: Record<string, Label>;
 }
 interface Focus {
-  file: { path: string; exports: string[]; test: boolean };
-  metrics: { fanIn: number; fanOut: number };
-  imports: { to: string; kinds: string[] }[];
+  file: { path: string };
+  imports: { to: string }[];
   importedBy: { from: string }[];
-  callsIn: { from: string; to: string }[];
   externals: string[];
   impact: { dependents: number; paths: string[][] };
   inCycle: string[] | null;
@@ -45,33 +44,60 @@ interface Interaction {
   viaA: string[];
   viaB: string[];
 }
-interface Overlay {
-  changedA: string[];
-  changedB: string[];
-  interactions: Interaction[];
-  notes: string[];
-  diffA: { crossFolderAdded: { from: string; to: string }[] };
-  diffB: { crossFolderAdded: { from: string; to: string }[] };
-}
+type Overlay =
+  | { unavailable: string }
+  | {
+      changedA: string[];
+      changedB: string[];
+      interactions: Interaction[];
+      notes: string[];
+      summary: { folderEdges: FolderEdge[] };
+      diffA: { crossFolderAdded: FolderEdge[] };
+      diffB: { crossFolderAdded: FolderEdge[] };
+    };
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
-const Path = ({ value }: { value: string }) => <code className="map-path">{value}</code>;
+const folderName = (id: string) => (id === '(root)' ? 'root files' : `${id}/`);
+
+/** A path that may break after each folder separator, never inside a name. */
+const Path = ({ value }: { value: string }) => (
+  <code className="map-path">
+    {value.split('/').map((part, i, all) => (
+      <Fragment key={i}>
+        {part}
+        {i < all.length - 1 && (
+          <>
+            /<wbr />
+          </>
+        )}
+      </Fragment>
+    ))}
+  </code>
+);
+/** An import chain. The arrow always means "imports", here and in the folder picture. */
 const Chain = ({ paths }: { paths: string[] }) => (
   <span className="map-chain">
     {paths.map((p, i) => (
-      <span key={p}>
-        {i > 0 && <span className="map-arrow" aria-label="reaches" />}
+      <span key={p + i}>
+        {i > 0 && (
+          <>
+            <span className="map-arrow" aria-hidden="true" />
+            <span className="sr-only"> imports </span>
+          </>
+        )}
         <Path value={p} />
       </span>
     ))}
   </span>
 );
-function List({ paths, open }: { paths: string[]; open: (path: string) => void }) {
+const More = ({ shown, total }: { shown: number; total: number }) =>
+  total > shown ? <p className="map-hint">And {total - shown} more.</p> : null;
+function Links({ paths, open }: { paths: string[]; open: (path: string) => void }) {
   return (
     <ul className="map-links">
       {paths.map((p) => (
         <li key={p}>
-          <button onClick={() => open(p)}>
+          <button type="button" onClick={() => open(p)}>
             <Path value={p} />
           </button>
         </li>
@@ -79,26 +105,46 @@ function List({ paths, open }: { paths: string[]; open: (path: string) => void }
     </ul>
   );
 }
+/** Screen-reader text for the folder picture, built from the same data. */
+function describeFolders(edges: FolderEdge[]) {
+  if (!edges.length) return 'No folder imports another.';
+  return `${edges
+    .slice(0, 30)
+    .map((e) => `${folderName(e.from)} imports ${folderName(e.to)}`)
+    .join('; ')}${edges.length > 30 ? `; and ${edges.length - 30} more` : ''}.`;
+}
 
-/** Chains read in the direction a change travels: from the changed file to the files it reaches. */
-const outward = (importPath: string[]) => [...importPath].reverse();
-
-/** The whole-repository map: picture, most-used files, and one file at a time. */
-export function RepoMapView() {
+/** The whole-repository map: picture, most-imported files, and one file at a time. */
+export function RepoMapView({ aiConfigured }: { aiConfigured: boolean }) {
   const [summary, setSummary] = useState<Summary>();
   const [focus, setFocus] = useState<Focus>();
+  const [loadingPath, setLoadingPath] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [version, setVersion] = useState(0);
+  const requested = useRef('');
+  const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     api<Summary>('/map').then(setSummary, (e: Error) => setError(e.message));
   }, [version]);
+  useEffect(() => {
+    if (!focus) return;
+    heading.current?.focus();
+    if (window.matchMedia('(max-width: 860px)').matches)
+      heading.current?.scrollIntoView({ block: 'start' });
+  }, [focus]);
   async function open(path: string) {
+    requested.current = path;
+    setLoadingPath(path);
     setError('');
     try {
-      setFocus(await api<Focus>(`/map?focus=${encodeURIComponent(path)}`));
+      const next = await api<Focus>(`/map?focus=${encodeURIComponent(path)}`);
+      // Ignore a slower response for a file the reader has already moved on from.
+      if (requested.current === path) setFocus(next);
     } catch (e) {
-      setError((e as Error).message);
+      if (requested.current === path) setError((e as Error).message);
+    } finally {
+      if (requested.current === path) setLoadingPath('');
     }
   }
   async function describe() {
@@ -125,7 +171,9 @@ export function RepoMapView() {
       </div>
     );
   const described = Object.keys(summary.labels).length > 0;
-  const hidden = summary.skipped.length + summary.unresolved.length;
+  const hidden = summary.totals.skipped + summary.totals.unresolved;
+  const openFile = (p: string) => void open(p);
+  const deep = focus ? focus.impact.paths.filter((p) => p.length > 2) : [];
   return (
     <div className="repo-map">
       <div className="page-heading">
@@ -136,153 +184,172 @@ export function RepoMapView() {
             commit <code>{summary.commit.slice(0, 7)}</code>
           </p>
         </div>
-        <Button size="sm" color="secondary" isLoading={busy} onClick={() => void describe()}>
-          {described ? 'Update descriptions' : 'Add file descriptions'}
-        </Button>
+        {aiConfigured && (
+          <div className="map-describe">
+            <Button size="sm" color="secondary" isLoading={busy} onClick={() => void describe()}>
+              {described ? 'Update descriptions' : 'Add file descriptions'}
+            </Button>
+            <p className="map-hint">
+              Sends up to 30 central files to the Fuse AI service to write a one-line summary of
+              each. Files that look like they hold secrets aren’t sent.
+            </p>
+          </div>
+        )}
       </div>
       {error && (
         <div className="error-banner" role="alert">
           <strong>{error}</strong>
         </div>
       )}
-      {(summary.hiddenUnicode.length > 0 || summary.cycles.length > 0) && (
+      {(summary.totals.hiddenUnicode > 0 || summary.totals.cycles > 0) && (
         <div className="map-findings" role="note">
           <AlertTriangle aria-hidden="true" />
           <div>
-            {summary.hiddenUnicode.length > 0 && (
-              <p>
-                <strong>
-                  Hidden characters in {plural(summary.hiddenUnicode.length, 'file')}.
-                </strong>{' '}
-                Invisible or right-to-left characters can make code read differently from how it
-                runs.
-              </p>
-            )}
-            {summary.hiddenUnicode.length > 0 && (
-              <List paths={summary.hiddenUnicode} open={(p) => void open(p)} />
+            {summary.totals.hiddenUnicode > 0 && (
+              <>
+                <p>
+                  <strong>
+                    Hidden characters in {plural(summary.totals.hiddenUnicode, 'file')}.
+                  </strong>{' '}
+                  Invisible or right-to-left characters can make code read differently from how it
+                  runs.
+                </p>
+                <Links paths={summary.hiddenUnicode} open={openFile} />
+                <More shown={summary.hiddenUnicode.length} total={summary.totals.hiddenUnicode} />
+              </>
             )}
             {summary.cycles.map((c) => (
               <p key={c.join()}>
                 <strong>Circular import.</strong> <Chain paths={[...c, c[0]]} />
               </p>
             ))}
+            <More shown={summary.cycles.length} total={summary.totals.cycles} />
           </div>
         </div>
       )}
-      <figure className="map-figure">
-        <img
-          src={`/api/map.svg?ref=${summary.commit}`}
-          alt="Folders in the repository, with arrows from each folder to the folders it imports"
-        />
+      <figure
+        className="map-figure"
+        tabIndex={0}
+        role="region"
+        aria-label="Folder map. Scrolls sideways on small screens."
+      >
+        <img src={`/api/map.svg?ref=${summary.commit}`} alt="" />
+        <figcaption className="sr-only">{describeFolders(summary.folderEdges)}</figcaption>
       </figure>
       <div className="map-columns">
-        <section aria-labelledby="most-used-heading">
-          <h2 id="most-used-heading">Most-used files</h2>
-          <p>
-            Imported by the most other files. Reading these first explains most of the codebase.
-          </p>
-          <ol className="map-list">
-            {summary.startHere.map((f) => (
-              <li key={f.path}>
-                <button
-                  className={focus?.file.path === f.path ? 'map-row active' : 'map-row'}
-                  aria-current={focus?.file.path === f.path || undefined}
-                  onClick={() => void open(f.path)}
-                >
-                  <span className="map-row-text">
-                    <Path value={f.path} />
-                    {summary.labels[f.path] && (
-                      <span className="map-label">{summary.labels[f.path].summary}</span>
-                    )}
-                  </span>
-                  <span className="map-meta">{plural(f.fanIn, 'importer')}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
+        <section aria-labelledby="most-imported-heading">
+          <h2 id="most-imported-heading">Most-imported files</h2>
+          <p>Files that the most other files import. Start reading here.</p>
+          {summary.startHere.length ? (
+            <ol className="map-list">
+              {summary.startHere.map((f) => {
+                const current = focus?.file.path === f.path;
+                return (
+                  <li key={f.path}>
+                    <button
+                      type="button"
+                      className={current ? 'map-row active' : 'map-row'}
+                      aria-current={current || undefined}
+                      onClick={() => openFile(f.path)}
+                    >
+                      <span className="map-row-text">
+                        <Path value={f.path} />
+                        {summary.labels[f.path] && (
+                          <span className="map-label">{summary.labels[f.path].summary}</span>
+                        )}
+                      </span>
+                      <span className="map-meta">
+                        {loadingPath === f.path ? 'Opening…' : plural(f.fanIn, 'importer')}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <p className="map-hint">No file imports another file yet.</p>
+          )}
           {described && (
             <p className="map-footnote">
-              Descriptions are written by AI from each file’s code and may be wrong.
+              Summaries are AI-written from each file’s code. Check them before relying on them.
             </p>
           )}
           {summary.entryPoints.length > 0 && (
             <>
               <h3>Entry points</h3>
               <p className="map-hint">Files nothing else imports, such as commands and servers.</p>
-              <List paths={summary.entryPoints.slice(0, 12)} open={(p) => void open(p)} />
+              <Links paths={summary.entryPoints} open={openFile} />
+              <More shown={summary.entryPoints.length} total={summary.totals.entryPoints} />
             </>
           )}
         </section>
-        <section aria-labelledby="file-heading" className="map-focus">
+        <section
+          aria-labelledby="file-heading"
+          className="map-focus"
+          aria-busy={loadingPath !== '' || undefined}
+        >
           {focus ? (
             <>
-              <h2 id="file-heading">
+              <h2 id="file-heading" ref={heading} tabIndex={-1}>
                 <Path value={focus.file.path} />
               </h2>
-              {focus.label && <p className="map-label">{focus.label.summary}</p>}
-              <dl className="map-facts">
-                <div>
-                  <dt>Imports</dt>
-                  <dd>{focus.imports.length}</dd>
-                </div>
-                <div>
-                  <dt>Imported by</dt>
-                  <dd>{focus.importedBy.length}</dd>
-                </div>
-                <div>
-                  <dt>Affected by a change</dt>
-                  <dd>{focus.impact.dependents}</dd>
-                </div>
-              </dl>
+              {focus.label && (
+                <p className="map-label">
+                  {focus.label.summary} <span className="map-ai-note">AI-written summary</span>
+                </p>
+              )}
+              <p className="map-impact">
+                {focus.impact.dependents
+                  ? `${plural(focus.impact.dependents, 'file')} depend on it, directly or through other files.`
+                  : 'No other file depends on it.'}
+              </p>
               {focus.inCycle && (
                 <p className="map-warn">
                   Part of a circular import: <Chain paths={[...focus.inCycle, focus.inCycle[0]]} />
                 </p>
               )}
               <h3>Imports</h3>
-              {focus.imports.length || focus.externals.length ? (
-                <>
-                  <List paths={focus.imports.map((e) => e.to)} open={(p) => void open(p)} />
-                  {focus.externals.length > 0 && (
-                    <p className="map-hint">Packages: {focus.externals.join(', ')}</p>
-                  )}
-                </>
+              {focus.imports.length ? (
+                <Links paths={focus.imports.map((e) => e.to)} open={openFile} />
               ) : (
-                <p className="map-hint">No imports.</p>
+                <p className="map-hint">No files in this repository.</p>
+              )}
+              {focus.externals.length > 0 && (
+                <p className="map-hint">Packages: {focus.externals.join(', ')}</p>
               )}
               <h3>Imported by</h3>
               {focus.importedBy.length ? (
-                <List paths={focus.importedBy.map((e) => e.from)} open={(p) => void open(p)} />
+                <Links paths={focus.importedBy.map((e) => e.from)} open={openFile} />
               ) : (
                 <p className="map-hint">No other file imports this one.</p>
               )}
-              {focus.impact.paths.length > 0 && (
+              {deep.length > 0 && (
                 <>
-                  <h3>Affected by a change</h3>
+                  <h3>Depend on it through other files</h3>
                   <ul className="map-paths">
-                    {focus.impact.paths.slice(0, 6).map((p) => (
+                    {deep.slice(0, 6).map((p) => (
                       <li key={p.join()}>
-                        <Chain paths={outward(p)} />
+                        <Chain paths={p} />
                       </li>
                     ))}
                   </ul>
-                  {focus.impact.paths.length > 6 && (
-                    <p className="map-hint">And {focus.impact.paths.length - 6} more.</p>
-                  )}
+                  <More shown={Math.min(6, deep.length)} total={deep.length} />
                 </>
               )}
             </>
           ) : (
             <div className="map-empty">
-              <h2 id="file-heading">Select a file</h2>
-              <p>See what it imports, what imports it, and which files a change to it affects.</p>
+              <h2 id="file-heading" ref={heading} tabIndex={-1}>
+                Select a file
+              </h2>
+              <p>See what it imports, what imports it, and which files depend on it.</p>
             </div>
           )}
         </section>
       </div>
       {hidden > 0 && (
         <details className="map-limits">
-          <summary>{plural(hidden, 'file or import')} not shown</summary>
+          <summary>Not shown: {plural(hidden, 'file or import')}</summary>
           <ul>
             {summary.skipped.map((s) => (
               <li key={s.path}>
@@ -295,6 +362,7 @@ export function RepoMapView() {
               </li>
             ))}
           </ul>
+          <More shown={summary.skipped.length + summary.unresolved.length} total={hidden} />
         </details>
       )}
       <p className="map-footnote">
@@ -306,27 +374,72 @@ export function RepoMapView() {
 }
 
 /** Where a reviewed change sits in the repository, and where both sides' changes meet. */
-export function ReviewMap({ reviewId }: { reviewId: string }) {
+export function ReviewMap({
+  reviewId,
+  sides,
+}: {
+  reviewId: string;
+  sides: { a: string; b: string };
+}) {
   const [overlay, setOverlay] = useState<Overlay>();
   const [error, setError] = useState('');
   useEffect(() => {
     api<Overlay>(`/reviews/${reviewId}/map`).then(setOverlay, (e: Error) => setError(e.message));
   }, [reviewId]);
-  if (error) return <p className="map-hint">The repository map couldn’t be loaded. {error}</p>;
+  if (error)
+    return (
+      <div className="inline-warning" role="status">
+        Couldn’t load the repository map.
+        <details>
+          <summary>Details</summary>
+          {error}
+        </details>
+      </div>
+    );
   if (!overlay) return <LoadingIndicator size="sm" label="Reading the repository…" />;
+  if ('unavailable' in overlay) return <p className="map-hint">{overlay.unavailable}</p>;
   const crossings = [...overlay.diffA.crossFolderAdded, ...overlay.diffB.crossFolderAdded];
   const nearest = overlay.interactions.length
     ? Math.min(...overlay.interactions.map((i) => i.viaA.length + i.viaB.length))
     : 0;
   const first = overlay.interactions.filter((i) => i.viaA.length + i.viaB.length === nearest);
-  const downstream = overlay.interactions.filter((i) => !first.includes(i));
+  const further = overlay.interactions.filter((i) => !first.includes(i));
+  /** How the meeting file reaches a side's change, in import order. */
+  const route = (via: string[]) =>
+    via.length === 1 ? (
+      'changed in this file'
+    ) : (
+      <>
+        imports <Path value={via[via.length - 1]} />
+        {via.length > 2 && (
+          <>
+            {' '}
+            through{' '}
+            {via.slice(1, -1).map((p, i) => (
+              <Fragment key={p}>
+                {i > 0 && ', '}
+                <Path value={p} />
+              </Fragment>
+            ))}
+          </>
+        )}
+      </>
+    );
   return (
     <div className="review-map">
-      <figure className="map-figure">
-        <img
-          src={`/api/reviews/${reviewId}/map.svg`}
-          alt="Folders in the repository, highlighting each side's changes and the folder where they meet"
-        />
+      <figure
+        className="map-figure"
+        tabIndex={0}
+        role="region"
+        aria-label="Folder map. Scrolls sideways on small screens."
+      >
+        <img src={`/api/reviews/${reviewId}/map.svg`} alt="" />
+        <figcaption className="sr-only">
+          {describeFolders(overlay.summary.folderEdges)} Changed by A:{' '}
+          {overlay.changedA.join(', ') || 'nothing'}. Changed by B:{' '}
+          {overlay.changedB.join(', ') || 'nothing'}.
+          {first.length ? ` The changes meet in ${first.map((i) => i.file).join(', ')}.` : ''}
+        </figcaption>
       </figure>
       {first.length ? (
         <div className="meet-list">
@@ -335,26 +448,32 @@ export function ReviewMap({ reviewId }: { reviewId: string }) {
               <p className="meet-file">
                 <Path value={i.file} />
               </p>
-              <p className="map-via">
-                <span className="side-tag a">A</span>
-                <Chain paths={outward(i.viaA)} />
-              </p>
-              <p className="map-via">
-                <span className="side-tag b">B</span>
-                <Chain paths={outward(i.viaB)} />
-              </p>
+              {(['a', 'b'] as const).map((k) => (
+                <p className="map-via" key={k}>
+                  <span className="side-tag" data-side={k} title={sides[k]} aria-hidden="true">
+                    {k.toUpperCase()}
+                  </span>
+                  <span>
+                    <span className="sr-only">
+                      Change {k.toUpperCase()} ({sides[k]}):{' '}
+                    </span>
+                    {route(k === 'a' ? i.viaA : i.viaB)}
+                  </span>
+                </p>
+              ))}
             </div>
           ))}
-          {downstream.length > 0 && (
+          <More shown={Math.min(6, first.length)} total={first.length} />
+          {further.length > 0 && (
             <p className="map-hint">
-              Also affected:{' '}
-              {downstream.slice(0, 5).map((i, n) => (
-                <span key={i.file}>
+              Further downstream:{' '}
+              {further.slice(0, 5).map((i, n) => (
+                <Fragment key={i.file}>
                   {n > 0 && ', '}
                   <Path value={i.file} />
-                </span>
+                </Fragment>
               ))}
-              {downstream.length > 5 ? `, and ${downstream.length - 5} more` : ''}.
+              {further.length > 5 ? `, and ${further.length - 5} more` : ''}.
             </p>
           )}
         </div>
@@ -369,10 +488,7 @@ export function ReviewMap({ reviewId }: { reviewId: string }) {
           ))}
         </p>
       )}
-      <p className="map-footnote">
-        Shared imports show where to look, not that the code is broken.
-        {overlay.notes.length ? ` ${overlay.notes.join(' ')}` : ''}
-      </p>
+      {overlay.notes.length > 0 && <p className="map-footnote">{overlay.notes.join(' ')}</p>}
     </div>
   );
 }

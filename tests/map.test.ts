@@ -201,3 +201,85 @@ describe('branch overlays', () => {
     expect(cone.has('src/shipping.ts')).toBe(false);
   });
 });
+
+describe('review fixes', () => {
+  it('flags a side that newly imports the other side’s change', () => {
+    const repo = repoWith({
+      'src/a.ts': 'export const a = () => 1;\n',
+      'src/b.ts': 'export const b = () => 2;\n',
+    });
+    commitOn(repo, 'agent-a', 'main', { 'src/a.ts': 'export const a = () => 100;\n' });
+    commitOn(repo, 'agent-b', 'main', {
+      'src/b.ts': "import { a } from './a';\nexport const b = () => a() + 2;\n",
+    });
+    const result = mapBranches(repo, 'main', 'agent-a', 'agent-b');
+    expect(result.interactions.map((i) => i.file)).toEqual(['src/b.ts']);
+    expect(result.interactions[0].viaA).toEqual(['src/b.ts', 'src/a.ts']);
+  });
+
+  it('flags a side that imports a file the other side deleted', () => {
+    const repo = repoWith({
+      'src/util.ts': 'export const u = 1;\n',
+      'src/x.ts': 'export const x = 1;\n',
+    });
+    run(repo, 'switch', '-q', '-c', 'agent-a');
+    run(repo, 'rm', '-q', 'src/util.ts');
+    run(repo, 'commit', '-qm', 'delete util');
+    run(repo, 'switch', '-q', 'main');
+    commitOn(repo, 'agent-b', 'main', {
+      'src/x.ts': "import { u } from './util';\nexport const x = u;\n",
+    });
+    const result = mapBranches(repo, 'main', 'agent-a', 'agent-b');
+    expect(result.changedA).toEqual(['src/util.ts']);
+    expect(result.interactions.map((i) => i.file)).toEqual(['src/x.ts']);
+  });
+
+  it('skips file names with control characters instead of crashing', () => {
+    const repo = repoWith({ 'src/a.ts': 'export const a = 1;\n' });
+    write(repo, { 'src/we\nird.ts': "import { a } from './a';\nexport const w = a;\n" });
+    run(repo, 'add', '-A');
+    run(repo, 'commit', '-qm', 'odd name');
+    const map = buildMap(repo);
+    expect(map.skipped.map((s) => s.reason)).toContain('File name contains control characters.');
+    expect(map.files.map((f) => f.path)).toEqual(['src/a.ts']);
+  });
+
+  it('resolves tsconfig references, workspace packages and alias misses correctly', () => {
+    const map = buildMap(
+      repoWith({
+        'tsconfig.json': JSON.stringify({
+          files: [],
+          references: [{ path: './tsconfig.app.json' }],
+        }),
+        'tsconfig.app.json': JSON.stringify({
+          compilerOptions: { baseUrl: '.', paths: { '@/*': ['src/*'] } },
+        }),
+        'src/lib.ts': 'export const lib = 1;\n',
+        'src/app.ts':
+          "import { lib } from '@/lib';\nimport { core } from '@acme/core';\nimport { gone } from '@/missing';\nexport const app = [lib, core, gone];\n",
+        'packages/core/package.json': JSON.stringify({ name: '@acme/core', main: 'dist/index.js' }),
+        'packages/core/src/index.ts': 'export const core = 1;\n',
+      }),
+    );
+    const edges = map.edges.map((e) => `${e.from} -> ${e.to}`);
+    expect(edges).toContain('src/app.ts -> src/lib.ts');
+    expect(edges).toContain('src/app.ts -> packages/core/src/index.ts');
+    expect(map.externals).toEqual([]);
+    expect(map.unresolved).toEqual([{ from: 'src/app.ts', specifier: '@/missing' }]);
+  });
+
+  it('finds import-equals, template-literal imports and namespace calls', () => {
+    const map = buildMap(
+      repoWith({
+        'src/c.ts': 'export function c() { return 1; }\n',
+        'src/d.ts': 'export const d = 1;\n',
+        'src/use.ts':
+          "import x = require('./c');\nimport * as ns from './c';\nexport async function go() { await import(`./d`); return ns.c() + x.c(); }\n",
+      }),
+    );
+    const edges = map.edges.map((e) => `${e.to} [${e.kinds}]`);
+    expect(edges).toContain('src/c.ts [require,value]');
+    expect(edges).toContain('src/d.ts [dynamic]');
+    expect(map.calls.map((c) => `${c.from} -> ${c.to}`)).toContain('src/use.ts#go -> src/c.ts#c');
+  });
+});

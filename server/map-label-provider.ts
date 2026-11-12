@@ -81,11 +81,17 @@ export function labelServiceUrl() {
   const visual = new URL(
     process.env.FUSE_AI_URL || 'https://fuse-alpha-seven.vercel.app/api/visual',
   );
-  return new URL('/api/map-labels', visual);
+  // Beside the visual route, keeping any path prefix (…/api/visual → …/api/map-labels).
+  return new URL('map-labels', visual);
 }
 
 export async function runMapLabelModel(prompt: string) {
-  if (process.env.OPENAI_API_KEY && !process.env.FUSE_AI_URL && !process.env.FUSE_SERVICE_TOKEN)
+  if (
+    process.env.OPENAI_API_KEY &&
+    !process.env.FUSE_AI_URL &&
+    !process.env.FUSE_MAP_AI_URL &&
+    !process.env.FUSE_SERVICE_TOKEN
+  )
     return runOpenAiMapLabels(prompt);
   const url = labelServiceUrl();
   if (

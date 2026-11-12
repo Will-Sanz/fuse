@@ -47,7 +47,7 @@ fuse demo --dir NEW_DIRECTORY [--single] [--json]
 fuse demo --dir NEW_DIRECTORY --merge [--scenario checkout|shipping] [--json]
 fuse visualize ID [--regenerate] [--repo PATH] [--json]
 fuse map [--repo PATH] [--ref REF] [--focus PATH] [--a REF --b REF [--base REF]] [--svg FILE] [--full] [--json]
-fuse map-labels [--repo PATH] [--ref REF] [--file PATH ...] [--regenerate] [--json]
+fuse map-labels [--repo PATH] [--ref REF] [--file PATH] [--regenerate] [--json]
 fuse mcp [--repo PATH]
 fuse meeting [--scenario checkout|shipping] [--no-open] [--verify]
 
@@ -396,7 +396,7 @@ export async function main(args = process.argv.slice(2)) {
     }
     case 'map-labels': {
       const { cachedMap } = await import('../server/map-service');
-      const { labelMap } = await import('../server/map-labels');
+      const { labelMap, sanitize } = await import('../server/map-labels');
       const result = await labelMap(selectedRepo, cachedMap(selectedRepo, v.ref || 'HEAD'), {
         paths: v.file ? [v.file] : undefined,
         regenerate: v.regenerate,
@@ -404,7 +404,7 @@ export async function main(args = process.argv.slice(2)) {
       print(
         result,
         Object.entries(result.labels)
-          .map(([path, l]) => `${path}\n  ${l.summary}`)
+          .map(([path, l]) => `${path}\n  AI summary: ${sanitize(l.summary)}`)
           .concat(result.dropped.map((d) => `dropped ${d.path}: ${d.reason}`))
           .join('\n') || 'No labels.',
       );

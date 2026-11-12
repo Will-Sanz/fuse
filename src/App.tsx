@@ -62,6 +62,7 @@ function Code({
   );
 }
 const mapPage = new URLSearchParams(location.search).get('view') === 'map';
+if (mapPage) document.title = 'Repository map · Fuse';
 export default function App() {
   const [review, setReview] = useState<Review>();
   const [connection, setConnection] = useState<Connection>();
@@ -172,20 +173,24 @@ export default function App() {
           {connection?.mode === 'local' && !isShowcase && (
             <Button
               size="sm"
-              color={mapPage ? 'primary' : 'secondary'}
+              color="secondary"
               iconLeading={Dataflow03}
               href="/?view=map"
+              aria-label="Repository map"
+              aria-current={mapPage ? 'page' : undefined}
+              className={mapPage ? 'topbar-current' : undefined}
             >
-              Repository map
+              <span className="topbar-label">Repository map</span>
             </Button>
           )}
           <Button
             size="sm"
             color="secondary"
             iconLeading={Terminal}
+            aria-label="Run live MCP"
             onClick={() => setSetupOpen(true)}
           >
-            Run live MCP
+            <span className="topbar-label">Run live MCP</span>
           </Button>
         </div>
       </header>
@@ -203,7 +208,7 @@ export default function App() {
           </div>
         )}
         {mapPage && !loading && !isShowcase ? (
-          <RepoMapView />
+          <RepoMapView aiConfigured={connection?.aiConfigured === true} />
         ) : loading ? (
           <div className="loading-state">
             <LoadingIndicator label="Opening the change…" />
@@ -313,14 +318,17 @@ export default function App() {
                 </p>
               )}
               {!isShowcase && (
-                <div className="review-map-block" aria-labelledby="repo-heading">
+                <section className="review-map-block" aria-labelledby="repo-heading">
                   <h3 id="repo-heading">Where the changes meet</h3>
                   <p>
-                    Files that import code changed on both sides. Git can merge these changes
-                    cleanly while the combined behavior still breaks.
+                    Files that import code changed on both sides. Git can merge both changes cleanly
+                    and the combined behavior can still break.
                   </p>
-                  <ReviewMap reviewId={review.id} />
-                </div>
+                  <ReviewMap
+                    reviewId={review.id}
+                    sides={{ a: review.sources.a.ref.label, b: review.sources.b.ref.label }}
+                  />
+                </section>
               )}
             </section>
             <section className="step-section" aria-labelledby="visual-heading">

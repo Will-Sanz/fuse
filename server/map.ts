@@ -74,11 +74,51 @@ const SCRIPT = /\.(js|jsx|mjs|cjs)$/;
 const SKIP_DIR = /^(node_modules|dist|build|out|coverage|vendor|\.next|\.turbo|\.git)$/;
 const SECRET_PATH =
   /(^|\/)(\.env[^/]*|\.npmrc|id_rsa[^/]*|credentials?[^/]*|secrets?[^/]*)$|\.(pem|key|p12|pfx)$/i;
-export const SECRET_CONTENT =
-  /AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[abprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----/;
-// Zero-width, bidi controls, word joiners, BOM (when not leading) and Unicode tag characters.
-const HIDDEN =
-  /[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]|[\u{E0000}-\u{E007F}]/u;
+// Known token formats and credential-shaped assignments. A file that matches is never sent to AI.
+const SECRET_TOKENS = [
+  /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/,
+  /\bgh[pousr]_[A-Za-z0-9]{36}\b/,
+  /\bgithub_pat_[A-Za-z0-9_]{20,}/,
+  /\bsk-[A-Za-z0-9_-]{20,}/,
+  /\b[rs]k_(?:live|test)_[A-Za-z0-9]{16,}/,
+  /\bAIza[0-9A-Za-z_-]{35}\b/,
+  /\bnpm_[A-Za-z0-9]{36}\b/,
+  /\bxox[abprs]-[A-Za-z0-9-]{10,}/,
+  /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/,
+  /\b[a-z][a-z0-9+.-]*:\/\/[^\s:@/'"`]+:[^\s@/'"`]+@/i,
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
+  /(?:password|passwd|secret|token|api_?key|access_?key|private_?key|client_?secret)['"]?\s*[:=]\s*['"`][^'"`\s]{8,}['"`]/i,
+];
+export const looksSecret = (text: string) => SECRET_TOKENS.some((r) => r.test(text));
+/** Replace token-shaped text and long high-entropy string literals before anything leaves the machine. */
+export function redactSecrets(text: string) {
+  let out = text;
+  for (const r of SECRET_TOKENS)
+    out = out.replace(
+      new RegExp(r.source, r.flags.includes('g') ? r.flags : r.flags + 'g'),
+      '[redacted]',
+    );
+  return out.replace(/(['"`])([A-Za-z0-9+/=_-]{32,})\1/g, (whole, quote: string, body: string) =>
+    entropy(body) > 4.2 ? `${quote}[redacted]${quote}` : whole,
+  );
+}
+function entropy(text: string) {
+  const counts = new Map<string, number>();
+  for (const c of text) counts.set(c, (counts.get(c) ?? 0) + 1);
+  return [...counts.values()].reduce(
+    (sum, n) => sum - (n / text.length) * Math.log2(n / text.length),
+    0,
+  );
+}
+// Invisible characters that can hide instructions or change how code reads: zero-width space, bidi
+// marks and controls, word joiners (not ZWJ/ZWNJ, which emoji and many scripts need), soft hyphen, Mongolian vowel separator, Hangul filler, variation selectors,
+// BOM (when not leading) and Unicode tag characters.
+export const HIDDEN_SOURCE =
+  '[\\u00AD\\u061C\\u180E\\u200B\\u200E\\u200F\\u202A-\\u202E\\u2060-\\u2064\\u2066-\\u2069\\u3164\\uFEFF]|[\\u{E0000}-\\u{E007F}\\u{E0100}-\\u{E01EF}]';
+const HIDDEN = new RegExp(HIDDEN_SOURCE, 'u');
+/** Stripped before anything is sent to AI: the flagged set plus joiners and emoji variation selectors. */
+export const STRIP_SOURCE = `${HIDDEN_SOURCE}|[\\u200C\\u200D\\uFE00-\\uFE0F]`;
+const CONTROL = /[\u0000-\u001F\u007F]/;
 const ROOT = '/repo';
 const at = (path: string) => `${ROOT}/${path}`;
 const rel = (abs: string) => (abs.startsWith(`${ROOT}/`) ? abs.slice(ROOT.length + 1) : null);
@@ -90,8 +130,29 @@ interface Entry {
   oid: string;
   size: number;
 }
+function run(repo: string, args: string[], input: string | undefined, maxBuffer: number) {
+  try {
+    return execFileSync('git', ['-c', 'core.fsmonitor=false', '-C', repo, ...args], {
+      input,
+      maxBuffer,
+      timeout: 20000,
+      env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_OPTIONAL_LOCKS: '0' },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    throw new InputError(
+      code === 'ENOBUFS'
+        ? 'Git: the repository is too large to map.'
+        : code === 'ETIMEDOUT'
+          ? 'Git: reading the repository timed out.'
+          : 'Git: unable to read the repository for the map.',
+    );
+  }
+}
 function listTree(repo: string, sha: string): Entry[] {
-  return git(repo, ['ls-tree', '-r', '-z', '-l', '--full-tree', sha])
+  return run(repo, ['ls-tree', '-r', '-z', '-l', '--full-tree', sha], undefined, 256_000_000)
+    .toString('utf8')
     .split('\0')
     .filter(Boolean)
     .map((row) => {
@@ -103,16 +164,11 @@ function listTree(repo: string, sha: string): Entry[] {
 export function readBlobs(repo: string, oids: string[]) {
   const out = new Map<string, string>();
   if (!oids.length) return out;
-  const data = execFileSync(
-    'git',
-    ['-c', 'core.fsmonitor=false', '-C', repo, 'cat-file', '--batch'],
-    {
-      input: oids.join('\n') + '\n',
-      maxBuffer: mapLimits.totalBytes + oids.length * 128 + 1024,
-      timeout: 15000,
-      env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GIT_OPTIONAL_LOCKS: '0' },
-      stdio: ['pipe', 'pipe', 'pipe'],
-    },
+  const data = run(
+    repo,
+    ['cat-file', '--batch'],
+    oids.join('\n') + '\n',
+    mapLimits.totalBytes + oids.length * 128 + 1024,
   );
   let offset = 0;
   while (offset < data.length) {
@@ -127,27 +183,28 @@ export function readBlobs(repo: string, oids: string[]) {
   return out;
 }
 
-function compilerOptionsFrom(tsconfig: Map<string, string>, allPaths: Set<string>) {
-  // Data only: baseUrl, paths and allowJs. Plugins and anything executable are ignored.
-  const options: ts.CompilerOptions = {
-    target: ts.ScriptTarget.ES2022,
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    jsx: ts.JsxEmit.Preserve,
-    noEmit: true,
-    skipLibCheck: true,
-    allowImportingTsExtensions: true,
-  };
-  let path: string | undefined = 'tsconfig.json';
+/** One tsconfig and the in-repo files it extends, outermost first, read as JSON data only. */
+function configChain(tsconfig: Map<string, string>, start: string) {
+  let path: string | undefined = start;
   const seen = new Set<string>();
   const chain: { dir: string; compilerOptions: Record<string, unknown> }[] = [];
-  while (path && allPaths.has(path) && !seen.has(path) && seen.size < 5) {
+  let references: string[] = [];
+  while (path && tsconfig.has(path) && !seen.has(path) && seen.size < 5) {
     seen.add(path);
     const parsed = ts.parseConfigFileTextToJson(path, tsconfig.get(path) ?? '');
     const config = (parsed.config ?? {}) as {
       extends?: unknown;
       compilerOptions?: Record<string, unknown>;
+      references?: unknown;
     };
+    if (path === start && Array.isArray(config.references))
+      references = config.references
+        .map((r) => (r as { path?: unknown })?.path)
+        .filter((r): r is string => typeof r === 'string')
+        .map((r) => posix.normalize(posix.join(posix.dirname(start), r)))
+        .map((r) => (r.endsWith('.json') ? r : `${r}/tsconfig.json`))
+        .filter((r) => !r.startsWith('..'))
+        .slice(0, 10);
     chain.unshift({ dir: posix.dirname(path), compilerOptions: config.compilerOptions ?? {} });
     path =
       typeof config.extends === 'string' && config.extends.startsWith('.')
@@ -160,18 +217,45 @@ function compilerOptionsFrom(tsconfig: Map<string, string>, allPaths: Set<string
         : undefined;
     if (path?.startsWith('..')) path = undefined;
   }
+  return { chain, references };
+}
+
+function compilerOptionsFrom(tsconfig: Map<string, string>) {
+  // Data only: baseUrl, paths and allowJs. Plugins and anything executable are ignored.
+  const options: ts.CompilerOptions = {
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    jsx: ts.JsxEmit.Preserve,
+    noEmit: true,
+    skipLibCheck: true,
+    allowImportingTsExtensions: true,
+  };
+  // The root config plus the configs it references (Vite-style tsconfig.app.json, etc.).
+  const root = configChain(tsconfig, 'tsconfig.json');
+  const chain = [...root.chain, ...root.references.flatMap((r) => configChain(tsconfig, r).chain)];
+  let baseUrl: string | undefined;
+  const paths: Record<string, string[]> = {};
   for (const { dir, compilerOptions: c } of chain) {
-    if (typeof c.baseUrl === 'string')
-      options.baseUrl = at(posix.normalize(posix.join(dir, c.baseUrl)));
-    if (c.paths && typeof c.paths === 'object') {
-      options.paths = Object.fromEntries(
-        Object.entries(c.paths as Record<string, unknown>)
-          .filter(([, v]) => Array.isArray(v))
-          .map(([k, v]) => [k, (v as unknown[]).filter((s): s is string => typeof s === 'string')]),
-      );
-      if (!options.baseUrl) options.pathsBasePath = at(dir === '.' ? '' : dir).replace(/\/$/, '');
-    }
+    const base = typeof c.baseUrl === 'string' ? posix.normalize(posix.join(dir, c.baseUrl)) : dir;
+    if (typeof c.baseUrl === 'string' && baseUrl === undefined) baseUrl = base;
+    if (c.paths && typeof c.paths === 'object')
+      for (const [k, v] of Object.entries(c.paths as Record<string, unknown>))
+        if (Array.isArray(v))
+          // Targets are stored relative to the repository root, then rebased below.
+          paths[k] = v
+            .filter((t): t is string => typeof t === 'string')
+            .map((t) => posix.normalize(posix.join(base, t)));
     if (typeof c.allowJs === 'boolean') options.allowJs = c.allowJs;
+  }
+  if (baseUrl !== undefined)
+    options.baseUrl = at(baseUrl === '.' ? '' : baseUrl).replace(/\/$/, '');
+  if (Object.keys(paths).length) {
+    const from = baseUrl ?? '.';
+    options.paths = Object.fromEntries(
+      Object.entries(paths).map(([k, v]) => [k, v.map((t) => `./${posix.relative(from, t)}`)]),
+    );
+    if (baseUrl === undefined) options.pathsBasePath = ROOT;
   }
   return options;
 }
@@ -251,14 +335,22 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
   const packageJsons = entries.filter(
     (e) => /(^|\/)package\.json$/.test(e.path) && e.mode.startsWith('100'),
   );
+  // Config files are data, read with their own bounds: shallowest first, at most 250 files and 4 MB.
+  const depth = (p: string) => p.split('/').length;
+  let configBytes = 0;
+  const configs = [...tsconfigs.slice(0, 50), ...packageJsons]
+    .filter(
+      (e) => e.size <= mapLimits.fileBytes && !e.path.split('/').some((s) => SKIP_DIR.test(s)),
+    )
+    .sort((x, y) => depth(x.path) - depth(y.path) || byString(x.path, y.path))
+    .slice(0, 250)
+    .filter((e) => (configBytes += e.size) <= 4_000_000);
   const configText = readBlobs(
     top,
-    [...tsconfigs, ...packageJsons].filter((e) => e.size <= mapLimits.fileBytes).map((e) => e.oid),
+    configs.map((e) => e.oid),
   );
-  const configByPath = new Map(
-    [...tsconfigs, ...packageJsons].map((e) => [e.path, configText.get(e.oid) ?? '']),
-  );
-  const options = compilerOptionsFrom(configByPath, new Set(configByPath.keys()));
+  const configByPath = new Map(configs.map((e) => [e.path, configText.get(e.oid) ?? '']));
+  const options = compilerOptionsFrom(configByPath);
 
   const candidates: Entry[] = [];
   let total = 0;
@@ -267,19 +359,21 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
     if (!code) continue;
     const reason = e.path.split('/').some((s) => SKIP_DIR.test(s))
       ? null // generated or vendored: ignored without noise
-      : !['100644', '100755'].includes(e.mode)
-        ? 'Symlinks and submodules are not analyzed.'
-        : /\.d\.[cm]?ts$/.test(e.path)
-          ? null
-          : /\.min\.[cm]?js$/.test(e.path)
+      : CONTROL.test(e.path)
+        ? 'File name contains control characters.'
+        : !['100644', '100755'].includes(e.mode)
+          ? 'Symlinks and submodules are not analyzed.'
+          : /\.d\.[cm]?ts$/.test(e.path)
             ? null
-            : e.size > mapLimits.fileBytes
-              ? 'File exceeds the 100 KB analysis limit.'
-              : candidates.length >= mapLimits.files
-                ? `Repository exceeds the ${mapLimits.files}-file map limit.`
-                : total + e.size > mapLimits.totalBytes
-                  ? 'Repository exceeds the 20 MB map limit.'
-                  : '';
+            : /\.min\.[cm]?js$/.test(e.path)
+              ? null
+              : e.size > mapLimits.fileBytes
+                ? 'File exceeds the 100 KB analysis limit.'
+                : candidates.length >= mapLimits.files
+                  ? `Repository exceeds the ${mapLimits.files}-file map limit.`
+                  : total + e.size > mapLimits.totalBytes
+                    ? 'Repository exceeds the 20 MB map limit.'
+                    : '';
     if (reason === null) continue;
     if (reason) {
       skipped.push({ path: e.path, reason });
@@ -331,6 +425,55 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
   };
   const packageName = (s: string) =>
     s.startsWith('@') ? s.split('/').slice(0, 2).join('/') : s.split('/')[0];
+  // Packages that live in this repository (workspaces) resolve to their source, not to npm.
+  const workspaces = new Map<string, { dir: string; entries: string[] }>();
+  for (const [path, body] of configByPath) {
+    if (!path.endsWith('package.json') || path === 'package.json') continue;
+    try {
+      const pkg = JSON.parse(body) as Record<string, unknown>;
+      if (typeof pkg.name !== 'string') continue;
+      const dir = posix.dirname(path);
+      const fields = [pkg.source, pkg.types, pkg.module, pkg.main].filter(
+        (v): v is string => typeof v === 'string',
+      );
+      workspaces.set(pkg.name, {
+        dir,
+        entries: [
+          ...fields.flatMap((f) => {
+            const p = posix.normalize(posix.join(dir, f));
+            return [
+              p,
+              p.replace(/\.[cm]?js$/, '.ts'),
+              p.replace(/\.[cm]?js$/, '.tsx'),
+              p.replace(/\.d\.ts$/, '.ts'),
+            ];
+          }),
+          `${dir}/src/index.ts`,
+          `${dir}/src/index.tsx`,
+          `${dir}/index.ts`,
+        ],
+      });
+    } catch {
+      // Unparseable package.json files are reported below.
+    }
+  }
+  const workspaceTarget = (specifier: string) => {
+    const pkg = workspaces.get(packageName(specifier));
+    if (!pkg) return null;
+    const sub = specifier.slice(packageName(specifier).length + 1);
+    const tries = sub
+      ? [`${pkg.dir}/${sub}`, `${pkg.dir}/src/${sub}`].flatMap((b) => [
+          `${b}.ts`,
+          `${b}.tsx`,
+          `${b}/index.ts`,
+          b,
+        ])
+      : pkg.entries;
+    return tries.find((t) => known.has(t)) ?? null;
+  };
+  const aliasPatterns = Object.keys(options.paths ?? {}).map(
+    (k) => new RegExp(`^${k.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace('*', '.*')}$`),
+  );
 
   const edges = new Map<string, Set<EdgeKind>>();
   const externals = new Map<string, Set<string>>();
@@ -338,19 +481,23 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
   const notAnalyzed = new Map<string, RepoMap['notAnalyzed'][number]>();
   const tracked = new Set(entries.map((e) => e.path));
   const add = (from: string, specifier: string, kind: EdgeKind) => {
-    const target = resolveSpecifier(specifier, from);
+    const target = resolveSpecifier(specifier, from) ?? workspaceTarget(specifier);
     if (target) {
       if (target === from) return;
-      const key = `${from}\n${target}`;
+      const key = `${from}\0${target}`;
       edges.set(key, (edges.get(key) ?? new Set()).add(kind));
-    } else if (!specifier.startsWith('.') && !specifier.startsWith('/')) {
+    } else if (
+      !specifier.startsWith('.') &&
+      !specifier.startsWith('/') &&
+      !aliasPatterns.some((r) => r.test(specifier))
+    ) {
       const name = specifier.startsWith('node:') ? specifier : packageName(specifier);
       externals.set(name, (externals.get(name) ?? new Set()).add(from));
     } else {
       const target = posix.normalize(posix.join(posix.dirname(from), specifier.replace(/^\//, '')));
       if (tracked.has(target))
-        notAnalyzed.set(`${from}\n${specifier}`, { from, specifier, target });
-      else unresolved.set(`${from}\n${specifier}`, { from, specifier });
+        notAnalyzed.set(`${from}\0${specifier}`, { from, specifier, target });
+      else unresolved.set(`${from}\0${specifier}`, { from, specifier });
     }
   };
 
@@ -362,9 +509,18 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
       const s = d.getModuleSpecifierValue();
       if (s) add(path, s, d.isTypeOnly() ? 'type' : 'reexport');
     }
+    for (const d of sf.getDescendantsOfKind(SyntaxKind.ImportEqualsDeclaration)) {
+      const ref = d.getModuleReference();
+      if (Node.isExternalModuleReference(ref)) {
+        const e = ref.getExpression();
+        if (e && Node.isStringLiteral(e))
+          add(path, e.getLiteralValue(), d.isTypeOnly() ? 'type' : 'require');
+      }
+    }
     for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
       const [arg] = call.getArguments();
-      if (!arg || !Node.isStringLiteral(arg)) continue;
+      if (!arg || !(Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg)))
+        continue;
       const callee = call.getExpression();
       if (callee.getKind() === SyntaxKind.ImportKeyword)
         add(path, arg.getLiteralValue(), 'dynamic');
@@ -375,7 +531,7 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
     files.push({
       path,
       oid: candidates.find((e) => e.path === path)!.oid,
-      bytes: Buffer.byteLength(body),
+      bytes: candidates.find((e) => e.path === path)!.size,
       test: isTest(path),
       exports: [...sf.getExportedDeclarations().keys()].sort(byString),
       functions: topLevelFunctions(sf),
@@ -383,7 +539,7 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
       hiddenUnicode: HIDDEN.test(body.replace(/^\uFEFF/, '')),
       ...(SECRET_PATH.test(path)
         ? { aiExcluded: 'Path looks like a secret or credential file.' }
-        : SECRET_CONTENT.test(body)
+        : looksSecret(body)
           ? { aiExcluded: 'Content matches a known secret or token pattern.' }
           : {}),
     });
@@ -400,10 +556,16 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
     for (const [path, sf] of sources) {
       for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
         const callee = call.getExpression();
-        if (!Node.isIdentifier(callee)) continue;
+        // Direct calls (f()) and calls through a namespace import (ns.f()).
+        const name = Node.isIdentifier(callee)
+          ? callee
+          : Node.isPropertyAccessExpression(callee) && Node.isIdentifier(callee.getExpression())
+            ? callee.getNameNode()
+            : undefined;
+        if (!name) continue;
         const owner = ownerName(call);
         if (!owner) continue;
-        let symbol = callee.getSymbol();
+        let symbol = name.getSymbol();
         if (symbol?.isAlias()) symbol = symbol.getAliasedSymbol() ?? symbol;
         const declaration = symbol?.getDeclarations().find((d) => declarationName(d));
         if (!declaration) continue;
@@ -417,7 +579,7 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
           continue;
         const from = `${path}#${owner}`,
           to = `${targetPath}#${targetName}`;
-        if (from !== to) calls.set(`${from}\n${to}`, { from, to, crossFile: path !== targetPath });
+        if (from !== to) calls.set(`${from}\0${to}`, { from, to, crossFile: path !== targetPath });
       }
       if (Date.now() - started > mapLimits.ms) {
         warnings.push('Time budget reached during call analysis; calls are partial.');
@@ -427,7 +589,7 @@ export function buildMap(repo: string, ref = 'HEAD'): RepoMap {
 
   const edgeList: MapEdge[] = [...edges]
     .map(([key, kinds]) => {
-      const [from, to] = key.split('\n');
+      const [from, to] = key.split('\0');
       return { from, to, kinds: [...kinds].sort(byString) };
     })
     .sort((a, b) => byString(a.from, b.from) || byString(a.to, b.to));
@@ -608,14 +770,15 @@ export function diffMaps(base: RepoMap, head: RepoMap) {
  * Everything that transitively depends on the given files, with one shortest import path back
  * to a changed file as evidence for each.
  */
-export function impactCone(map: RepoMap, changed: string[]) {
+/** Breadth-first over importers: every file that transitively imports a seed, with one shortest path. */
+function coneOver(edges: { from: string; to: string }[], seeds: string[]) {
   const importers = new Map<string, string[]>();
-  for (const e of map.edges) importers.set(e.to, [...(importers.get(e.to) ?? []), e.from]);
+  for (const e of edges) importers.set(e.to, [...(importers.get(e.to) ?? []), e.from]);
   const path = new Map<string, string[]>();
-  const queue = changed.filter((c) => map.files.some((f) => f.path === c)).sort(byString);
+  const queue = [...new Set(seeds)].sort(byString);
   for (const c of queue) path.set(c, [c]);
   for (let i = 0; i < queue.length; i++)
-    for (const parent of (importers.get(queue[i]) ?? []).sort(byString))
+    for (const parent of [...new Set(importers.get(queue[i]) ?? [])].sort(byString))
       if (!path.has(parent)) {
         path.set(parent, [parent, ...path.get(queue[i])!]);
         queue.push(parent);
@@ -624,20 +787,34 @@ export function impactCone(map: RepoMap, changed: string[]) {
 }
 
 /**
- * Where two branches' changes could meet. A file in both impact cones depends on something
- * each branch changed. This is a review candidate with its import paths as evidence,
- * not proof of a behavioral conflict.
+ * Everything that transitively depends on the given files, with one shortest import path back
+ * to a changed file as evidence for each.
+ */
+export function impactCone(map: RepoMap, changed: string[]) {
+  return coneOver(
+    map.edges,
+    changed.filter((c) => map.files.some((f) => f.path === c)),
+  );
+}
+
+/**
+ * Where two branches' changes could meet: files that depend on something each side changed.
+ * Cones are walked over the union of base, A and B imports, so a side that newly imports the
+ * other side's change, or imports a file the other side deleted, is caught. Each result is a
+ * review candidate with its import paths as evidence, not proof of a behavioral conflict.
  */
 export function possibleInteractions(base: RepoMap, a: RepoMap, b: RepoMap) {
   const changedA = changedFiles(base, a),
     changedB = changedFiles(base, b);
-  const coneA = impactCone(a, changedA),
-    coneB = impactCone(b, changedB);
+  const union = [...base.edges, ...a.edges, ...b.edges];
+  const coneA = coneOver(union, changedA),
+    coneB = coneOver(union, changedB);
+  const exists = new Set([...a.files, ...b.files].map((f) => f.path));
   return {
     changedA,
     changedB,
     interactions: [...coneA.keys()]
-      .filter((p) => coneB.has(p))
+      .filter((p) => coneB.has(p) && exists.has(p))
       .map((file) => ({ file, viaA: coneA.get(file)!, viaB: coneB.get(file)! }))
       // Closest meeting points first: where both changes first come together.
       .sort(
