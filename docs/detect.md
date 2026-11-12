@@ -83,6 +83,17 @@ fuse detect --a feature/one --b feature/two --target .fuse/detect.json
 Prints one JSON object. Exit code 0 means no conflict, 1 a conflict, 2 the check failed
 to run. `--no-llm` stops after step 5.
 
+## From an agent without the hook
+
+The Fuse MCP server offers the same checks as tools, for agents that have no hook or
+want an answer now:
+
+- `fuse_incoming`: check teammates' pushes against your local code. `action` can be
+  `check` (default), `status`, `on` or `off`.
+- `fuse_detect`: check two branches or commits, `a` and `b`.
+
+Both take `skipAi: true` to stop after step 5. They report only and change no files.
+
 ## Tests
 
 - `tests/incoming.test.ts` and `tests/detect.test.ts`: a fake teammate repository, no
@@ -93,7 +104,10 @@ to run. `--no-llm` stops after step 5.
 
   ```sh
   node scripts/mock-push.mjs --repo ../realworld-express-prisma --case rw-042 --case rw-043
+  node scripts/mock-push.mjs --repo ../realworld-express-prisma --all --budget 1
   ```
+
+  `--budget` stops before the next case once that many dollars are spent on the AI step.
 
 ## Not in v1
 

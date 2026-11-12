@@ -52,15 +52,28 @@ const SCRIPTS = { 'merge-check': 'merge-check.mjs', llm: 'llm.mjs' };
 // Nothing built or tested the merged pair: no target, and no CI did it either.
 const untested = !args.target && !args['skip-merge-check'];
 
+// The stages work in a separate worktree, where a name like HEAD means that
+// worktree's own commit, so each side is pinned to its commit here.
+function commitOf(ref) {
+  const res = spawnSync('git', ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`], {
+    cwd: repo,
+    encoding: 'utf8',
+  });
+  if (res.status !== 0) fail(`not a commit in ${repo}: ${ref}`);
+  return res.stdout.trim();
+}
+const sideA = commitOf(args.a);
+const sideB = commitOf(args.b);
+
 function mergeBase() {
-  const res = spawnSync('git', ['merge-base', args.a, args.b], {
+  const res = spawnSync('git', ['merge-base', sideA, sideB], {
     cwd: repo,
     encoding: 'utf8',
   });
   if (res.status !== 0) fail(`no merge base for ${args.a} and ${args.b}:\n${res.stderr}`);
   return res.stdout.trim();
 }
-const base = args.base ?? mergeBase();
+const base = args.base ? commitOf(args.base) : mergeBase();
 
 function runStage(name) {
   const detectArgs = [
@@ -70,9 +83,9 @@ function runStage(name) {
     '--base',
     base,
     '--a',
-    args.a,
+    sideA,
     '--b',
-    args.b,
+    sideB,
   ];
   if (args.task) detectArgs.push('--task', args.task);
   if (args.target) detectArgs.push('--target', args.target);

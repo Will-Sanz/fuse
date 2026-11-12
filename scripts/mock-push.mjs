@@ -7,11 +7,13 @@
 // Usage:
 //   node scripts/mock-push.mjs --repo <eval repo> (--case <id>... | --all)
 //                      [--cases <cases.jsonl>] [--target <target.json>] [--no-llm]
+//                      [--budget <usd>]
 //
 //   --repo     a checkout of the eval repository (its cases are branch pairs)
 //   --cases    default: <repo>/eval/cases.jsonl
 //   --target   default: <repo>/eval/targets/realworld-express-prisma.json
 //
+//   --budget   stop before the next case once this much has been spent on the LLM
 //   --no-llm   merge-check only, no API call. A case merge-check does not flag
 //              is then reported as "needs the LLM" rather than pass or fail.
 //
@@ -33,6 +35,7 @@ const { values: args } = parseArgs({
     case: { type: 'string', multiple: true, default: [] },
     all: { type: 'boolean', default: false },
     'no-llm': { type: 'boolean', default: false },
+    budget: { type: 'string' },
   },
 });
 
@@ -56,11 +59,16 @@ const unknown = args.case.filter((id) => !all.some((c) => c.id === id));
 if (unknown.length) fail(`no such case: ${unknown.join(', ')}`);
 const cases = args.all ? all : all.filter((c) => args.case.includes(c.id));
 
+const budget = args.budget === undefined ? undefined : Number(args.budget);
+if (budget !== undefined && !(budget >= 0)) fail('--budget must be zero or more dollars');
 let failed = 0,
   errors = 0,
   unchecked = 0,
   cost = 0;
+let ran = 0;
 for (const c of cases) {
+  if (budget !== undefined && cost >= budget) break;
+  ran++;
   const checkArgs = [
     path.join(here, '../detect/check.mjs'),
     '--repo',
@@ -105,10 +113,11 @@ for (const c of cases) {
   console.log(line);
 }
 
-const passed = cases.length - failed - errors - unchecked;
+const passed = ran - failed - errors - unchecked;
 console.log(
   `\n${passed} passed, ${failed} failed, ${errors} errors` +
     (unchecked ? `, ${unchecked} need the LLM` : '') +
-    ` of ${cases.length}; cost $${cost.toFixed(2)}`,
+    ` of ${ran}; cost $${cost.toFixed(2)}` +
+    (ran < cases.length ? `; stopped at the budget with ${cases.length - ran} cases not run` : ''),
 );
 process.exit(errors ? 2 : failed ? 1 : 0);

@@ -325,7 +325,8 @@ if (command === 'off') {
   }
 } else {
   if (!readState().enabled && !args.background) {
-    console.log('Incoming checks are off for this repository. Run `fuse incoming on` first.');
+    if (args.json) console.log(JSON.stringify({ off: true, checked: [] }));
+    else console.log('Incoming checks are off for this repository. Run `fuse incoming on` first.');
     process.exit(0);
   }
   // Shown directly when checking now; left for the hook when in the background.

@@ -10,6 +10,8 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
 // A teammate pushes while you have local work. No LLM stage: no API key needed.
 const incoming = resolve('detect/incoming.mjs');
@@ -60,7 +62,7 @@ function team() {
     git(mate, 'push', '-q', 'origin', branch);
   };
   const state = () => JSON.parse(readFileSync(join(mine, '.git/fuse/incoming.json'), 'utf8'));
-  return { mine, run, push, state };
+  return { mine, run, push, state, env };
 }
 async function until(done: () => boolean) {
   for (let i = 0; i < 300 && !done(); i++) await new Promise((r) => setTimeout(r, 100));
@@ -148,5 +150,40 @@ describe('incoming pushes against local work', () => {
     expect(run().out).toBe('No new pushes to check.');
     expect(run('status').out).toContain('Incoming checks are on');
     expect(existsSync(join(mine, '.git/fuse/incoming.json'))).toBe(true);
+  });
+  it('is offered to agents as MCP tools', async () => {
+    const { mine, push, env } = team();
+    const client = new Client({ name: 'fuse-incoming-test', version: '1' });
+    await client.connect(
+      new StdioClientTransport({
+        command: process.execPath,
+        args: [resolve('cli/run.mjs'), 'mcp', '--repo', mine],
+        env: env as Record<string, string>,
+        stderr: 'pipe',
+      }),
+    );
+    try {
+      const call = async (name: string, args: Record<string, unknown>) => {
+        const response = await client.callTool({ name, arguments: args });
+        expect(response.isError).not.toBe(true);
+        return JSON.parse((response.content as { text: string }[])[0].text).data;
+      };
+      expect(await call('fuse_incoming', { skipAi: true })).toMatchObject({ watching: 1 });
+      push('main', 'shared.txt', 'from the teammate\n', 'Reword the shared text');
+      writeFileSync(join(mine, 'shared.txt'), 'from me\n');
+
+      const found = await call('fuse_incoming', { skipAi: true });
+      expect(found.conflict).toBe(true);
+      expect(found.checked[0]).toMatchObject({ ref: 'origin/main', category: 'textual' });
+      expect((await call('fuse_incoming', { action: 'status' })).results).toHaveLength(1);
+      expect((await call('fuse_incoming', { action: 'off' })).message).toContain('off');
+      expect(await call('fuse_incoming', { skipAi: true })).toMatchObject({ off: true });
+
+      // Committed code only: HEAD is still the base, so the push merges cleanly.
+      const pair = await call('fuse_detect', { a: 'HEAD', b: 'origin/main', skipAi: true });
+      expect(pair).toMatchObject({ conflict: false, stage: 'merge-check' });
+    } finally {
+      await client.close();
+    }
   });
 });
