@@ -10,6 +10,7 @@
   "files": [
     "cli",
     "server",
+    "detect",
     "shared",
     "dist",
     "tsconfig.json",
@@ -55,6 +56,7 @@
     "test:containers": "node -e \"if (!process.env.FUSE_TEST_IMAGE) { console.error('Set FUSE_TEST_IMAGE to a prepared Docker image ID.'); process.exit(1); }\" && vitest run tests/behavioral.test.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@fontsource/inter": "^5.3.0",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@resvg/resvg-js": "^2.6.2",
