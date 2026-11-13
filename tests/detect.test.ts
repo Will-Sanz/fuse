@@ -96,4 +96,23 @@ describe('conflict check without the LLM stage', () => {
     expect(r.status).toBe(2);
     expect(r.stderr).toContain('--a and --b are required');
   });
+  it('builds the AI prompt with or without a task, and finds the key', async () => {
+    // Loaded at run time: the detector is plain JavaScript with no type declarations.
+    const llm = await import(/* @vite-ignore */ resolve('detect/llm.mjs'));
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const refs = { repo, base: 'main', a: 'a', b: 'b' };
+    const without = llm.buildPrompt(refs, { graph: true, intent: true }).text;
+    expect(without).not.toContain('<agent_task>');
+    expect(without).toContain('<commit_message_a>\nChange on a');
+    expect(without).toContain('<diff_b>');
+    const withTask = llm.buildPrompt({ ...refs, task: 'Add a.txt' }, { graph: true, intent: true });
+    expect(withTask.text).toContain('<agent_task>\nAdd a.txt');
+
+    const envFile = join(directory(), '.env');
+    expect(llm.apiKeyFrom({}, envFile)).toBeUndefined();
+    writeFileSync(envFile, 'OTHER=1\nANTHROPIC_API_KEY=from-file\n');
+    expect(llm.apiKeyFrom({}, envFile)).toBe('from-file');
+    expect(llm.apiKeyFrom({ ANTHROPIC_API_KEY: '' }, envFile)).toBe('from-file');
+    expect(llm.apiKeyFrom({ ANTHROPIC_API_KEY: 'from-env' }, envFile)).toBe('from-env');
+  });
 });

@@ -14,7 +14,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseArgs } from 'node:util';
+import { parseArgs, parseEnv } from 'node:util';
 import { buildGraph, fileRanks } from './graph.mjs';
 
 export const MODEL = 'claude-sonnet-5-5';
@@ -168,12 +168,22 @@ function commitMessages(repo, base, branch) {
   );
 }
 
+/**
+ * The key from the environment, else from the .env file. An empty value in the
+ * environment counts as unset: a host can start the process with it blanked.
+ */
+export function apiKeyFrom(env, envFile) {
+  if (env.ANTHROPIC_API_KEY) return env.ANTHROPIC_API_KEY;
+  if (!fs.existsSync(envFile)) return undefined;
+  return parseEnv(fs.readFileSync(envFile, 'utf8')).ANTHROPIC_API_KEY || undefined;
+}
+
 function loadApiKey() {
   // The Fuse installation's own .env, never the target repository's.
   const envFile = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env');
-  if (!process.env.ANTHROPIC_API_KEY && fs.existsSync(envFile)) process.loadEnvFile(envFile);
-  if (!process.env.ANTHROPIC_API_KEY)
-    fail("ANTHROPIC_API_KEY is not set and Fuse's .env does not provide it");
+  const key = apiKeyFrom(process.env, envFile);
+  if (!key) fail("ANTHROPIC_API_KEY is not set and Fuse's .env does not provide it");
+  process.env.ANTHROPIC_API_KEY = key;
 }
 
 // Builds the user message for the requested inputs. Returns which inputs were
@@ -198,9 +208,9 @@ export function buildPrompt({ repo, base, a, b, task }, include) {
     inputs.push(['related_code', capped(graph, MAX_GRAPH_CHARS)]);
   }
   if (include.intent) {
-    if (!task) fail('this variant needs --task');
+    // The task is often unknown, as when a hook checks a teammate's push.
+    if (task?.trim()) inputs.push(['agent_task', capped(`${task.trim()}\n`, MAX_TEXT_CHARS)]);
     inputs.push(
-      ['agent_task', capped(`${task.trim()}\n`, MAX_TEXT_CHARS)],
       ['commit_message_a', commitMessages(repo, base, a)],
       ['commit_message_b', commitMessages(repo, base, b)],
     );
