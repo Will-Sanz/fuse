@@ -260,4 +260,111 @@ describe('conflict check without the LLM stage', () => {
     expect(both.answer.explanation).toContain('TS2000');
     expect(both.answer.explanation).not.toContain('TS1000');
   });
+  it('counts a second copy of an error a side already has as new', () => {
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    // Side A has one TS2322 in a.ts; the merge adds an identical one elsewhere.
+    const typecheck = [
+      'if test -f a.txt; then echo "a.ts(3,1): error TS2322: bad"; fi',
+      'if test -f a.txt && test -f b.txt; then echo "a.ts(9,1): error TS2322: bad"; fi',
+      '! test -f a.txt',
+    ].join('; ');
+    writeFileSync(target, JSON.stringify({ typecheck, test: 'true' }));
+    const { status, answer } = run(repo, '--target', target);
+    expect(status).toBe(1);
+    expect(answer).toMatchObject({ conflict: true, category: 'build' });
+  });
+
+  it('treats a typecheck that times out as a check that failed to run', () => {
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    writeFileSync(
+      target,
+      JSON.stringify({ typecheck: 'sleep 5', test: 'true', timeout_seconds: 1 }),
+    );
+    const { status, stderr } = run(repo, '--target', target);
+    expect(status).toBe(2);
+    expect(stderr).toContain('typecheck timed out');
+  });
+
+  it('compares test suites that fail to load instead of calling it an outage', () => {
+    // Every suite fails to load after the merge only, so no assertion runs.
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    const report = (failed: boolean) =>
+      JSON.stringify({
+        numPassedTests: failed ? 0 : 1,
+        numFailedTests: 0,
+        testResults: failed
+          ? [{ name: 'suite.test.ts', status: 'failed', assertionResults: [] }]
+          : [],
+      });
+    const test = `if test -f a.txt && test -f b.txt; then echo '${report(true)}' > {report}; exit 1; else echo '${report(false)}' > {report}; fi`;
+    writeFileSync(target, JSON.stringify({ typecheck: 'true', test, test_report: 'jest-json' }));
+    const { status, answer } = run(repo, '--target', target);
+    expect(status).toBe(1);
+    expect(answer).toMatchObject({ conflict: true, category: 'test' });
+    expect(answer.explanation).toContain('suite.test.ts');
+  });
+
+  it('runs setup again when its command or environment changes', () => {
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const tmp = directory();
+    const runs = join(directory(), 'setup-runs');
+    const target = join(directory(), 'target.json');
+    const write = (run: string, env: Record<string, string> = {}) =>
+      writeFileSync(
+        target,
+        JSON.stringify({
+          setup: [{ run, inputs: ['shared.txt'] }],
+          env,
+          typecheck: 'true',
+          test: 'true',
+        }),
+      );
+    const checkOnce = () =>
+      spawnSync(
+        process.execPath,
+        [check, '--repo', repo, '--a', 'a', '--b', 'b', '--no-llm', '--target', target],
+        {
+          env: { ...process.env, TMPDIR: tmp, FUSE_DETECT_DB_LOCK: join(tmp, 'db.lock') },
+        },
+      ).status;
+    const setupRuns = () => readFileSync(runs, 'utf8').trim().split('\n');
+
+    write(`echo one >> '${runs}'`);
+    checkOnce();
+    checkOnce();
+    expect(setupRuns()).toEqual(['one']);
+    write(`echo two >> '${runs}'`);
+    checkOnce();
+    expect(setupRuns()).toEqual(['one', 'two']);
+    write(`echo two >> '${runs}'`, { MODE: 'other' });
+    checkOnce();
+    expect(setupRuns()).toEqual(['one', 'two', 'two']);
+  });
+  it('counts a changed import as a change to the code that uses it', async () => {
+    const { buildGraph } = await import(/* @vite-ignore */ resolve('detect/graph.mjs'));
+    const repo = join(directory(), 'repo');
+    spawnSync('git', ['init', '-q', '-b', 'main', repo]);
+    mkdirSync(join(repo, 'src'));
+    writeFileSync(join(repo, 'src/old.ts'), 'export function provide() {\n  return 1;\n}\n');
+    writeFileSync(join(repo, 'src/new.ts'), 'export function provide() {\n  return 2;\n}\n');
+    const handler = (from: string) =>
+      `import { provide } from './${from}';\n\nexport function handle() {\n  return provide();\n}\n`;
+    writeFileSync(join(repo, 'src/handler.ts'), handler('old'));
+    git(repo, 'add', '.');
+    git(repo, 'commit', '-q', '-m', 'Base');
+    // A only redirects the import; B changes the module it now points to.
+    git(repo, 'checkout', '-q', '-b', 'a');
+    writeFileSync(join(repo, 'src/handler.ts'), handler('new'));
+    git(repo, 'commit', '-qam', 'Use the new provider');
+    git(repo, 'checkout', '-q', '-b', 'b', 'main');
+    writeFileSync(join(repo, 'src/new.ts'), 'export function provide() {\n  return 3;\n}\n');
+    git(repo, 'commit', '-qam', 'Change the new provider');
+    const graph = buildGraph({ repo, base: 'main', a: 'a', b: 'b' });
+    expect(graph).toContain('src/handler.ts#handle');
+    expect(graph).toContain('src/new.ts#provide');
+    expect(graph).not.toContain('No links found');
+  });
 });

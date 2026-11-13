@@ -306,4 +306,38 @@ describe('incoming pushes against local work', () => {
     expect(state().results).toHaveLength(1);
     expect(run('--target', target).out).toBe('No new pushes to check.');
   });
+  it('starts every worktree watching afresh when checks are turned back on', () => {
+    const { mine, run, runIn, push } = team();
+    const second = join(mine, '..', 'second');
+    git(mine, 'worktree', 'add', '-q', '-b', 'second', second);
+    run();
+    runIn(second);
+    run('off');
+    push('main', 'shared.txt', 'from the teammate\n', 'Pushed while off');
+    run('on');
+    // The second worktree did not run `on` itself, but must not check that push.
+    expect(runIn(second).out).toContain('Nothing checked yet');
+    expect(runIn(second).out).toBe('No new pushes to check.');
+  });
+
+  it('does not start a background check while checks are off or too soon', async () => {
+    const { mine, run, push, state } = team();
+    run();
+    push('main', 'shared.txt', 'from the teammate\n', 'Reword the shared text');
+    writeFileSync(join(mine, 'shared.txt'), 'from me\n');
+    run('off');
+    // A background run started anyway (say by a hook just before `off`).
+    expect(run('--background', '--interval', '0').status).toBe(0);
+    expect(state().results).toHaveLength(0);
+
+    run('on');
+    push('main', 'shared.txt', 'second change\n', 'Change it again');
+    const ran = state().lastRun;
+    // Within the interval a background run does nothing, even if a hook started it.
+    expect(run('--background', '--interval', '15').status).toBe(0);
+    expect(state().results).toHaveLength(0);
+    expect(state().lastRun).toBe(ran);
+    expect(run('--background', '--interval', '0').status).toBe(1);
+    expect(state().results).toHaveLength(1);
+  });
 });

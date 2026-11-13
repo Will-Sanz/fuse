@@ -109,9 +109,11 @@ function writeJson(file, value) {
   fs.writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`);
   fs.renameSync(temporary, file);
 }
+// Shared by all linked worktrees: whether checks are on, and how many times they
+// were turned back on (each worktree starts watching afresh when that changes).
 function readState() {
-  const enabled = readJson(settingsFile).enabled ?? true;
-  return { results: [], ...readJson(stateFile), enabled };
+  const { enabled = true, resumed = 0 } = readJson(settingsFile);
+  return { results: [], ...readJson(stateFile), enabled, resumed };
 }
 // Reads the file again each time: the hook and a background run can overlap.
 // One read-change-write at a time, across the hook, a background run and other
@@ -122,12 +124,13 @@ function update(change) {
   const release = acquireLock(lock, 'incoming', 'the incoming state', () => {}, 20);
   try {
     const state = readState();
-    const wasEnabled = state.enabled;
+    const shared = { enabled: state.enabled, resumed: state.resumed };
     change(state);
-    const { enabled, ...own } = state;
+    const { enabled, resumed, ...own } = state;
     own.results = own.results.slice(-50);
     writeJson(stateFile, own);
-    if (enabled !== wasEnabled) writeJson(settingsFile, { enabled });
+    if (enabled !== shared.enabled || resumed !== shared.resumed)
+      writeJson(settingsFile, { enabled, resumed });
     return state;
   } finally {
     release();
@@ -141,8 +144,9 @@ function alive(pid) {
     return err.code === 'EPERM';
   }
 }
-const isRunning = (state) =>
-  Boolean(state.running) && alive(state.running.pid) && Date.now() - state.running.at < 30 * 60_000;
+// A run owns the worktree for as long as its process lives: a check with setup
+// and tests on both sides can take well over half an hour.
+const isRunning = (state) => Boolean(state.running) && alive(state.running.pid);
 
 // ---------- git ----------
 
@@ -231,21 +235,30 @@ function checkPair(mine, ref, sha) {
 
 /** Fetches and checks new pushes. `reported` marks results as already shown. */
 function runOnce(reported) {
-  // One run at a time per worktree, or two would check the same push twice.
-  let busy = false;
+  // Claimed in one step under the state lock: one run at a time per worktree,
+  // none while checks are off, and a background run only once per interval.
+  let skip = null;
   update((s) => {
-    busy = isRunning(s);
-    if (busy) return;
+    if (!s.enabled) skip = { off: true, checked: [] };
+    else if (isRunning(s)) skip = { busy: true, checked: [] };
+    else if (args.background && Date.now() - (s.lastRun ?? 0) < intervalMs)
+      skip = { early: true, checked: [] };
+    if (skip) return;
     s.running = { pid: process.pid, at: Date.now() };
     s.lastRun = Date.now();
   });
-  if (busy) return { busy: true, checked: [] };
+  if (skip) return skip;
   try {
     fetch();
     const branches = remoteBranches();
     const state = readState();
-    if (!state.seen) {
-      update((s) => (s.seen = shas(branches)));
+    // First run, or checks were turned back on since this worktree last looked:
+    // watch from now, so pushes made while it was off are not checked.
+    if (!state.seen || (state.watchedSince ?? 0) !== state.resumed) {
+      update((s) => {
+        s.seen = shas(branches);
+        s.watchedSince = s.resumed;
+      });
       return { watching: Object.keys(branches).length, checked: [] };
     }
     const head = gitOk(['rev-parse', 'HEAD']);
@@ -325,8 +338,10 @@ if (command === 'off') {
   fetch();
   const branches = remoteBranches();
   update((s) => {
+    if (!s.enabled) s.resumed += 1;
     s.enabled = true;
     s.seen = shas(branches);
+    s.watchedSince = s.resumed;
   });
   console.log(`Incoming checks are on. Watching ${Object.keys(branches).length} branches.`);
 } else if (command === 'status') {
@@ -354,6 +369,7 @@ if (command === 'off') {
   }
   if (!isRunning(state) && Date.now() - (state.lastRun ?? 0) >= intervalMs) {
     const passed = ['--repo', repo, '--remote', args.remote, '--max', args.max];
+    passed.push('--interval', args.interval);
     if (target) passed.push('--target', target);
     if (args.task) passed.push('--task', args.task);
     if (args['no-llm']) passed.push('--no-llm');
@@ -365,7 +381,7 @@ if (command === 'off') {
     }).unref();
   }
 } else {
-  if (!readState().enabled && !args.background) {
+  if (!readState().enabled) {
     if (args.json) console.log(JSON.stringify({ off: true, checked: [] }));
     else console.log('Incoming checks are off for this repository. Run `fuse incoming on` first.');
     process.exit(0);

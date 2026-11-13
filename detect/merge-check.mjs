@@ -146,9 +146,12 @@ function setupSteps() {
   return [{ run: target.setup, inputs: target.setup_inputs }];
 }
 
-function inputsDigest(inputs) {
+// What a setup step's result depends on: its command, the target's
+// environment and its input files. Changing any of them reruns the step.
+function stepDigest(step) {
   const hash = createHash('sha256');
-  for (const file of inputs) {
+  hash.update(JSON.stringify({ run: step.run, env: target.env ?? {} }));
+  for (const file of step.inputs) {
     const p = path.join(workdir, file);
     hash.update(file);
     hash.update(fs.existsSync(p) ? fs.readFileSync(p) : '<missing>');
@@ -161,7 +164,7 @@ function setup() {
   let rerunRest = false;
   for (const [index, step] of steps.entries()) {
     const hashFile = `${workdir}.setup-hash-${index}`;
-    const digest = step.inputs ? inputsDigest(step.inputs) : null;
+    const digest = step.inputs ? stepDigest(step) : null;
     const previous = fs.existsSync(hashFile) ? fs.readFileSync(hashFile, 'utf8') : null;
     if (!rerunRest && digest !== null && previous === digest) continue;
     rerunRest = true;
@@ -250,6 +253,8 @@ function typeErrors(output) {
 function runChecks(where) {
   setup();
   const tc = run(target.typecheck, workdir);
+  // Like a test timeout: an unfinished typecheck says nothing about the code.
+  if (tc.exit === 124) fail(`typecheck timed out ${where}:\n${tc.output.slice(-1000)}`);
   if (tc.exit !== 0)
     return { step: 'typecheck', failures: typeErrors(tc.output), output: tc.output };
 
@@ -261,10 +266,11 @@ function runChecks(where) {
   releaseDb();
   const { failed, ran } = readReport(reportPath);
   fs.rmSync(reportPath, { force: true });
-  // A timeout, or a run where no test got to run (say the database is down),
-  // says nothing about the code, so it is an error rather than a result.
+  // A timeout, or a run where no test got to run and none is named as failing
+  // (say the database is down), says nothing about the code: an error, not a
+  // result. Suites that fail to load are named, so they are compared below.
   if (tests.exit === 124) fail(`tests timed out ${where}:\n${tests.output.slice(-1000)}`);
-  if (tests.exit !== 0 && ran === 0)
+  if (tests.exit !== 0 && ran === 0 && failed.length === 0)
     fail(`tests did not run ${where}:\n${tests.output.slice(-1000)}`);
   if (tests.exit !== 0) return { step: 'test', failures: failed, output: tests.output };
   return { step: null, failures: [] };
@@ -290,11 +296,24 @@ for (const side of ['a', 'b']) {
 }
 const failing = ['a', 'b'].filter((side) => alone[side].step);
 const sameStep = failing.filter((side) => alone[side].step === merged.step);
-const known = new Set(sameStep.flatMap((side) => alone[side].failures));
+// Counted, not just listed: a second copy of an error a side already has (same
+// code and message elsewhere in the file) is a new failure.
+const known = new Map();
+for (const side of sameStep) {
+  const counts = new Map();
+  for (const f of alone[side].failures) counts.set(f, (counts.get(f) ?? 0) + 1);
+  for (const [f, n] of counts) known.set(f, Math.max(known.get(f) ?? 0, n));
+}
 // Without names to compare (no test report, or a checker that is not tsc), a
 // side failing the same step alone is taken to explain the merged failure.
 const named = merged.failures.length > 0;
-const fresh = named ? merged.failures.filter((f) => !known.has(f)) : [];
+const fresh = [];
+if (named)
+  for (const f of merged.failures) {
+    const left = known.get(f) ?? 0;
+    if (left > 0) known.set(f, left - 1);
+    else fresh.push(f);
+  }
 const isConflict = named ? fresh.length > 0 : sameStep.length === 0;
 const sides = failing.map((side) => `side ${side.toUpperCase()}`).join(' and ');
 const what = merged.step === 'typecheck' ? 'typecheck fails' : 'tests fail';

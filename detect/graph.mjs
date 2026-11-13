@@ -84,8 +84,8 @@ function statementName(st) {
   return st.getText().split('\n')[0].slice(0, 80);
 }
 
-// Top-level statements worth tracking (imports are skipped: an import change
-// shows up as a change to the statements that use it).
+// Top-level statements worth tracking. Imports are not tracked themselves; a
+// changed import counts as a change to the statements that use its names.
 function statements(sf) {
   return sf
     .getStatements()
@@ -125,6 +125,26 @@ function changedRanges(repo, base, branch) {
 
 const overlaps = (s, ranges) => ranges.some(([from, to]) => s.start <= to && from <= s.end);
 
+// Statements that use a name brought in by an import the ranges touch: an
+// import redirected to another module changes what those statements call.
+function importUsers(sf, ranges) {
+  const names = new Set();
+  for (const imp of sf.getImportDeclarations()) {
+    const at = { start: imp.getStartLineNumber(), end: imp.getEndLineNumber() };
+    if (!overlaps(at, ranges)) continue;
+    const clause = imp.getImportClause();
+    if (!clause) continue;
+    if (clause.getDefaultImport()) names.add(clause.getDefaultImport().getText());
+    const bindings = clause.getNamedBindings();
+    if (bindings && Node.isNamespaceImport(bindings)) names.add(bindings.getName());
+    else if (bindings) for (const n of bindings.getElements()) names.add(n.getName());
+  }
+  if (!names.size) return [];
+  return statements(sf).filter((s) =>
+    s.st.getDescendantsOfKind(SyntaxKind.Identifier).some((id) => names.has(id.getText())),
+  );
+}
+
 // Keys of the top-level statements a side changed, including ones it deleted.
 function changedKeys(repo, base, branch, baseProject, sideProject) {
   const keys = new Set();
@@ -134,7 +154,10 @@ function changedKeys(repo, base, branch, baseProject, sideProject) {
   for (const [p, { added, removed }] of changedRanges(repo, base, branch)) {
     if (!isSource(p)) continue;
     const sf = sideProject.getSourceFile(`/${p}`);
-    if (sf) for (const s of statements(sf)) if (overlaps(s, added)) keys.add(s.key);
+    if (sf) {
+      for (const s of statements(sf)) if (overlaps(s, added)) keys.add(s.key);
+      for (const s of importUsers(sf, added)) keys.add(s.key);
+    }
     const old = baseProject.getSourceFile(`/${p}`);
     if (old)
       for (const s of statements(old))
