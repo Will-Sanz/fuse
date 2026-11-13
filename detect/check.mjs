@@ -50,7 +50,7 @@ const repo = path.resolve(args.repo);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPTS = { 'merge-check': 'merge-check.mjs', llm: 'llm.mjs' };
 // Nothing built or tested the merged pair: no target, and no CI did it either.
-const untested = !args.target && !args['skip-merge-check'];
+let untested = !args.target && !args['skip-merge-check'];
 
 // The stages work in a separate worktree, where a name like HEAD means that
 // worktree's own commit, so each side is pinned to its commit here.
@@ -113,9 +113,13 @@ if (!args['no-llm']) stages.push('llm');
 const ran = [];
 for (const name of stages) {
   ran.push(runStage(name));
+  // merge-check could not vouch for the merged code (say a side fails alone).
+  if (ran.at(-1).tested === false) untested = true;
   if (ran.at(-1).conflict) break;
 }
 const last = ran.at(-1);
+// Failures a side already has alone, which merge-check did not count as a conflict.
+const inherited = ran.find((s) => s.name === 'merge-check')?.inherited;
 const answer = {
   conflict: last.conflict,
   stage: last.name,
@@ -127,6 +131,7 @@ const answer = {
   base,
   stages_run: ran.map((s) => s.name),
   tested: !untested,
+  ...(inherited ? { inherited } : {}),
   seconds: Math.round(ran.reduce((t, s) => t + s.seconds, 0) * 10) / 10,
   cost_usd: ran.reduce((t, s) => t + (s.cost_usd ?? 0), 0),
 };
@@ -148,7 +153,12 @@ if (args.summary) {
         '',
         `Checked with ${answer.stages_run.join(', then ')}.`,
       ];
-  if (untested) lines.push('', 'The merged code was not built or tested.');
+  if (inherited?.length)
+    lines.push(
+      '',
+      `Not counted: ${inherited.map((i) => `the ${i.step} step already fails on side ${i.side.toUpperCase()} alone`).join('; ')}.`,
+    );
+  else if (untested) lines.push('', 'The merged code was not built or tested.');
   fs.writeFileSync(args.summary, `${lines.join('\n')}\n`);
 }
 

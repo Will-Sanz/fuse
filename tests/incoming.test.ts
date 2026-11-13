@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   realpathSync,
@@ -47,13 +48,14 @@ function team() {
     TMPDIR: directory(),
     FUSE_DETECT_DB_LOCK: join(directory(), 'db.lock'),
   };
-  const run = (...args: string[]) => {
-    const r = spawnSync(process.execPath, [incoming, '--repo', mine, '--no-llm', ...args], {
+  const runIn = (repo: string, ...args: string[]) => {
+    const r = spawnSync(process.execPath, [incoming, '--repo', repo, '--no-llm', ...args], {
       encoding: 'utf8',
       env,
     });
     return { status: r.status, out: r.stdout.trim(), stderr: r.stderr };
   };
+  const run = (...args: string[]) => runIn(mine, ...args);
   const push = (branch: string, file: string, text: string, message: string) => {
     git(mate, 'checkout', '-q', '-B', branch);
     writeFileSync(join(mate, file), text);
@@ -62,7 +64,7 @@ function team() {
     git(mate, 'push', '-q', 'origin', branch);
   };
   const state = () => JSON.parse(readFileSync(join(mine, '.git/fuse/incoming.json'), 'utf8'));
-  return { mine, run, push, state, env };
+  return { mine, run, runIn, push, state, env };
 }
 async function until(done: () => boolean) {
   for (let i = 0; i < 300 && !done(); i++) await new Promise((r) => setTimeout(r, 100));
@@ -176,6 +178,16 @@ describe('incoming pushes against local work', () => {
       expect(found.conflict).toBe(true);
       expect(found.checked[0]).toMatchObject({ ref: 'origin/main', category: 'textual' });
       expect((await call('fuse_incoming', { action: 'status' })).results).toHaveLength(1);
+      // A check that cannot run comes back with its own message, not a bare failure.
+      push('feature', 'other.txt', 'new file\n', 'Add another file');
+      mkdirSync(join(mine, '.fuse'));
+      writeFileSync(join(mine, '.fuse', 'detect.json'), 'not json');
+      const broken = await call('fuse_incoming', { skipAi: true });
+      expect(broken).toMatchObject({ failed: true, conflict: false });
+      expect(broken.checked[0].ref).toBe('origin/feature');
+      expect(broken.checked[0].error).toContain('merge-check');
+      rmSync(join(mine, '.fuse'), { recursive: true });
+
       expect((await call('fuse_incoming', { action: 'off' })).message).toContain('off');
       expect(await call('fuse_incoming', { skipAi: true })).toMatchObject({ off: true });
 
@@ -185,5 +197,113 @@ describe('incoming pushes against local work', () => {
     } finally {
       await client.close();
     }
+  });
+  it('checks each linked worktree against its own code, sharing only on and off', () => {
+    const { mine, run, runIn, push } = team();
+    const second = join(mine, '..', 'second');
+    git(mine, 'worktree', 'add', '-q', '-b', 'second', second);
+    run();
+    runIn(second);
+    push('main', 'shared.txt', 'from the teammate\n', 'Reword the shared text');
+    // Only the first worktree has local work the push conflicts with.
+    writeFileSync(join(mine, 'shared.txt'), 'from me\n');
+
+    const first = run();
+    expect(first.status).toBe(1);
+    expect(first.out).toContain('conflicts with your local work');
+    // The same push is still new to the second worktree, and fine for its code.
+    const other = runIn(second);
+    expect(other.status).toBe(0);
+    expect(other.out).toContain('origin/main');
+    expect(other.out).toContain('does not conflict');
+    expect(runIn(second, '--hook', '--interval', '15').out).toBe('');
+
+    run('off');
+    expect(runIn(second, 'status').out).toContain('Incoming checks are off');
+  });
+  it('reports each result once when several hooks run at the same moment', async () => {
+    const { mine, run, env } = team();
+    run();
+    // Results a background run has saved but no hook has shown yet.
+    const file = join(mine, '.git/fuse/incoming.json');
+    const saved = JSON.parse(readFileSync(file, 'utf8'));
+    saved.lastRun = Date.now();
+    saved.results = [1, 2, 3].map((n) => ({
+      ref: `origin/push-${n}`,
+      sha: `${n}`.repeat(40),
+      author: 'Sam',
+      subject: `Push ${n}`,
+      conflict: true,
+      category: 'runtime',
+      stage: 'llm',
+      explanation: `explanation ${n}`,
+      reported: false,
+    }));
+    writeFileSync(file, JSON.stringify(saved));
+
+    const outputs = await Promise.all(
+      Array.from(
+        { length: 8 },
+        () =>
+          new Promise<string>((done) => {
+            let out = '';
+            const child = spawn(process.execPath, [incoming, '--repo', mine, '--hook'], { env });
+            child.stdout.on('data', (chunk) => (out += chunk));
+            child.on('exit', () => done(out));
+          }),
+      ),
+    );
+    const all = outputs.join('');
+    for (const n of [1, 2, 3]) expect(all.split(`explanation ${n}`)).toHaveLength(2);
+    expect(JSON.parse(readFileSync(file, 'utf8')).results).toHaveLength(3);
+  });
+  it('checks a push once when several checks start at the same moment', async () => {
+    const { mine, run, push, state, env } = team();
+    run();
+    push('main', 'shared.txt', 'from the teammate\n', 'Reword the shared text');
+    writeFileSync(join(mine, 'shared.txt'), 'from me\n');
+
+    const outputs = await Promise.all(
+      Array.from(
+        { length: 4 },
+        () =>
+          new Promise<string>((done) => {
+            let out = '';
+            const child = spawn(process.execPath, [incoming, '--repo', mine, '--no-llm'], { env });
+            child.stdout.on('data', (chunk) => (out += chunk));
+            child.on('exit', () => done(out));
+          }),
+      ),
+    );
+    // One run checked it; the others found a run in progress or nothing left to check.
+    expect(outputs.filter((out) => out.includes('conflicts with your local work'))).toHaveLength(1);
+    expect(state().results).toHaveLength(1);
+    expect(state().running).toBeUndefined();
+  });
+  it('tries a push again after a check that failed to run', () => {
+    const { mine, run, push, state } = team();
+    run();
+    push('main', 'shared.txt', 'from the teammate\n', 'Add a line');
+    writeFileSync(join(mine, 'mine.txt'), 'local work\n');
+    // A broken configuration stands in for an outage: the check cannot run.
+    const target = join(directory(), 'target.json');
+    writeFileSync(target, 'not json');
+    const failed = run('--target', target);
+    expect(failed.status).toBe(2);
+    expect(failed.out).toContain('could not check origin/main');
+    // Reported to the agent once, however many times it fails.
+    expect(run('--hook', '--interval', '15').out).toBe('');
+    expect(run('--target', target).status).toBe(2);
+    expect(state().results).toHaveLength(1);
+    expect(state().results[0].reported).toBe(true);
+
+    // Fails only with both: my new file and the teammate's reworded text.
+    const fails = '! (test -f mine.txt && grep -q teammate shared.txt)';
+    writeFileSync(target, JSON.stringify({ typecheck: 'true', test: fails }));
+    const retried = run('--target', target);
+    expect(retried.status).toBe(1);
+    expect(retried.out).toContain('Kind: test');
+    expect(state().results).toHaveLength(1);
+    expect(run('--target', target).out).toBe('No new pushes to check.');
   });
 });

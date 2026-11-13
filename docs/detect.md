@@ -63,7 +63,8 @@ Each check runs only if the one before it found nothing.
 - **At most 5 new pushes per run** (`--max N`), newest first.
 - **The first run checks nothing.** It records the remote as it is and watches for
   pushes after that.
-- A push is checked once. What was seen and found is kept in `.git/fuse/incoming.json`.
+- A push is checked once per worktree. What was seen and found is kept in
+  `.git/fuse/incoming.json`, separately for each linked worktree; on and off are shared.
 
 ## On and off
 

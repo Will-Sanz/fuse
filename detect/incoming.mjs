@@ -5,7 +5,8 @@
 // A run fetches the remote, finds branches with commits you do not have and
 // that it has not checked before, snapshots your local code (uncommitted work
 // included, without touching your files or index) and runs check.mjs on each
-// pair. What it has seen and found is kept in <git dir>/fuse/incoming.json.
+// pair. What it has seen and found is kept in <git dir>/fuse/incoming.json,
+// separately for each linked worktree.
 //
 // Usage:
 //   node incoming.mjs [--repo .] [--target <target.json>] [--no-llm]   check now
@@ -32,6 +33,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { acquireLock } from './db-lock.mjs';
 
 const self = fileURLToPath(import.meta.url);
 const { values: args, positionals } = parseArgs({
@@ -77,10 +79,13 @@ function gitOk(gitArgs, env) {
 
 let repo = path.resolve(args.repo);
 repo = gitOk(['rev-parse', '--show-toplevel']);
-const stateFile = path.join(
+// What was seen and found depends on this worktree's own code, so it is kept
+// per worktree. Linked worktrees share only the on/off setting.
+const stateFile = path.join(gitOk(['rev-parse', '--absolute-git-dir']), 'fuse', 'incoming.json');
+const settingsFile = path.join(
   gitOk(['rev-parse', '--path-format=absolute', '--git-common-dir']),
   'fuse',
-  'incoming.json',
+  'incoming-settings.json',
 );
 const defaultTarget = path.join(repo, '.fuse', 'detect.json');
 const target = args.target
@@ -91,23 +96,42 @@ const target = args.target
 
 // ---------- state ----------
 
-function readState() {
+function readJson(file) {
   try {
-    return { enabled: true, results: [], ...JSON.parse(fs.readFileSync(stateFile, 'utf8')) };
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch {
-    return { enabled: true, results: [] };
+    return {};
   }
 }
+function writeJson(file, value) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const temporary = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`);
+  fs.renameSync(temporary, file);
+}
+function readState() {
+  const enabled = readJson(settingsFile).enabled ?? true;
+  return { results: [], ...readJson(stateFile), enabled };
+}
 // Reads the file again each time: the hook and a background run can overlap.
+// One read-change-write at a time, across the hook, a background run and other
+// worktrees: without the lock, whichever saved last would undo the other.
 function update(change) {
-  const state = readState();
-  change(state);
-  state.results = state.results.slice(-50);
-  fs.mkdirSync(path.dirname(stateFile), { recursive: true });
-  const temporary = `${stateFile}.${process.pid}.tmp`;
-  fs.writeFileSync(temporary, `${JSON.stringify(state, null, 2)}\n`);
-  fs.renameSync(temporary, stateFile);
-  return state;
+  fs.mkdirSync(path.dirname(settingsFile), { recursive: true });
+  const lock = path.join(path.dirname(settingsFile), 'incoming.lock');
+  const release = acquireLock(lock, 'incoming', 'the incoming state', () => {}, 20);
+  try {
+    const state = readState();
+    const wasEnabled = state.enabled;
+    change(state);
+    const { enabled, ...own } = state;
+    own.results = own.results.slice(-50);
+    writeJson(stateFile, own);
+    if (enabled !== wasEnabled) writeJson(settingsFile, { enabled });
+    return state;
+  } finally {
+    release();
+  }
 }
 function alive(pid) {
   try {
@@ -207,10 +231,15 @@ function checkPair(mine, ref, sha) {
 
 /** Fetches and checks new pushes. `reported` marks results as already shown. */
 function runOnce(reported) {
+  // One run at a time per worktree, or two would check the same push twice.
+  let busy = false;
   update((s) => {
+    busy = isRunning(s);
+    if (busy) return;
     s.running = { pid: process.pid, at: Date.now() };
     s.lastRun = Date.now();
   });
+  if (busy) return { busy: true, checked: [] };
   try {
     fetch();
     const branches = remoteBranches();
@@ -240,13 +269,20 @@ function runOnce(reported) {
       const result = { ...checkPair(mine, ref, sha), reported };
       checked.push(result);
       update((s) => {
-        s.seen[ref] = sha;
+        // A failed check (say the API was down) is tried again on the next run,
+        // so the push is not marked as seen. The agent hears of the failure once.
+        const earlier = s.results.find((r) => r.ref === ref && r.sha === sha && r.error);
+        s.results = s.results.filter((r) => r !== earlier);
+        if (!result.error) s.seen[ref] = sha;
+        else if (earlier?.reported) result.reported = true;
         s.results.push(result);
       });
     }
     return { checked, waiting: fresh.length - now.length };
   } finally {
-    update((s) => delete s.running);
+    update((s) => {
+      if (s.running?.pid === process.pid) delete s.running;
+    });
   }
 }
 
@@ -299,9 +335,14 @@ if (command === 'off') {
 } else if (args.hook) {
   const state = readState();
   if (!state.enabled) process.exit(0);
-  const news = state.results.filter((r) => !r.reported && (r.conflict || r.error));
+  // Taken and marked as shown in one step, so each result is reported once.
+  let news = [];
+  if (state.results.some((r) => !r.reported))
+    update((s) => {
+      news = s.results.filter((r) => !r.reported && (r.conflict || r.error));
+      s.results.forEach((r) => (r.reported = true));
+    });
   if (news.length) {
-    update((s) => s.results.forEach((r) => (r.reported = true)));
     const conflicts = news.filter((r) => r.conflict).length;
     console.log(
       [
@@ -332,6 +373,7 @@ if (command === 'off') {
   // Shown directly when checking now; left for the hook when in the background.
   const run = runOnce(!args.background);
   if (args.json) console.log(JSON.stringify(run));
+  else if (run.busy) console.log('A check is already running for this worktree.');
   else if (run.watching !== undefined)
     console.log(`Watching ${run.watching} branches on ${args.remote}. Nothing checked yet.`);
   else if (!run.checked.length) console.log('No new pushes to check.');

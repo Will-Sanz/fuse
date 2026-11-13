@@ -282,6 +282,8 @@ export function createMcp(boundRepo?: string) {
         (error, stdout, stderr) => {
           const code = error ? error.code : 0;
           if (code === 0 || code === 1) return done({ code, stdout });
+          // A run where some check failed still reports each push, with its error.
+          if (code === 2 && stdout.trim().startsWith('{')) return done({ code, stdout });
           failed(
             new InputError(stderr.trim().split('\n').slice(-3).join(' ') || 'The check failed.'),
           );
@@ -318,8 +320,14 @@ export function createMcp(boundRepo?: string) {
       }
       if (task) args.push('--task', task);
       if (skipAi) args.push('--no-llm');
-      const { code, stdout } = await detectScript('incoming.mjs', args);
-      return reply({ conflict: code === 1, ...JSON.parse(stdout) });
+      const run = JSON.parse((await detectScript('incoming.mjs', args)).stdout);
+      const checked: { conflict?: boolean; error?: string }[] = run.checked ?? [];
+      return reply({
+        conflict: checked.some((c) => c.conflict),
+        // Each failed check keeps its own message in checked[].error.
+        failed: checked.some((c) => c.error),
+        ...run,
+      });
     },
   );
   server.registerTool(

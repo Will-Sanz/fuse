@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { acquireDbLock } from './db-lock.mjs';
+import { acquireDbLock, acquireLock } from './db-lock.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -45,10 +45,15 @@ if (!args.repo || !args.base || !args.a || !args.b)
 
 const repo = path.resolve(args.repo);
 const target = args.target ? JSON.parse(fs.readFileSync(args.target, 'utf8')) : null;
+// One workspace per repository: two clones with the same folder name must not
+// share one, so the name carries a hash of the repository's real path.
+const repoKey = `${path.basename(repo)}-${createHash('sha256')
+  .update(fs.realpathSync(repo))
+  .digest('hex')
+  .slice(0, 12)}`;
 // Real path, because git lists worktrees by it (on macOS /var -> /private/var).
 const workdir = path.resolve(
-  args.workdir ??
-    path.join(fs.realpathSync(os.tmpdir()), 'fuse-detect', 'merge-check', path.basename(repo)),
+  args.workdir ?? path.join(fs.realpathSync(os.tmpdir()), 'fuse-detect', 'merge-check', repoKey),
 );
 const env = { ...process.env, ...(target?.env ?? {}) };
 const timings = {};
@@ -116,6 +121,12 @@ function ensureWorktree() {
   if (known) gitOk('worktree prune');
   fs.rmSync(workdir, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(workdir), { recursive: true });
+  // Whatever setup produced (say node_modules) went with the old worktree, so
+  // its steps must run again even if their inputs did not change.
+  const hashPrefix = `${path.basename(workdir)}.setup-hash-`;
+  for (const file of fs.readdirSync(path.dirname(workdir)))
+    if (file.startsWith(hashPrefix))
+      fs.rmSync(path.join(path.dirname(workdir), file), { force: true });
   gitOk(`worktree add --detach "${workdir}" HEAD`);
 }
 
@@ -190,6 +201,10 @@ function answer(fields) {
 
 // ---------- main ----------
 
+// Held until this process exits: another check of the same repository (say a
+// hook's background run) would reset and re-merge the workspace under this one.
+fs.mkdirSync(path.dirname(workdir), { recursive: true });
+acquireLock(`${workdir}.lock`, 'merge-check', "this repository's check workspace");
 ensureWorktree();
 checkout(args.a);
 
@@ -215,52 +230,91 @@ if (!target)
     conflict: false,
     confidence: 0.3,
     category: null,
+    tested: false,
     explanation: 'merges cleanly; not built or tested (no target config)',
   });
 
-timed('setup', setup);
-
-const tc = timed('typecheck', () => run(target.typecheck, workdir));
-if (tc.exit !== 0) {
-  const errors = tc.output
+// TypeScript errors without their positions, which move when code is merged.
+function typeErrors(output) {
+  return output
     .split('\n')
     .filter((l) => /error TS\d+/.test(l))
-    .slice(0, 5);
-  answer({
-    conflict: true,
-    confidence: 1,
-    category: 'build',
-    explanation: `typecheck fails after merge:\n${errors.join('\n')}`,
-  });
+    .map((l) => l.replace(/\(\d+,\d+\)/, '').trim());
 }
 
-const reportPath = path.join(os.tmpdir(), `conflict-detect-report-${process.pid}.json`);
-fs.rmSync(reportPath, { force: true });
-// Only the tests use the database, and only one run may use it at a time.
-const releaseDb = acquireDbLock('merge-check');
-const tests = timed('tests', () => run(target.test.replaceAll('{report}', reportPath), workdir));
-releaseDb();
-const { failed, ran } = readReport(reportPath);
-fs.rmSync(reportPath, { force: true });
-// A timeout, or a run where no test got to run (say the database is down),
-// says nothing about the merge, so it is an error rather than a conflict.
-if (tests.exit === 124) fail(`tests timed out after merge:\n${tests.output.slice(-1000)}`);
-if (tests.exit !== 0 && ran === 0)
-  fail(`tests did not run after merge:\n${tests.output.slice(-1000)}`);
-if (tests.exit !== 0) {
+/**
+ * Sets up, typechecks and tests whatever is checked out in the workspace.
+ * Returns the step that failed (null if none) and what failed in it: type
+ * errors, or failing tests when the target has a test report.
+ */
+function runChecks(where) {
+  setup();
+  const tc = run(target.typecheck, workdir);
+  if (tc.exit !== 0)
+    return { step: 'typecheck', failures: typeErrors(tc.output), output: tc.output };
+
+  const reportPath = path.join(os.tmpdir(), `conflict-detect-report-${process.pid}.json`);
+  fs.rmSync(reportPath, { force: true });
+  // Only the tests use the database, and only one run may use it at a time.
+  const releaseDb = acquireDbLock('merge-check');
+  const tests = run(target.test.replaceAll('{report}', reportPath), workdir);
+  releaseDb();
+  const { failed, ran } = readReport(reportPath);
+  fs.rmSync(reportPath, { force: true });
+  // A timeout, or a run where no test got to run (say the database is down),
+  // says nothing about the code, so it is an error rather than a result.
+  if (tests.exit === 124) fail(`tests timed out ${where}:\n${tests.output.slice(-1000)}`);
+  if (tests.exit !== 0 && ran === 0)
+    fail(`tests did not run ${where}:\n${tests.output.slice(-1000)}`);
+  if (tests.exit !== 0) return { step: 'test', failures: failed, output: tests.output };
+  return { step: null, failures: [] };
+}
+
+const merged = timed('checks', () => runChecks('after merge'));
+if (!merged.step)
+  answer({
+    conflict: false,
+    confidence: 0.5,
+    category: null,
+    tested: true,
+    explanation: 'merges cleanly; typecheck and tests pass',
+  });
+
+// Something fails after the merge. That is a conflict only if it does not
+// already fail on a side alone: unfinished local work often has failing tests,
+// whatever the other side pushed.
+const alone = {};
+for (const side of ['a', 'b']) {
+  checkout(args[side]);
+  alone[side] = timed(`alone_${side}`, () => runChecks(`on side ${side.toUpperCase()} alone`));
+}
+const failing = ['a', 'b'].filter((side) => alone[side].step);
+const sameStep = failing.filter((side) => alone[side].step === merged.step);
+const known = new Set(sameStep.flatMap((side) => alone[side].failures));
+// Without names to compare (no test report, or a checker that is not tsc), a
+// side failing the same step alone is taken to explain the merged failure.
+const named = merged.failures.length > 0;
+const fresh = named ? merged.failures.filter((f) => !known.has(f)) : [];
+const isConflict = named ? fresh.length > 0 : sameStep.length === 0;
+const sides = failing.map((side) => `side ${side.toUpperCase()}`).join(' and ');
+const what = merged.step === 'typecheck' ? 'typecheck fails' : 'tests fail';
+
+if (isConflict)
   answer({
     conflict: true,
     confidence: 1,
-    category: 'test',
-    explanation: `tests fail after merge:\n${
-      failed.slice(0, 5).join('\n') || tests.output.slice(-1000)
+    category: merged.step === 'typecheck' ? 'build' : 'test',
+    tested: true,
+    explanation: `${what} after merge${failing.length ? `, beyond what already fails on ${sides} alone` : ''}:\n${
+      named ? fresh.slice(0, 5).join('\n') : merged.output.slice(-1000)
     }`,
   });
-}
 
 answer({
   conflict: false,
-  confidence: 0.5,
+  confidence: 0.3,
   category: null,
-  explanation: 'merges cleanly; typecheck and tests pass',
+  tested: false,
+  inherited: failing.map((side) => ({ side, step: alone[side].step })),
+  explanation: `${what} after merge, but the same already fails on ${sides} alone, so it is not caused by combining them; the merged code could not be fully checked`,
 });
