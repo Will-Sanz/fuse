@@ -7,6 +7,9 @@
   "functions": {
     "api/visual.ts": {
       "maxDuration": 150
+    },
+    "api/map-labels.ts": {
+      "maxDuration": 120
     }
   }
 }

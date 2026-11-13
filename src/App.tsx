@@ -1,9 +1,17 @@
 import { BehaviorReview } from './components/BehaviorReview';
 import { useEffect, useState } from 'react';
-import { ArrowRight, CheckCircle, Code02, RefreshCw01, Terminal } from '@untitledui/icons';
+import {
+  ArrowRight,
+  CheckCircle,
+  Code02,
+  Dataflow03,
+  RefreshCw01,
+  Terminal,
+} from '@untitledui/icons';
 import { Button } from './untitledui/components/base/buttons/button';
 import { LoadingIndicator } from './untitledui/components/application/loading-indicator/loading-indicator';
 import { MeetingSetup, type Connection } from './components/MeetingSetup';
+import { RepoMapView, ReviewMap } from './components/RepoMap';
 import type { Review } from '../shared/review';
 import { actionDecision, type VisualSpec } from '../shared/visual';
 import { api, isShowcase } from './api';
@@ -53,6 +61,8 @@ function Code({
     </pre>
   );
 }
+const mapPage = new URLSearchParams(location.search).get('view') === 'map';
+if (mapPage) document.title = 'Repository map · Fuse';
 export default function App() {
   const [review, setReview] = useState<Review>();
   const [connection, setConnection] = useState<Connection>();
@@ -73,6 +83,7 @@ export default function App() {
         const mode = await api<Connection>('/mode');
         if (!active) return;
         setConnection(mode);
+        if (mapPage) return;
         const id = new URLSearchParams(location.search).get('review');
         const r = id
           ? await api<Review>(`/reviews/${id}`)
@@ -158,14 +169,30 @@ export default function App() {
         <a href="/" className="wordmark" aria-label="Fuse home">
           <span className="fuse-symbol">f</span>fuse
         </a>
-        <Button
-          size="sm"
-          color="secondary"
-          iconLeading={Terminal}
-          onClick={() => setSetupOpen(true)}
-        >
-          Run live MCP
-        </Button>
+        <div className="topbar-actions">
+          {connection?.mode === 'local' && !isShowcase && (
+            <Button
+              size="sm"
+              color="secondary"
+              iconLeading={Dataflow03}
+              href="/?view=map"
+              aria-label="Repository map"
+              aria-current={mapPage ? 'page' : undefined}
+              className={mapPage ? 'topbar-current' : undefined}
+            >
+              <span className="topbar-label">Repository map</span>
+            </Button>
+          )}
+          <Button
+            size="sm"
+            color="secondary"
+            iconLeading={Terminal}
+            aria-label="Run live MCP"
+            onClick={() => setSetupOpen(true)}
+          >
+            <span className="topbar-label">Run live MCP</span>
+          </Button>
+        </div>
       </header>
       <main>
         {error && (
@@ -180,7 +207,9 @@ export default function App() {
             </Button>
           </div>
         )}
-        {loading ? (
+        {mapPage && !loading && !isShowcase ? (
+          <RepoMapView aiConfigured={connection?.aiConfigured === true} />
+        ) : loading ? (
           <div className="loading-state">
             <LoadingIndicator label="Opening the change…" />
           </div>
@@ -287,6 +316,19 @@ export default function App() {
                   These files need manual review: {review.unsupported.map((f) => f.path).join(', ')}
                   .
                 </p>
+              )}
+              {!isShowcase && (
+                <section className="review-map-block" aria-labelledby="repo-heading">
+                  <h3 id="repo-heading">Where the changes meet</h3>
+                  <p>
+                    Functions and files that reach code changed on both sides. Git can merge both
+                    changes cleanly and the combined behavior can still break.
+                  </p>
+                  <ReviewMap
+                    reviewId={review.id}
+                    sides={{ a: review.sources.a.ref.label, b: review.sources.b.ref.label }}
+                  />
+                </section>
               )}
             </section>
             <section className="step-section" aria-labelledby="visual-heading">

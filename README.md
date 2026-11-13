@@ -49,6 +49,14 @@ The assistant calls `fuse_explain` with the project's absolute `repo` path. The 
 
 One connection works across repositories: pass `repo` on each tool call. An optional `--repo PATH` launch argument restricts a connection to one repository. Inspection without AI is available through `fuse_inspect`. For source investigations, `detail: "compact"` avoids repeated code while retaining exact inputs and evidence; the complete response remains available through `fuse_review` with `detail: "full"`.
 
+## Understand a repository first
+
+Inherited a codebase, or let agents write most of one? Ask your assistant:
+
+> Use fuse_map to show me how this repository fits together and where to start reading.
+
+`fuse_map` builds a map from the pinned commit without AI: what depends on what, the most central files, cycles and entry points, plus a picture. Pass `focus` for one file, or `a` and `b` to see where two branches' changes meet even when Git merges them cleanly. `fuse_map_labels` optionally adds short AI descriptions that must cite real names from each file. See [the repository map](docs/integration.md#repository-map).
+
 ## Show it working in a meeting
 
 For maintainers with the repository's ignored `.env` already configured:

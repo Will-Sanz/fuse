@@ -39,6 +39,9 @@ flowchart TD
 - `server/review-server.ts`: repository-bound browser API; retains legacy snapshot/import routes. Mutations enforce local origin and Host restrictions.
 - `server/inline-review.ts`: static MCP resource, private capability sessions, exact client privacy-compatibility gate and component-only action routing.
 - `src/inline/`: compact expandable review, standard host bridge, executed results and exact code approval; the real liquidglass bundle renders only its own background. `vite.inline.config.ts` emits one self-contained resource.
+- `server/map.ts`, `server/map-service.ts`, `server/map-render.ts`: the deterministic repository map: pinned-commit Git reads, in-memory TypeScript parsing, import and cross-file call edges, metrics, cycles, branch overlays, caching and a folder-level SVG/PNG. No AI and no execution.
+- `server/map-labels.ts`, `server/map-label-provider.ts`, `api/map-labels.ts`: opt-in AI file descriptions with a strict schema, path and citation checks, Unicode and secret filtering, and per-file-version caching. Labels never alter the map.
+- `src/components/RepoMap.tsx`: the repository map page and the review's "Where the changes meet" section.
 - `src/`: the preserved browser source/visual/choice review. Standard buttons, dialogs, and loading indicators use the MIT Untitled UI implementation with provenance retained under `src/untitledui/`.
 
 ## Inline candidate and browser runtimes

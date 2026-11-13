@@ -46,6 +46,8 @@ fuse merged ID --into REF [--repo PATH]
 fuse demo --dir NEW_DIRECTORY [--single] [--json]
 fuse demo --dir NEW_DIRECTORY --merge [--scenario checkout|shipping] [--json]
 fuse visualize ID [--regenerate] [--repo PATH] [--json]
+fuse map [--repo PATH] [--ref REF] [--focus PATH] [--a REF --b REF [--base REF]] [--svg FILE] [--full] [--json]
+fuse map-labels [--repo PATH] [--ref REF] [--file PATH] [--regenerate] [--json]
 fuse mcp [--repo PATH]
 fuse meeting [--scenario checkout|shipping] [--no-open] [--verify]
 
@@ -54,6 +56,69 @@ the current preview token. Checks run only after explicit configuration and appr
 Exit codes: 0 success/quiet, 1 invalid input, 2 review attention, 3 stale/dirty,
 4 configured checks failed. --json emits one versioned JSON object (watch: JSONL).
 `;
+/** Readable terminal summary of fuse map output. */
+export function describeMap(data: Record<string, unknown>) {
+  const d = data as {
+    counts?: Record<string, number>;
+    startHere?: { path: string; fanIn: number }[];
+    cycles?: string[][];
+    interactions?: { file: string; viaA: string[]; viaB: string[] }[];
+    functionInteractions?: { function: string; viaA: string[]; viaB: string[] }[];
+    changedA?: string[];
+    changedB?: string[];
+    file?: { path: string };
+    importedBy?: { from: string }[];
+    imports?: { to: string }[];
+    impact?: { dependents: number };
+  };
+  if (d.interactions) {
+    const fn = (id: string) => {
+      const at = id.lastIndexOf('#');
+      return `${id.slice(at + 1)}() in ${id.slice(0, at)}`;
+    };
+    const nearest = <T extends { viaA: string[]; viaB: string[] }>(list: T[]) => {
+      const best = Math.min(...list.map((i) => i.viaA.length + i.viaB.length));
+      return list.filter((i) => i.viaA.length + i.viaB.length === best);
+    };
+    const fns = d.functionInteractions ?? [];
+    const lines = [
+      `A changed: ${d.changedA?.join(', ') || 'nothing'}`,
+      `B changed: ${d.changedB?.join(', ') || 'nothing'}`,
+      '',
+    ];
+    if (fns.length) {
+      const first = nearest(fns);
+      lines.push('Both changes meet in:');
+      for (const i of first)
+        lines.push(
+          `  ${fn(i.function)}`,
+          `    A: calls ${i.viaA.length > 1 ? fn(i.viaA[i.viaA.length - 1]) : 'nothing; A changed it'}`,
+          `    B: calls ${i.viaB.length > 1 ? fn(i.viaB[i.viaB.length - 1]) : 'nothing; B changed it'}`,
+        );
+      if (fns.length > first.length)
+        lines.push(`  ${fns.length - first.length} more functions reach both through these.`);
+    } else if (d.interactions.length) {
+      lines.push('Files that import both changes:');
+      for (const i of nearest(d.interactions))
+        lines.push(`  ${i.file}`, `    A: ${i.viaA.join(' -> ')}`, `    B: ${i.viaB.join(' -> ')}`);
+    } else lines.push('No function or file reaches code changed on both sides.');
+    lines.push('', 'Static call and import paths: where to look, not proof of a conflict.');
+    return lines.join('\n');
+  }
+  if (d.file)
+    return [
+      d.file.path,
+      `  imports: ${d.imports?.map((e) => e.to).join(', ') || 'none'}`,
+      `  imported by: ${d.importedBy?.map((e) => e.from).join(', ') || 'none'}`,
+      `  a change here can reach ${d.impact?.dependents ?? 0} other files`,
+    ].join('\n');
+  return [
+    `${d.counts?.files ?? 0} files · ${d.counts?.imports ?? 0} imports · ${d.counts?.crossFileCalls ?? 0} cross-file calls`,
+    'Start here:',
+    ...(d.startHere ?? []).slice(0, 8).map((f) => `  ${f.path} (imported by ${f.fanIn})`),
+    ...(d.cycles?.length ? ['Import cycles:', ...d.cycles.map((c) => `  ${c.join(' <-> ')}`)] : []),
+  ].join('\n');
+}
 export function describe(review: Review) {
   const lines = [
     `Fuse · ${review.title}`,
@@ -147,6 +212,10 @@ export async function main(args = process.argv.slice(2)) {
       merge: { type: 'boolean' },
       scenario: { type: 'string' },
       regenerate: { type: 'boolean' },
+      ref: { type: 'string' },
+      focus: { type: 'string' },
+      svg: { type: 'string' },
+      full: { type: 'boolean' },
       'no-open': { type: 'boolean' },
     },
   });
@@ -328,6 +397,40 @@ export async function main(args = process.argv.slice(2)) {
       print(
         d,
         `Scripted Git fixture created at ${d.repo}\n${d.expectation || ''}\n${describe(d.review)}`,
+      );
+      return 0;
+    }
+    case 'map': {
+      const { mapView } = await import('../server/map-service');
+      const view = await mapView({
+        repo: selectedRepo,
+        ref: v.ref,
+        focus: v.focus,
+        base: v.base,
+        a: v.a,
+        b: v.b,
+        detail: v.full ? 'full' : 'summary',
+      });
+      if (v.svg) {
+        const { writeFileSync } = await import('node:fs');
+        writeFileSync(resolve(v.svg), view.svg);
+      }
+      print(view.data, describeMap(view.data as Record<string, unknown>));
+      return 0;
+    }
+    case 'map-labels': {
+      const { cachedMap } = await import('../server/map-service');
+      const { labelMap, sanitize } = await import('../server/map-labels');
+      const result = await labelMap(selectedRepo, cachedMap(selectedRepo, v.ref || 'HEAD'), {
+        paths: v.file ? [v.file] : undefined,
+        regenerate: v.regenerate,
+      });
+      print(
+        result,
+        Object.entries(result.labels)
+          .map(([path, l]) => `${path}\n  AI summary: ${sanitize(l.summary)}`)
+          .concat(result.dropped.map((d) => `dropped ${d.path}: ${d.reason}`))
+          .join('\n') || 'No labels.',
       );
       return 0;
     }
