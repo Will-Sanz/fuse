@@ -91,6 +91,9 @@ for (const c of cases) {
 
   const expected = c.label === 'conflict';
   let line;
+  // An AI reply that was paid for but unusable still counts against the budget.
+  for (const billed of (res.stderr ?? '').matchAll(/billed cost_usd=([\d.e-]+)/g))
+    cost += Number(billed[1]);
   if (res.status !== 0 && res.status !== 1) {
     errors++;
     const tail = (res.stderr ?? '').trim().split('\n').slice(-3).join(' | ');

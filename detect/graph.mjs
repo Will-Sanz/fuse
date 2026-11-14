@@ -86,16 +86,24 @@ function statementName(st) {
 
 // Top-level statements worth tracking. Imports are not tracked themselves; a
 // changed import counts as a change to the statements that use its names.
+// Unnamed statements that share a first line (say two `router.get(` calls) are
+// told apart by their order among those in the file: `#router.get( (2)`.
 function statements(sf) {
+  const seen = new Map();
   return sf
     .getStatements()
     .filter((st) => !Node.isImportDeclaration(st))
-    .map((st) => ({
-      key: `${pathOf(sf)}#${statementName(st)}`,
-      st,
-      start: st.getStartLineNumber(),
-      end: st.getEndLineNumber(),
-    }));
+    .map((st) => {
+      const name = statementName(st);
+      const n = (seen.get(name) ?? 0) + 1;
+      seen.set(name, n);
+      return {
+        key: `${pathOf(sf)}#${name}${n > 1 ? ` (${n})` : ''}`,
+        st,
+        start: st.getStartLineNumber(),
+        end: st.getEndLineNumber(),
+      };
+    });
 }
 
 // Changed line ranges per file from a zero-context diff: added lines in the
@@ -137,7 +145,10 @@ function importUsers(sf, ranges) {
     if (clause.getDefaultImport()) names.add(clause.getDefaultImport().getText());
     const bindings = clause.getNamedBindings();
     if (bindings && Node.isNamespaceImport(bindings)) names.add(bindings.getName());
-    else if (bindings) for (const n of bindings.getElements()) names.add(n.getName());
+    // The local name, which is what the code uses: `b` in `import { a as b }`.
+    else if (bindings)
+      for (const n of bindings.getElements())
+        names.add((n.getAliasNode() ?? n.getNameNode()).getText());
   }
   if (!names.size) return [];
   return statements(sf).filter((s) =>

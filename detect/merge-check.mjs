@@ -20,6 +20,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { acquireDbLock, acquireLock } from './db-lock.mjs';
 
@@ -60,46 +61,62 @@ const timings = {};
 
 // ---------- shell helpers ----------
 
+const runGroup = path.join(path.dirname(fileURLToPath(import.meta.url)), 'run-group.mjs');
+
+// timeout_seconds: 0 means no limit; Node timers cannot go past about 24 days.
+const timeoutSeconds = target?.timeout_seconds ?? 900;
+if (!(timeoutSeconds >= 0 && timeoutSeconds * 1000 <= 2 ** 31 - 1))
+  fail(`timeout_seconds must be 0 (no limit) or up to 2147483 seconds, not ${timeoutSeconds}`);
+
+// Runs a configured command (setup, typecheck, tests) in its own process group,
+// which is killed when the command ends or times out (exit 124).
 function run(cmd, cwd) {
-  const res = spawnSync(cmd, {
+  const timeoutMs = timeoutSeconds * 1000;
+  const res = spawnSync(process.execPath, [runGroup, String(timeoutMs), cmd], {
     cwd,
     env,
-    shell: '/bin/bash',
     encoding: 'utf8',
     maxBuffer: 256 * 1024 * 1024,
-    timeout: (target?.timeout_seconds ?? 900) * 1000,
+    // Something that left the group (say a daemonized server) can keep the
+    // output open after the command ends; give up on it rather than hang.
+    ...(timeoutMs ? { timeout: timeoutMs + 30_000, killSignal: 'SIGKILL' } : {}),
   });
-  killStragglers();
+  // If the command itself had finished, its exit code still holds; only a
+  // command killed here has none.
+  if (res.error?.code === 'ETIMEDOUT')
+    return { exit: res.status ?? 124, output: `${res.stdout ?? ''}${res.stderr ?? ''}` };
   return {
-    exit: res.status ?? (res.signal ? 124 : 1),
+    exit: res.status ?? 1,
     output: `${res.stdout ?? ''}${res.stderr ?? ''}`,
   };
 }
 
-// A timeout only kills the shell, not what it started, so kill anything left
-// running from the worktree's own tools (it could hold the test database).
-function killStragglers() {
-  const found = spawnSync('pgrep', ['-f', `${workdir}/node_modules`], {
-    encoding: 'utf8',
-  });
-  for (const pid of (found.stdout ?? '').split('\n').map(Number)) {
-    if (!pid || pid === process.pid) continue;
-    try {
-      process.kill(pid, 'SIGKILL');
-    } catch {
-      // already gone
-    }
-  }
+// A command the shell could not run at all (126 not executable, 127 not
+// found) says nothing about the code: an error, not a build or test failure.
+// The same for one a signal killed (exit above 128, say out of memory): it
+// stopped before it could say anything about the code.
+function failIfNotRun(what, res, where) {
+  if (res.exit === 126 || res.exit === 127)
+    fail(`${what} could not run ${where} (exit ${res.exit}):\n${res.output.slice(-1000)}`);
+  if (res.exit > 128)
+    fail(`${what} was killed by a signal ${where} (exit ${res.exit}):\n${res.output.slice(-1000)}`);
 }
 
+// Git with its arguments passed as-is, never through a shell: a path such as a
+// repository folder named with $ or backticks must stay a literal argument.
 function git(gitArgs, cwd = repo) {
-  const res = run(`git ${gitArgs}`, cwd);
-  return { ...res, out: res.output.trim() };
+  const res = spawnSync('git', gitArgs, {
+    cwd,
+    env,
+    encoding: 'utf8',
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  return { exit: res.status ?? 1, out: `${res.stdout ?? ''}${res.stderr ?? ''}`.trim() };
 }
 
 function gitOk(gitArgs, cwd = repo) {
   const res = git(gitArgs, cwd);
-  if (res.exit !== 0) fail(`git ${gitArgs} failed in ${cwd}:\n${res.out}`);
+  if (res.exit !== 0) fail(`git ${gitArgs.join(' ')} failed in ${cwd}:\n${res.out}`);
   return res.out;
 }
 
@@ -113,12 +130,12 @@ function timed(name, fn) {
 // ---------- worktree and setup ----------
 
 function ensureWorktree() {
-  const known = gitOk('worktree list --porcelain')
+  const known = gitOk(['worktree', 'list', '--porcelain'])
     .split('\n')
     .some((line) => line === `worktree ${workdir}`);
   // The OS can clear part of a temp dir, leaving files but no .git link.
   if (known && fs.existsSync(path.join(workdir, '.git'))) return;
-  if (known) gitOk('worktree prune');
+  if (known) gitOk(['worktree', 'prune']);
   fs.rmSync(workdir, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(workdir), { recursive: true });
   // Whatever setup produced (say node_modules) went with the old worktree, so
@@ -127,15 +144,17 @@ function ensureWorktree() {
   for (const file of fs.readdirSync(path.dirname(workdir)))
     if (file.startsWith(hashPrefix))
       fs.rmSync(path.join(path.dirname(workdir), file), { force: true });
-  gitOk(`worktree add --detach "${workdir}" HEAD`);
+  gitOk(['worktree', 'add', '--detach', workdir, 'HEAD']);
 }
 
+// Ignored files go too (-x), except keep_between_checkouts: build output left by
+// one revision must not be seen by the next revision's checks.
 function checkout(ref) {
-  git('merge --abort', workdir);
-  gitOk('reset --hard -q', workdir);
-  const keep = (target?.keep_between_checkouts ?? []).map((p) => `-e "${p}"`).join(' ');
-  gitOk(`clean -fdq ${keep}`, workdir);
-  gitOk(`checkout -q --detach ${ref}`, workdir);
+  git(['merge', '--abort'], workdir);
+  gitOk(['reset', '--hard', '-q'], workdir);
+  const keep = (target?.keep_between_checkouts ?? []).flatMap((p) => ['-e', p]);
+  gitOk(['clean', '-fdqx', ...keep], workdir);
+  gitOk(['checkout', '-q', '--detach', ref], workdir);
 }
 
 // Same caching as verify.mjs: a step re-runs only when its input files change,
@@ -211,22 +230,25 @@ acquireLock(`${workdir}.lock`, 'merge-check', "this repository's check workspace
 ensureWorktree();
 checkout(args.a);
 
+// Merged in memory with the given base, the same way the AI step's graph does,
+// so the checks and the AI look at the same merged code.
 const merge = timed('merge', () =>
-  git(
-    `-c user.name=detect -c user.email=detect@localhost merge --no-ff --no-commit ${args.b}`,
-    workdir,
-  ),
+  git(['merge-tree', '--write-tree', '--name-only', `--merge-base=${args.base}`, args.a, args.b]),
 );
-const conflicted = git('diff --name-only --diff-filter=U', workdir).out;
-if (merge.exit !== 0 && conflicted) {
+const [mergedTree, ...rest] = merge.out.split('\n');
+if (merge.exit === 1) {
+  const conflicted = rest.slice(0, rest.indexOf('') === -1 ? undefined : rest.indexOf(''));
   answer({
     conflict: true,
     confidence: 1,
     category: 'textual',
-    explanation: `git merge conflict in ${conflicted.split('\n').join(', ')}`,
+    tested: false,
+    explanation: `git merge conflict in ${conflicted.join(', ')}`,
   });
 }
 if (merge.exit !== 0) fail(`merge of ${args.b} into ${args.a} failed:\n${merge.out}`);
+// The worktree holds A, with the merged files on top.
+gitOk(['read-tree', '-u', '--reset', mergedTree], workdir);
 
 if (!target)
   answer({
@@ -253,6 +275,7 @@ function typeErrors(output) {
 function runChecks(where) {
   setup();
   const tc = run(target.typecheck, workdir);
+  failIfNotRun('typecheck', tc, where);
   // Like a test timeout: an unfinished typecheck says nothing about the code.
   if (tc.exit === 124) fail(`typecheck timed out ${where}:\n${tc.output.slice(-1000)}`);
   if (tc.exit !== 0)
@@ -263,6 +286,7 @@ function runChecks(where) {
   // Only the tests use the database, and only one run may use it at a time.
   const releaseDb = acquireDbLock('merge-check');
   const tests = run(target.test.replaceAll('{report}', reportPath), workdir);
+  failIfNotRun('tests', tests, where);
   releaseDb();
   const { failed, ran } = readReport(reportPath);
   fs.rmSync(reportPath, { force: true });
@@ -296,24 +320,45 @@ for (const side of ['a', 'b']) {
 }
 const failing = ['a', 'b'].filter((side) => alone[side].step);
 const sameStep = failing.filter((side) => alone[side].step === merged.step);
-// Counted, not just listed: a second copy of an error a side already has (same
-// code and message elsewhere in the file) is a new failure.
-const known = new Map();
-for (const side of sameStep) {
-  const counts = new Map();
-  for (const f of alone[side].failures) counts.set(f, (counts.get(f) ?? 0) + 1);
-  for (const [f, n] of counts) known.set(f, Math.max(known.get(f) ?? 0, n));
+// A side that stops at the typecheck alone never runs its tests, so whether the
+// merged code's failing tests already fail there is unknown: not a conflict.
+const stoppedEarlier = failing.filter(
+  (side) => alone[side].step === 'typecheck' && merged.step === 'test',
+);
+if (stoppedEarlier.length)
+  answer({
+    conflict: false,
+    confidence: 0.3,
+    category: null,
+    tested: false,
+    inherited: stoppedEarlier.map((side) => ({ side, step: 'typecheck' })),
+    explanation: `tests fail after merge, but ${stoppedEarlier
+      .map((side) => `side ${side.toUpperCase()}`)
+      .join(
+        ' and ',
+      )} already fails the typecheck alone, so its tests could not be compared; the merged code could not be fully checked`,
+  });
+// Counted, not just listed. For each failure, the merge inherits at least as
+// many copies as the side with most (if the sides share them) and at most both
+// sides' copies together (if each side added its own). More than that is new;
+// a count between the two cannot be told apart, so it is not called a conflict.
+const counts = (list) => {
+  const n = new Map();
+  for (const f of list) n.set(f, (n.get(f) ?? 0) + 1);
+  return n;
+};
+const sideCounts = sameStep.map((side) => counts(alone[side].failures));
+const fresh = [];
+let unclear = false;
+for (const [f, n] of counts(merged.failures)) {
+  const most = Math.max(0, ...sideCounts.map((c) => c.get(f) ?? 0));
+  const both = sideCounts.reduce((t, c) => t + (c.get(f) ?? 0), 0);
+  if (n > both) fresh.push(...Array(n - both).fill(f));
+  else if (n > most) unclear = true;
 }
 // Without names to compare (no test report, or a checker that is not tsc), a
 // side failing the same step alone is taken to explain the merged failure.
 const named = merged.failures.length > 0;
-const fresh = [];
-if (named)
-  for (const f of merged.failures) {
-    const left = known.get(f) ?? 0;
-    if (left > 0) known.set(f, left - 1);
-    else fresh.push(f);
-  }
 const isConflict = named ? fresh.length > 0 : sameStep.length === 0;
 const sides = failing.map((side) => `side ${side.toUpperCase()}`).join(' and ');
 const what = merged.step === 'typecheck' ? 'typecheck fails' : 'tests fail';
@@ -335,5 +380,7 @@ answer({
   category: null,
   tested: false,
   inherited: failing.map((side) => ({ side, step: alone[side].step })),
-  explanation: `${what} after merge, but the same already fails on ${sides} alone, so it is not caused by combining them; the merged code could not be fully checked`,
+  explanation: unclear
+    ? `${what} after merge with failures that also appear on ${sides} alone, in numbers that cannot show whether combining them added any; the merged code could not be fully checked`
+    : `${what} after merge, but the same already fails on ${sides} alone, so it is not caused by combining them; the merged code could not be fully checked`,
 });

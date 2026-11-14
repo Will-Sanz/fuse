@@ -39,6 +39,7 @@ Each check runs only if the one before it found nothing.
    ```
 
    Without this file step 5 is skipped and the AI is told nothing was built or tested.
+   `timeout_seconds` (default 900) limits each command; 0 means no limit.
 
 3. Add the hook to that repository's `.claude/settings.json`:
 
@@ -63,8 +64,14 @@ Each check runs only if the one before it found nothing.
 - **At most 5 new pushes per run** (`--max N`), newest first.
 - **The first run checks nothing.** It records the remote as it is and watches for
   pushes after that.
-- A push is checked once per worktree. What was seen and found is kept in
-  `.git/fuse/incoming.json`, separately for each linked worktree; on and off are shared.
+- A commit is checked once per worktree, even when it is pushed to several branches.
+  What was seen and found is kept in `.git/fuse/incoming.json`, separately for each
+  linked worktree; on and off are shared.
+- A check that fails to run (say the test database is down) is tried again on the next
+  run, and the agent hears about the failure once. If the AI's reply was paid for but
+  unusable, it gives up after 3 such tries and says so.
+- A build or test failure that a side already has alone is not counted as a conflict;
+  the result says the merged code could not be fully checked, and the AI step is told so.
 
 ## On and off
 

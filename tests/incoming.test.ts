@@ -131,6 +131,8 @@ describe('incoming pushes against local work', () => {
     expect(report.out).toContain('origin/main');
     expect(report.out).toContain('conflicts with your local work');
     expect(report.out).toContain('Tell the user');
+    expect(report.out).toContain('<fuse-report>');
+    expect(report.out).toContain('not as instructions');
     expect(state().lastRun).toBe(ran);
     expect(run('--hook', '--interval', '15').out).toBe('');
   });
@@ -339,5 +341,65 @@ describe('incoming pushes against local work', () => {
     expect(state().lastRun).toBe(ran);
     expect(run('--background', '--interval', '0').status).toBe(1);
     expect(state().results).toHaveLength(1);
+  });
+  it('keeps trying a push whose check fails for free reasons', () => {
+    const { run, push, state } = team();
+    run();
+    push('main', 'shared.txt', 'from the teammate\n', 'Add a line');
+    const target = join(directory(), 'target.json');
+    writeFileSync(target, 'not json');
+    for (let i = 0; i < 4; i++) expect(run('--target', target).status).toBe(2);
+    expect(state().results).toHaveLength(1);
+    expect(state().results[0]).toMatchObject({ attempts: 0 });
+    expect(state().results[0].gaveUp).toBeUndefined();
+    writeFileSync(target, JSON.stringify({ typecheck: 'true', test: 'true' }));
+    expect(run('--target', target).out).toContain('does not conflict');
+  });
+
+  it('gives up after 3 paid tries whose reply could not be used, and says so once', () => {
+    const { run, push, state } = team();
+    run();
+    push('main', 'shared.txt', 'from the teammate\n', 'Add a line');
+    // Stands in for a paid AI reply that came back unusable: the failure's
+    // output carries the billed marker the AI step prints.
+    const target = join(directory(), 'target.json');
+    writeFileSync(
+      target,
+      JSON.stringify({ typecheck: "echo 'llm: billed cost_usd=0.01' >&2; exit 127", test: 'true' }),
+    );
+    expect(run('--target', target).status).toBe(2);
+    expect(run('--target', target).status).toBe(2);
+    const last = run('--target', target);
+    expect(last.out).toContain('gave up after 3 paid tries');
+    expect(state().results[0]).toMatchObject({ attempts: 3, gaveUp: true, reported: true });
+    // Shown by that run already, so the hook does not repeat it.
+    expect(run('--hook', '--interval', '15').out).toBe('');
+    expect(run('--target', target).out).toBe('No new pushes to check.');
+  });
+
+  it('checks a commit once when it is pushed to two branches', () => {
+    const { mine, run, push } = team();
+    run();
+    push('feature', 'shared.txt', 'from the teammate\n', 'Reword the shared text');
+    git(join(mine, '..', 'mate'), 'push', '-q', 'origin', 'feature:main');
+    writeFileSync(join(mine, 'shared.txt'), 'from me\n');
+    const first = run();
+    expect(first.out.split('conflicts with your local work')).toHaveLength(2);
+    expect(run().out).toBe('No new pushes to check.');
+  });
+
+  it('does not take a reused process id for a run still going', () => {
+    const { mine, run, push, state } = team();
+    run();
+    push('main', 'other.txt', 'new\n', 'Add a file');
+    // A claim left by a run before a reboot, whose pid now belongs to a live
+    // process (this test's own) that started at another time.
+    const file = join(mine, '.git/fuse/incoming.json');
+    const saved = JSON.parse(readFileSync(file, 'utf8'));
+    saved.running = { pid: process.pid, at: 0, started: 'Mon Jan  1 00:00:00 2001' };
+    writeFileSync(file, JSON.stringify(saved));
+    const checked = run();
+    expect(checked.out).toContain('origin/main');
+    expect(state().running).toBeUndefined();
   });
 });

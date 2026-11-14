@@ -367,4 +367,155 @@ describe('conflict check without the LLM stage', () => {
     expect(graph).toContain('src/new.ts#provide');
     expect(graph).not.toContain('No links found');
   });
+  it('keeps a repository path with shell characters literal', () => {
+    const root = directory();
+    const marker = join(root, 'ran');
+    const repo = join(root, `repo$(touch ${marker})`);
+    spawnSync('git', ['init', '-q', '-b', 'main', repo]);
+    writeFileSync(join(repo, 'shared.txt'), 'base\n');
+    git(repo, 'add', '.');
+    git(repo, 'commit', '-q', '-m', 'Base');
+    for (const side of ['a', 'b']) {
+      git(repo, 'checkout', '-q', '-b', side, 'main');
+      writeFileSync(join(repo, `${side}.txt`), `${side}\n`);
+      git(repo, 'add', '.');
+      git(repo, 'commit', '-q', '-m', side);
+    }
+    expect(run(repo).answer).toMatchObject({ conflict: false });
+    expect(existsSync(marker)).toBe(false);
+  });
+
+  it('marks a textual conflict as untested, and a checker that cannot run as an error', () => {
+    const textual = repository({ a: { 'shared.txt': 'a\n' }, b: { 'shared.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    writeFileSync(target, JSON.stringify({ typecheck: 'no-such-checker-xyz', test: 'true' }));
+    expect(run(textual, '--target', target).answer).toMatchObject({
+      category: 'textual',
+      tested: false,
+    });
+
+    const clean = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const missing = run(clean, '--target', target);
+    expect(missing.status).toBe(2);
+    expect(missing.stderr).toContain('could not run');
+  });
+
+  it('does not call an error both sides added on their own a conflict', () => {
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    // Each side adds the same TS2322 at its own place; the merge has both.
+    const typecheck = [
+      'if test -f a.txt; then echo "x.ts(1,1): error TS2322: bad"; fi',
+      'if test -f b.txt; then echo "x.ts(5,1): error TS2322: bad"; fi',
+      '! (test -f a.txt || test -f b.txt)',
+    ].join('; ');
+    writeFileSync(target, JSON.stringify({ typecheck, test: 'true' }));
+    expect(run(repo, '--target', target).answer).toMatchObject({ conflict: false, tested: false });
+  });
+
+  it('leaves nothing a check started running after it ends', () => {
+    const pidFile = join(directory(), 'pid');
+    const r = spawnSync(
+      process.execPath,
+      [resolve('detect/run-group.mjs'), '5000', `sleep 30 & echo $! > '${pidFile}'`],
+      { encoding: 'utf8' },
+    );
+    expect(r.status).toBe(0);
+    const pid = Number(readFileSync(pidFile, 'utf8'));
+    let alive = true;
+    try {
+      process.kill(pid, 0);
+    } catch {
+      alive = false;
+    }
+    expect(alive).toBe(false);
+    const timedOut = spawnSync(process.execPath, [
+      resolve('detect/run-group.mjs'),
+      '200',
+      'sleep 5',
+    ]);
+    expect(timedOut.status).toBe(124);
+  });
+
+  it('tells apart unnamed statements and follows aliased imports', async () => {
+    const { buildGraph } = await import(/* @vite-ignore */ resolve('detect/graph.mjs'));
+    const repo = join(directory(), 'repo');
+    spawnSync('git', ['init', '-q', '-b', 'main', repo]);
+    mkdirSync(join(repo, 'src'));
+    const routes = (second: string) =>
+      `import { provide as getValue } from './new';\n\nrouter.get(\n  '/one', () => 1,\n);\n\nrouter.get(\n  '/two', () => ${second},\n);\n`;
+    writeFileSync(join(repo, 'src/new.ts'), 'export function provide() {\n  return 2;\n}\n');
+    writeFileSync(join(repo, 'src/routes.ts'), routes('getValue()'));
+    git(repo, 'add', '.');
+    git(repo, 'commit', '-q', '-m', 'Base');
+    git(repo, 'checkout', '-q', '-b', 'a');
+    writeFileSync(join(repo, 'src/routes.ts'), routes('getValue() + 1'));
+    git(repo, 'commit', '-qam', 'Change the second route');
+    git(repo, 'checkout', '-q', '-b', 'b', 'main');
+    writeFileSync(join(repo, 'src/new.ts'), 'export function provide() {\n  return 3;\n}\n');
+    git(repo, 'commit', '-qam', 'Change the provider');
+    const graph = buildGraph({ repo, base: 'main', a: 'a', b: 'b' });
+    expect(graph).toContain('src/routes.ts#router.get( (2)');
+    expect(graph).toContain('src/new.ts#provide');
+  });
+  it('does not blame the merge for tests a side could not reach alone', () => {
+    // Base has a type error that B fixes; A's unfinished work fails a test.
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'fixed.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    writeFileSync(
+      target,
+      JSON.stringify({ typecheck: 'test -f fixed.txt', test: '! test -f a.txt' }),
+    );
+    const { status, answer } = run(repo, '--target', target);
+    expect(status).toBe(0);
+    expect(answer).toMatchObject({ conflict: false, tested: false });
+    expect(answer.explanation).toContain('already fails the typecheck alone');
+  });
+
+  it('reports a checker killed by a signal as an error, and takes 0 as no time limit', () => {
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const target = join(directory(), 'target.json');
+    writeFileSync(target, JSON.stringify({ typecheck: 'kill -9 $$', test: 'true' }));
+    const killed = run(repo, '--target', target);
+    expect(killed.status).toBe(2);
+    expect(killed.stderr).toContain('killed by a signal');
+
+    writeFileSync(
+      target,
+      JSON.stringify({ typecheck: 'sleep 0.2', test: 'true', timeout_seconds: 0 }),
+    );
+    expect(run(repo, '--target', target).answer).toMatchObject({ conflict: false, tested: true });
+    writeFileSync(target, JSON.stringify({ typecheck: 'true', test: 'true', timeout_seconds: -1 }));
+    expect(run(repo, '--target', target).stderr).toContain('timeout_seconds must be');
+  });
+
+  it('kills what a check started when the process running it dies', async () => {
+    const dir = directory();
+    const pidFile = join(dir, 'pid');
+    const group = JSON.stringify(resolve('detect/run-group.mjs'));
+    const command = JSON.stringify(`sleep 30 & echo $! > '${pidFile}'; wait`);
+    // A stand-in for merge-check: starts run-group, then is killed outright.
+    const parent = spawn(
+      process.execPath,
+      [
+        '-e',
+        `require('node:child_process').spawn(process.execPath, [${group}, '0', ${command}], { stdio: 'ignore' }); setInterval(() => {}, 1000);`,
+      ],
+      { stdio: 'ignore' },
+    );
+    for (let i = 0; i < 50 && !existsSync(pidFile); i++)
+      await new Promise((r) => setTimeout(r, 100));
+    const pid = Number(readFileSync(pidFile, 'utf8'));
+    parent.kill('SIGKILL');
+    const alive = () => {
+      try {
+        process.kill(pid, 0);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    for (let i = 0; i < 40 && alive(); i++) await new Promise((r) => setTimeout(r, 100));
+    expect(alive()).toBe(false);
+  });
 });
