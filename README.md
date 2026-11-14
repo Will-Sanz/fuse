@@ -133,7 +133,7 @@ The last two commands incur model usage through the configured shared service or
 
 Named top-level TypeScript functions and direct local calls; bounded context; constrained one-file application. The compact UI focuses on one conflict. Multiple files/conflicts and unsupported language constructs remain visible in structured reviews but can require CLI or manual resolution. AI explanations are grounded in source, not proof of runtime behavior; configured checks provide the executed evidence. AI calls send the selected before/A/B source, observations, and up to ten bounded context files to OpenAI with `store: false`. No automatic fallback presents a prepared image as a live result.
 
-See [architecture](docs/architecture.md), [release criteria](docs/MVP.md), and [Untitled UI provenance](src/untitledui/PROVENANCE.md).
+See [architecture](docs/architecture.md), [conflict detection](docs/detect.md), [release criteria](docs/MVP.md), and [Untitled UI provenance](src/untitledui/PROVENANCE.md).
 
 The [RealWorld benchmark](docs/benchmark.md) compares a real agent with and without
 Fuse MCP on 53 pinned conflict/compatible branch pairs. It measures source-based
