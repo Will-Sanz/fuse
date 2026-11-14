@@ -140,11 +140,15 @@ function ensureWorktree() {
   fs.mkdirSync(path.dirname(workdir), { recursive: true });
   // Whatever setup produced (say node_modules) went with the old worktree, so
   // its steps must run again even if their inputs did not change.
+  forgetSetup();
+  gitOk(['worktree', 'add', '--detach', workdir, 'HEAD']);
+}
+
+function forgetSetup() {
   const hashPrefix = `${path.basename(workdir)}.setup-hash-`;
   for (const file of fs.readdirSync(path.dirname(workdir)))
     if (file.startsWith(hashPrefix))
       fs.rmSync(path.join(path.dirname(workdir), file), { force: true });
-  gitOk(['worktree', 'add', '--detach', workdir, 'HEAD']);
 }
 
 // Ignored files go too (-x), except keep_between_checkouts: build output left by
@@ -152,8 +156,16 @@ function ensureWorktree() {
 function checkout(ref) {
   git(['merge', '--abort'], workdir);
   gitOk(['reset', '--hard', '-q'], workdir);
-  const keep = (target?.keep_between_checkouts ?? []).flatMap((p) => ['-e', p]);
-  gitOk(['clean', '-fdqx', ...keep], workdir);
+  const kept = target?.keep_between_checkouts ?? [];
+  gitOk(['clean', '-fdqx', ...kept.flatMap((p) => ['-e', p])], workdir);
+  // A check that keeps less (say one with no target) deletes what setup made,
+  // so setup must run again even if its inputs did not change.
+  const keptFile = `${workdir}.kept`;
+  const keptNow = JSON.stringify(kept);
+  if ((fs.existsSync(keptFile) ? fs.readFileSync(keptFile, 'utf8') : null) !== keptNow) {
+    forgetSetup();
+    fs.writeFileSync(keptFile, keptNow);
+  }
   gitOk(['checkout', '-q', '--detach', ref], workdir);
 }
 

@@ -172,7 +172,9 @@ describe('conflict check without the LLM stage', () => {
     expect(checkIn(repository(sides))).toBe(0);
     expect(checkIn(repository(sides))).toBe(0);
     const workspaces = readdirSync(join(tmp, 'fuse-detect', 'merge-check'));
-    expect(workspaces.filter((name) => name.startsWith('repo-'))).toHaveLength(2);
+    expect(
+      workspaces.filter((name) => name.startsWith('repo-') && !name.includes('.')),
+    ).toHaveLength(2);
   });
   it("runs one check at a time in a repository's workspace", async () => {
     const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
@@ -343,6 +345,44 @@ describe('conflict check without the LLM stage', () => {
     checkOnce();
     expect(setupRuns()).toEqual(['one', 'two', 'two']);
   });
+  it('runs setup again after a check without a target cleared the workspace', () => {
+    const repo = repository({ a: { 'a.txt': 'a\n' }, b: { 'b.txt': 'b\n' } });
+    const tmp = directory();
+    const target = join(directory(), 'target.json');
+    const runs = join(directory(), 'setup-runs');
+    // Setup makes an ignored folder the checks need, like node_modules.
+    writeFileSync(
+      target,
+      JSON.stringify({
+        setup: [
+          {
+            run: `mkdir -p deps && touch deps/ok && echo ran >> '${runs}'`,
+            inputs: ['shared.txt'],
+          },
+        ],
+        keep_between_checkouts: ['deps'],
+        typecheck: 'test -f deps/ok',
+        test: 'true',
+      }),
+    );
+    const checkOnce = (...extra: string[]) =>
+      spawnSync(
+        process.execPath,
+        [check, '--repo', repo, '--a', 'a', '--b', 'b', '--no-llm', ...extra],
+        { env: { ...process.env, TMPDIR: tmp, FUSE_DETECT_DB_LOCK: join(tmp, 'db.lock') } },
+      ).status;
+
+    const setupRuns = () => readFileSync(runs, 'utf8').trim().split('\n').length;
+
+    expect(checkOnce('--target', target)).toBe(0);
+    expect(checkOnce('--target', target)).toBe(0);
+    expect(setupRuns()).toBe(1);
+    // No target: nothing is kept, so deps is deleted.
+    expect(checkOnce()).toBe(0);
+    expect(checkOnce('--target', target)).toBe(0);
+    expect(setupRuns()).toBe(2);
+  });
+
   it('counts a changed import as a change to the code that uses it', async () => {
     const { buildGraph } = await import(/* @vite-ignore */ resolve('detect/graph.mjs'));
     const repo = join(directory(), 'repo');
