@@ -133,23 +133,33 @@ function changedRanges(repo, base, branch) {
 
 const overlaps = (s, ranges) => ranges.some(([from, to]) => s.start <= to && from <= s.end);
 
-// Statements that use a name brought in by an import the ranges touch: an
-// import redirected to another module changes what those statements call.
-function importUsers(sf, ranges) {
-  const names = new Set();
-  for (const imp of sf.getImportDeclarations()) {
-    const at = { start: imp.getStartLineNumber(), end: imp.getEndLineNumber() };
-    if (!overlaps(at, ranges)) continue;
+// What each local import name refers to: `b` -> `./mod:a` for
+// `import { a as b } from './mod'`.
+function importBindings(sf) {
+  const out = new Map();
+  for (const imp of sf?.getImportDeclarations() ?? []) {
+    const from = imp.getModuleSpecifierValue();
     const clause = imp.getImportClause();
     if (!clause) continue;
-    if (clause.getDefaultImport()) names.add(clause.getDefaultImport().getText());
+    if (clause.getDefaultImport()) out.set(clause.getDefaultImport().getText(), `${from}:default`);
     const bindings = clause.getNamedBindings();
-    if (bindings && Node.isNamespaceImport(bindings)) names.add(bindings.getName());
-    // The local name, which is what the code uses: `b` in `import { a as b }`.
+    if (bindings && Node.isNamespaceImport(bindings)) out.set(bindings.getName(), `${from}:*`);
     else if (bindings)
       for (const n of bindings.getElements())
-        names.add((n.getAliasNode() ?? n.getNameNode()).getText());
+        // The local name, which is what the code uses: `b` in `import { a as b }`.
+        out.set((n.getAliasNode() ?? n.getNameNode()).getText(), `${from}:${n.getName()}`);
   }
+  return out;
+}
+
+// Statements that use a name whose import changed: an import redirected to
+// another module changes what those statements call. Only names that now
+// refer to something else count, so adding a name to an existing import line
+// does not mark every user of the line's other names as changed.
+function importUsers(sf, old) {
+  const before = importBindings(old);
+  const names = new Set();
+  for (const [name, ref] of importBindings(sf)) if (before.get(name) !== ref) names.add(name);
   if (!names.size) return [];
   return statements(sf).filter((s) =>
     s.st.getDescendantsOfKind(SyntaxKind.Identifier).some((id) => names.has(id.getText())),
@@ -165,11 +175,11 @@ function changedKeys(repo, base, branch, baseProject, sideProject) {
   for (const [p, { added, removed }] of changedRanges(repo, base, branch)) {
     if (!isSource(p)) continue;
     const sf = sideProject.getSourceFile(`/${p}`);
+    const old = baseProject.getSourceFile(`/${p}`);
     if (sf) {
       for (const s of statements(sf)) if (overlaps(s, added)) keys.add(s.key);
-      for (const s of importUsers(sf, added)) keys.add(s.key);
+      for (const s of importUsers(sf, old)) keys.add(s.key);
     }
-    const old = baseProject.getSourceFile(`/${p}`);
     if (old)
       for (const s of statements(old))
         if (overlaps(s, removed) && !sideKeys.has(s.key)) keys.add(s.key);

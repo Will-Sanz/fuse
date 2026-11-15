@@ -407,6 +407,35 @@ describe('conflict check without the LLM stage', () => {
     expect(graph).toContain('src/new.ts#provide');
     expect(graph).not.toContain('No links found');
   });
+  it('does not count users of other names on an import line a side added to', async () => {
+    const { buildGraph } = await import(/* @vite-ignore */ resolve('detect/graph.mjs'));
+    const repo = join(directory(), 'repo');
+    spawnSync('git', ['init', '-q', '-b', 'main', repo]);
+    mkdirSync(join(repo, 'src'));
+    const lib =
+      'export function one() {\n  return 1;\n}\n\nexport function two() {\n  return 2;\n}\n';
+    writeFileSync(join(repo, 'src/lib.ts'), lib);
+    const handlerBase =
+      "import { one } from './lib';\n\nexport function useOne() {\n  return one();\n}\n";
+    writeFileSync(join(repo, 'src/handler.ts'), handlerBase);
+    git(repo, 'add', '.');
+    git(repo, 'commit', '-q', '-m', 'Base');
+    git(repo, 'checkout', '-q', '-b', 'a');
+    writeFileSync(join(repo, 'src/lib.ts'), lib.replace('return 2', 'return 22'));
+    git(repo, 'commit', '-qam', 'Change two');
+    // B adds a name to the existing import line and a new user of it.
+    git(repo, 'checkout', '-q', '-b', 'b', 'main');
+    writeFileSync(
+      join(repo, 'src/handler.ts'),
+      handlerBase.replace('{ one }', '{ one, two }') +
+        '\nexport function useTwo() {\n  return two();\n}\n',
+    );
+    git(repo, 'commit', '-qam', 'Use two');
+    const graph = buildGraph({ repo, base: 'main', a: 'a', b: 'b' });
+    const changedByB = graph.split('\n').find((line: string) => line.startsWith('Changed by B:'));
+    expect(changedByB).toContain('src/handler.ts#useTwo');
+    expect(changedByB).not.toContain('src/handler.ts#useOne');
+  });
   it('keeps a repository path with shell characters literal', () => {
     const root = directory();
     const marker = join(root, 'ran');
