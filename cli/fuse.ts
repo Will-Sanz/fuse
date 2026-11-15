@@ -48,6 +48,8 @@ fuse demo --dir NEW_DIRECTORY --merge [--scenario checkout|shipping] [--json]
 fuse visualize ID [--regenerate] [--repo PATH] [--json]
 fuse mcp [--repo PATH]
 fuse meeting [--scenario checkout|shipping] [--no-open] [--verify]
+fuse detect --a REF --b REF [--repo PATH] [--base REF] [--task TEXT] [--target FILE] [--no-llm]
+fuse incoming [on|off|status] [--repo PATH] [--target FILE] [--hook] [--interval MINUTES]
 
 Use --revision N on mutations to reject stale tool/browser state. Apply always requires
 the current preview token. Checks run only after explicit configuration and approval.
@@ -102,10 +104,16 @@ export const attention = (r: Review) =>
   r.unsupported.length > 0 ||
   r.files.some((f) => f.analysis.conflicts.some((c) => !f.decisions[c.id]));
 export async function main(args = process.argv.slice(2)) {
-  if (args[0] === 'meeting') {
+  const scripts: Record<string, string> = {
+    meeting: '../scripts/meeting.mjs',
+    detect: '../detect/check.mjs',
+    incoming: '../detect/incoming.mjs',
+  };
+  const script = scripts[args[0]];
+  if (script) {
     const result = spawnSync(
       process.execPath,
-      [fileURLToPath(new URL('../scripts/meeting.mjs', import.meta.url)), ...args.slice(1)],
+      [fileURLToPath(new URL(script, import.meta.url)), ...args.slice(1)],
       { stdio: 'inherit' },
     );
     if (result.error) throw result.error;
